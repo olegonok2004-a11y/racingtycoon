@@ -1,0 +1,1637 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a0a15">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Pixel Racing Tycoon</title>
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+  }
+  html, body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    background: #0a0a15;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Courier New', monospace;
+    color: #eee;
+    user-select: none;
+    -webkit-user-select: none;
+    overscroll-behavior: none;
+    touch-action: manipulation;
+  }
+  #app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  #top-bar {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+    border-bottom: 2px solid #000;
+    gap: 10px;
+  }
+  #money-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+  }
+  .money-icon { font-size: 22px; line-height: 1; }
+  #money {
+    font-size: 22px;
+    font-weight: bold;
+    color: #ffcc00;
+    transition: color 0.3s;
+    font-variant-numeric: tabular-nums;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  #money.pulse { color: #4caf50; }
+  #stats-mini {
+    display: flex;
+    gap: 10px;
+    font-size: 11px;
+    color: #888;
+    flex-shrink: 0;
+  }
+  #stats-mini .val {
+    color: #eee;
+    font-weight: bold;
+    font-size: 13px;
+    display: block;
+  }
+
+  #track-area {
+    flex-shrink: 0;
+    position: relative;
+    background: #050510;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    aspect-ratio: 16 / 9;
+    width: 100%;
+  }
+  #track-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    background: #2d5a2d;
+  }
+  .hud {
+    position: absolute;
+    background: rgba(0,0,0,0.75);
+    border: 1px solid #444;
+    border-radius: 6px;
+    padding: 5px 8px;
+    font-size: 10px;
+    line-height: 1.4;
+    pointer-events: none;
+    z-index: 5;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+  #hud-topleft { top: 6px; left: 6px; }
+  #hud-topright {
+    top: 6px;
+    right: 6px;
+    min-width: 130px;
+    font-size: 10px;
+  }
+  #hud-topright .hud-title {
+    color: #888;
+    font-size: 9px;
+    margin-bottom: 2px;
+    letter-spacing: 0.5px;
+  }
+  #hud-topright .row {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 1px 0;
+  }
+  #hud-topright .row.player {
+    color: #ffcc00;
+    font-weight: bold;
+  }
+  #hud-topright .rank {
+    font-weight: bold;
+    font-size: 10px;
+    padding: 0 4px;
+    border-radius: 3px;
+    margin-left: 4px;
+  }
+  .rank-S { background: #f59e0b; color: #000; }
+  .rank-A { background: #a855f7; color: #fff; }
+  .rank-B { background: #3b82f6; color: #fff; }
+  .rank-C { background: #6b7280; color: #fff; }
+  .rank-D { background: #9ca3af; color: #000; }
+
+  .hud-line { white-space: nowrap; }
+  .hud-line b { color: #ffcc00; }
+
+  #content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding: 10px;
+    padding-bottom: 20px;
+    background: #0f1626;
+  }
+  #content::-webkit-scrollbar { width: 4px; }
+  #content::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+  #tab-bar {
+    flex-shrink: 0;
+    display: flex;
+    background: #16213e;
+    border-top: 2px solid #000;
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  .tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 4px;
+    cursor: pointer;
+    background: #16213e;
+    transition: background 0.15s;
+    min-height: 56px;
+    color: #888;
+    font-size: 10px;
+    gap: 3px;
+  }
+  .tab:active { background: #1a2a4a; }
+  .tab.active {
+    background: #1a2a4a;
+    color: #ffcc00;
+    border-top: 3px solid #ffcc00;
+    padding-top: 5px;
+  }
+  .tab-icon { font-size: 22px; line-height: 1; }
+  .tab-label { font-size: 10px; font-weight: bold; letter-spacing: 0.3px; }
+
+  h2 {
+    font-size: 15px;
+    margin-bottom: 10px;
+    color: #ffcc00;
+    letter-spacing: 0.5px;
+  }
+
+  .hint {
+    font-size: 11px;
+    color: #888;
+    line-height: 1.5;
+    padding: 8px 10px;
+    background: #0a0f1a;
+    border-left: 3px solid #3b82f6;
+    border-radius: 4px;
+    margin-bottom: 10px;
+  }
+  .hint.warn { border-left-color: #f59e0b; }
+
+  .item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    margin-bottom: 8px;
+    background: #1a1a2e;
+    border: 2px solid #333;
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+  .item.owned { border-color: #4caf50; }
+  .item.active {
+    border-color: #ffcc00;
+    box-shadow: 0 0 0 2px rgba(255,204,0,0.25);
+  }
+  .item.rarity-common    { border-left: 5px solid #aaa; }
+  .item.rarity-rare      { border-left: 5px solid #3b82f6; }
+  .item.rarity-epic      { border-left: 5px solid #a855f7; }
+  .item.rarity-legendary { border-left: 5px solid #f59e0b; }
+
+  .item-preview {
+    width: 52px;
+    height: 36px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0a0a1a;
+    border-radius: 4px;
+    border: 1px solid #222;
+    position: relative;
+  }
+  .item-preview canvas {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+  }
+
+  .item-info { flex: 1; min-width: 0; }
+  .item-name {
+    font-size: 14px;
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
+  }
+  .item-rarity {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .item-stats {
+    font-size: 11px;
+    color: #aaa;
+    line-height: 1.4;
+  }
+  .item-stats b { color: #eee; }
+  .rank-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  .item-action {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    min-width: 90px;
+  }
+  .item-price {
+    font-size: 12px;
+    font-weight: bold;
+    color: #ffcc00;
+    white-space: nowrap;
+  }
+  .item-price.owned { color: #4caf50; }
+
+  button {
+    font-family: inherit;
+    background: #e94560;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 14px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    min-height: 40px;
+    min-width: 80px;
+    transition: background 0.15s, transform 0.05s;
+    touch-action: manipulation;
+  }
+  button:active:not(:disabled) {
+    background: #c73a52;
+    transform: scale(0.97);
+  }
+  button:disabled {
+    background: #333;
+    color: #666;
+    cursor: not-allowed;
+  }
+  button.equip { background: #4caf50; }
+  button.equip:active { background: #3d8b40; }
+  button.danger { background: #555; }
+  button.danger:active { background: #444; }
+
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 14px;
+    background: #1a1a2e;
+    border: 2px solid #333;
+    border-radius: 8px;
+    margin-bottom: 6px;
+    font-size: 13px;
+  }
+  .stat-row .label { color: #aaa; }
+  .stat-row .value {
+    font-weight: bold;
+    color: #fff;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-row .value.gold { color: #ffcc00; }
+  .stat-row .value.green { color: #4caf50; }
+
+  .race-info {
+    background: #1a1a2e;
+    border: 2px solid #333;
+    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+  .race-info .row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 13px;
+    border-bottom: 1px solid #222;
+  }
+  .race-info .row:last-child { border-bottom: none; }
+  .race-info .label { color: #888; }
+  .race-info .value { font-weight: bold; }
+  .race-info .value.gold { color: #ffcc00; }
+  .race-info .value.green { color: #4caf50; }
+
+  .big-btn {
+    width: 100%;
+    padding: 14px;
+    font-size: 15px;
+    min-height: 52px;
+    margin-top: 6px;
+  }
+
+  .class-table {
+    background: #1a1a2e;
+    border: 2px solid #333;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 10px;
+    font-size: 11px;
+  }
+  .class-table .class-row {
+    display: flex;
+    align-items: center;
+    padding: 6px 4px;
+    border-bottom: 1px solid #222;
+    gap: 8px;
+  }
+  .class-table .class-row:last-child { border-bottom: none; }
+  .class-table .class-row.current {
+    background: rgba(255,204,0,0.1);
+    border-radius: 4px;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  .class-rank {
+    font-weight: bold;
+    font-size: 13px;
+    width: 22px;
+    text-align: center;
+    padding: 2px 0;
+    border-radius: 4px;
+  }
+  .class-name { flex: 1; color: #ccc; }
+  .class-speed { color: #ffcc00; font-weight: bold; font-family: monospace; }
+
+  #modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+  }
+  #modal-overlay.show { display: flex; }
+  #modal {
+    background: #1a1a2e;
+    border: 2px solid #444;
+    border-radius: 12px;
+    padding: 20px;
+    max-width: 340px;
+    width: 100%;
+  }
+  #modal h3 {
+    font-size: 16px;
+    color: #ffcc00;
+    margin-bottom: 10px;
+  }
+  #modal p {
+    font-size: 13px;
+    color: #ccc;
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+  .modal-buttons {
+    display: flex;
+    gap: 8px;
+  }
+  .modal-buttons button {
+    flex: 1;
+    min-height: 44px;
+  }
+  .modal-buttons .cancel { background: #555; }
+  .modal-buttons .cancel:active { background: #444; }
+
+  #toast-container {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: calc(72px + env(safe-area-inset-bottom, 0));
+    z-index: 500;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    width: 90%;
+    max-width: 320px;
+  }
+  .toast {
+    background: rgba(0,0,0,0.92);
+    border: 2px solid #4caf50;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: bold;
+    color: #4caf50;
+    animation: toastAnim 2s ease-out forwards;
+    text-align: center;
+    width: 100%;
+  }
+  .toast.win { border-color: #ffcc00; color: #ffcc00; }
+  .toast.info { border-color: #3b82f6; color: #3b82f6; }
+  .toast.lose { border-color: #888; color: #ccc; }
+  @keyframes toastAnim {
+    0%   { opacity: 0; transform: translateY(20px); }
+    10%  { opacity: 1; transform: translateY(0); }
+    80%  { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-10px); }
+  }
+
+  #error-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.95);
+    color: #ff5555;
+    padding: 20px;
+    font-family: monospace;
+    font-size: 12px;
+    z-index: 9999;
+    display: none;
+    overflow: auto;
+    white-space: pre-wrap;
+  }
+
+  @media (max-width: 360px) {
+    .item-preview { width: 42px; height: 30px; }
+    .item-action { min-width: 76px; }
+    .item-name { font-size: 13px; }
+    #money { font-size: 19px; }
+    .tab-label { font-size: 9px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div id="top-bar">
+    <div id="money-wrap">
+      <span class="money-icon">💰</span>
+      <span id="money">0</span>
+    </div>
+    <div id="stats-mini">
+      <div><span class="val" id="mini-laps">0</span>Круги</div>
+      <div><span class="val" id="mini-wins">0</span>Победы</div>
+    </div>
+  </div>
+
+  <div id="track-area">
+    <canvas id="track-canvas" width="640" height="360"></canvas>
+    <div class="hud" id="hud-topleft">
+      <div class="hud-line">🏁 <b id="hud-track">—</b></div>
+      <div class="hud-line">Круг: <b id="hud-lap">0</b> · Позиция: <b id="hud-place">—</b></div>
+    </div>
+    <div class="hud" id="hud-topright">
+      <div class="hud-title">ПОЗИЦИИ</div>
+    </div>
+  </div>
+
+  <div id="content"></div>
+
+  <div id="tab-bar">
+    <div class="tab active" data-tab="race">
+      <div class="tab-icon">🏁</div>
+      <div class="tab-label">Гонка</div>
+    </div>
+    <div class="tab" data-tab="cars">
+      <div class="tab-icon">🚗</div>
+      <div class="tab-label">Гараж</div>
+    </div>
+    <div class="tab" data-tab="tracks">
+      <div class="tab-icon">🛣️</div>
+      <div class="tab-label">Трассы</div>
+    </div>
+    <div class="tab" data-tab="profile">
+      <div class="tab-icon">👤</div>
+      <div class="tab-label">Профиль</div>
+    </div>
+  </div>
+</div>
+
+<div id="modal-overlay">
+  <div id="modal">
+    <h3 id="modal-title">Подтверждение</h3>
+    <p id="modal-text">Вы уверены?</p>
+    <div class="modal-buttons">
+      <button class="cancel" id="modal-cancel">Отмена</button>
+      <button id="modal-confirm">ОК</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<div id="error-overlay"></div>
+
+<script>
+'use strict';
+
+/* =========== ОТЛОВ ОШИБОК =========== */
+window.addEventListener('error', function(e) {
+  var ov = document.getElementById('error-overlay');
+  ov.style.display = 'block';
+  ov.textContent += 'ОШИБКА: ' + e.message + '\n  Строка: ' + e.lineno + ':' + e.colno + '\n' +
+    (e.error && e.error.stack ? e.error.stack : '') + '\n\n';
+});
+window.addEventListener('unhandledrejection', function(e) {
+  var ov = document.getElementById('error-overlay');
+  ov.style.display = 'block';
+  ov.textContent += 'PROMISE REJECTION: ' + e.reason + '\n\n';
+});
+
+/* =========================================================
+   КОНСТАНТЫ
+   ========================================================= */
+var CANVAS_W = 640;
+var CANVAS_H = 360;
+
+var TRACK = {
+  cx: CANVAS_W / 2,
+  cy: CANVAS_H / 2,
+  rx: 220,
+  ry: 110,
+  width: 56
+};
+
+var CLASSES = {
+  legendary: { rank: 'S', label: 'Легендарная', color: '#f59e0b', baseLapTime: 4.0, multiplier: 3.5 },
+  epic:      { rank: 'A', label: 'Эпическая',   color: '#a855f7', baseLapTime: 5.4, multiplier: 2.2 },
+  rare:      { rank: 'B', label: 'Редкая',      color: '#3b82f6', baseLapTime: 7.0, multiplier: 1.5 },
+  common:    { rank: 'C', label: 'Обычная',     color: '#aaa',    baseLapTime: 9.0, multiplier: 1.0 }
+};
+
+var RARITY_ORDER = ['common', 'rare', 'epic', 'legendary'];
+var INTRA_CLASS_VARIANCE = 0.03;
+
+/* =========================================================
+   МАШИНЫ
+   ========================================================= */
+var CARS = [
+  { id: 'lada',    name: 'Lada 2107',      rarity: 'common',    speedVariance: -0.8, price: 0,       color: '#c9a227' },
+  { id: 'civic',   name: 'Honda Civic',    rarity: 'common',    speedVariance:  0.0, price: 800,     color: '#e0e0e0' },
+  { id: 'golf',    name: 'VW Golf GTI',    rarity: 'common',    speedVariance:  0.7, price: 2500,    color: '#d32f2f' },
+  { id: 'bmw_m3',  name: 'BMW M3 E30',     rarity: 'rare',      speedVariance: -0.6, price: 8000,    color: '#f5f5f5' },
+  { id: 'supra',   name: 'Toyota Supra',   rarity: 'rare',      speedVariance:  0.1, price: 14000,   color: '#ff6f00' },
+  { id: 'gtr',     name: 'Nissan GT-R',    rarity: 'rare',      speedVariance:  0.7, price: 22000,   color: '#1e88e5' },
+  { id: 'porsche', name: 'Porsche 911',    rarity: 'epic',      speedVariance: -0.5, price: 65000,   color: '#fbc02d' },
+  { id: 'ferrari', name: 'Ferrari F40',    rarity: 'epic',      speedVariance:  0.6, price: 130000,  color: '#d32f2f' },
+  { id: 'lambo',   name: 'Lamborghini',    rarity: 'legendary', speedVariance: -0.4, price: 320000,  color: '#00e676' },
+  { id: 'bugatti', name: 'Bugatti Chiron', rarity: 'legendary', speedVariance:  0.6, price: 800000,  color: '#2979ff' }
+];
+
+var TRACKS = [
+  { id: 'oval',   name: 'Деревенский овал', rarity: 'common',    rewardMult: 1.0, price: 0,      style: 'country' },
+  { id: 'city',   name: 'Городское кольцо', rarity: 'common',    rewardMult: 1.3, price: 2500,   style: 'city'    },
+  { id: 'desert', name: 'Пустынный трек',   rarity: 'rare',      rewardMult: 1.8, price: 10000,  style: 'desert'  },
+  { id: 'snow',   name: 'Зимняя трасса',    rarity: 'rare',      rewardMult: 2.3, price: 25000,  style: 'snow'    },
+  { id: 'night',  name: 'Ночной город',     rarity: 'epic',      rewardMult: 3.2, price: 70000,  style: 'night'   },
+  { id: 'monaco', name: 'Монако',           rarity: 'epic',      rewardMult: 4.5, price: 180000, style: 'monaco'  },
+  { id: 'legend', name: 'Легендарный трек', rarity: 'legendary', rewardMult: 7.0, price: 600000, style: 'legend'  }
+];
+
+var BASE_REWARD = 100;
+var PLACE_BONUS = { 1: 3.0, 2: 2.0, 3: 1.5, 4: 1.2, 5: 1.0, 6: 0.9 };
+
+var PALETTES = {
+  country: { bg: '#3a7d3a', road: '#4a4a4a', line: '#e0e0e0', accent: '#2d5a2d', border: '#1a3a1a' },
+  city:    { bg: '#3a3a5a', road: '#333333', line: '#ffcc00', accent: '#222222', border: '#111111' },
+  desert:  { bg: '#c2a878', road: '#6b5a3a', line: '#ffffff', accent: '#a08858', border: '#5a4828' },
+  snow:    { bg: '#d8e8f0', road: '#5a5a6a', line: '#ffffff', accent: '#b0c8d8', border: '#8098a8' },
+  night:   { bg: '#0a0a1a', road: '#222222', line: '#ffcc00', accent: '#050510', border: '#000000' },
+  monaco:  { bg: '#1e3a5a', road: '#444444', line: '#ff5555', accent: '#0a1a2a', border: '#050a15' },
+  legend:  { bg: '#2a0a3a', road: '#3a1a4a', line: '#ff00ff', accent: '#1a0525', border: '#0a0212' }
+};
+
+/* =========================================================
+   СПРАЙТЫ МАШИН
+   =========================================================
+   Ищем спрайт в images/<id>.png.
+   Если найден — рисуем его вместо процедурной пиксельной машинки.
+   Размер на canvas: 16×10 пикселей (как у процедурной).
+   Ориентация спрайта: нос смотрит ВПРАВО.
+   ========================================================= */
+var SPRITE_DIR = 'images/';
+var SPRITE_EXT = '.png';
+var spriteCache = {}; // id -> { img, ready, failed }
+
+function getSprite(id) {
+  return spriteCache[id] || null;
+}
+
+// Загружает спрайт, возвращает промис-подобную структуру через колбэк onDone(ready)
+function loadSprite(car, onDone) {
+  var entry = { img: new Image(), ready: false, failed: false };
+  spriteCache[car.id] = entry;
+
+  var finished = false;
+  function finish(ok) {
+    if (finished) return;
+    finished = true;
+    entry.ready = ok;
+    entry.failed = !ok;
+    if (onDone) onDone(ok);
+  }
+
+  entry.img.onload = function() {
+    // Проверим, что картинка хоть как-то загрузилась
+    if (entry.img.naturalWidth > 0) {
+      finish(true);
+    } else {
+      finish(false);
+    }
+  };
+  entry.img.onerror = function() { finish(false); };
+
+  // Fallback через 3 секунды, чтобы игра не залипала
+  setTimeout(function() { finish(false); }, 3000);
+
+  try {
+    entry.img.src = SPRITE_DIR + car.id + SPRITE_EXT;
+  } catch (e) {
+    finish(false);
+  }
+}
+
+function preloadAllSprites(onAllDone) {
+  var total = CARS.length;
+  var loaded = 0;
+  var called = false;
+
+  function tryFinish() {
+    loaded++;
+    if (loaded >= total && !called) {
+      called = true;
+      onAllDone();
+    }
+  }
+
+  for (var i = 0; i < CARS.length; i++) {
+    loadSprite(CARS[i], tryFinish);
+  }
+}
+
+/* =========== ВСПОМОГАТЕЛЬНОЕ =========== */
+function getCar(id)   { for (var i = 0; i < CARS.length; i++)   if (CARS[i].id === id)   return CARS[i];   return null; }
+function getTrack(id) { for (var i = 0; i < TRACKS.length; i++) if (TRACKS[i].id === id) return TRACKS[i]; return null; }
+function getCarClass(car) { return CLASSES[car.rarity]; }
+
+function getCarLapTime(car) {
+  var base = CLASSES[car.rarity].baseLapTime;
+  var variance = car.speedVariance * INTRA_CLASS_VARIANCE;
+  return base * (1 - variance);
+}
+
+/* =========== СОСТОЯНИЕ =========== */
+var state = {
+  money: 500,
+  laps: 0,
+  wins: 0,
+  ownedCars: ['lada'],
+  ownedTracks: ['oval'],
+  activeCar: 'lada',
+  activeTrack: 'oval',
+  activeTab: 'race'
+};
+
+var racers = [];
+var sessionStart = 0;
+var shopButtonRefreshers = [];
+
+/* =========== СОХРАНЕНИЕ =========== */
+function save() {
+  try {
+    localStorage.setItem('pixelRacingTycoon', JSON.stringify({
+      money: state.money,
+      laps: state.laps,
+      wins: state.wins,
+      ownedCars: state.ownedCars,
+      ownedTracks: state.ownedTracks,
+      activeCar: state.activeCar,
+      activeTrack: state.activeTrack
+    }));
+  } catch (e) {}
+}
+
+function load() {
+  try {
+    var raw = localStorage.getItem('pixelRacingTycoon');
+    if (!raw) return;
+    var d = JSON.parse(raw);
+    if (typeof d.money === 'number') state.money = d.money;
+    if (typeof d.laps === 'number') state.laps = d.laps;
+    if (typeof d.wins === 'number') state.wins = d.wins;
+    if (Object.prototype.toString.call(d.ownedCars) === '[object Array]') state.ownedCars = d.ownedCars;
+    if (Object.prototype.toString.call(d.ownedTracks) === '[object Array]') state.ownedTracks = d.ownedTracks;
+    if (typeof d.activeCar === 'string') state.activeCar = d.activeCar;
+    if (typeof d.activeTrack === 'string') state.activeTrack = d.activeTrack;
+    if (state.ownedCars.indexOf(state.activeCar) === -1) state.activeCar = 'lada';
+    if (state.ownedTracks.indexOf(state.activeTrack) === -1) state.activeTrack = 'oval';
+  } catch (e) {}
+}
+
+/* =========== CANVAS =========== */
+var canvas = document.getElementById('track-canvas');
+var ctx = canvas.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+
+/* =========== ГЕОМЕТРИЯ =========== */
+function trackPos(t, offset) {
+  if (typeof offset !== 'number') offset = 0;
+  var rx = TRACK.rx + offset;
+  var ry = TRACK.ry + offset;
+  return {
+    x: TRACK.cx + rx * Math.sin(t),
+    y: TRACK.cy - ry * Math.cos(t)
+  };
+}
+
+function trackAngle(t) {
+  return Math.atan2(TRACK.ry * Math.sin(t), TRACK.rx * Math.cos(t));
+}
+
+/* =========================================================
+   ПОДБОР ИИ
+   ========================================================= */
+function pickAIOpponents(playerCar) {
+  var playerIdx = RARITY_ORDER.indexOf(playerCar.rarity);
+  var result = [];
+  var usedIds = {};
+
+  function pickFromRarity(rarity) {
+    var pool = [];
+    for (var i = 0; i < CARS.length; i++) {
+      var c = CARS[i];
+      if (c.rarity !== rarity) continue;
+      if (c.id === playerCar.id) continue;
+      if (usedIds[c.id]) continue;
+      pool.push(c);
+    }
+    if (pool.length === 0) return null;
+    var chosen = pool[Math.floor(Math.random() * pool.length)];
+    usedIds[chosen.id] = true;
+    return chosen;
+  }
+
+  if (playerIdx > 0) {
+    var lower = pickFromRarity(RARITY_ORDER[playerIdx - 1]);
+    if (lower) result.push(lower);
+  }
+
+  for (var k = 0; k < 2; k++) {
+    var same = pickFromRarity(playerCar.rarity);
+    if (same) result.push(same);
+  }
+
+  if (playerIdx < RARITY_ORDER.length - 1) {
+    var higher = pickFromRarity(RARITY_ORDER[playerIdx + 1]);
+    if (higher) result.push(higher);
+  }
+
+  var fallbackOrder = [];
+  if (playerIdx > 0) fallbackOrder.push(RARITY_ORDER[playerIdx - 1]);
+  fallbackOrder.push(playerCar.rarity);
+  if (playerIdx < RARITY_ORDER.length - 1) fallbackOrder.push(RARITY_ORDER[playerIdx + 1]);
+
+  while (result.length < 5) {
+    var picked = false;
+    for (var f = 0; f < fallbackOrder.length && !picked; f++) {
+      var candidate = pickFromRarity(fallbackOrder[f]);
+      if (candidate) {
+        result.push(candidate);
+        picked = true;
+      }
+    }
+    if (!picked) break;
+  }
+
+  return result.slice(0, 5);
+}
+
+/* =========================================================
+   НАСТРОЙКА ГОНЩИКОВ
+   ========================================================= */
+function setupRacers() {
+  racers = [];
+  var playerCar = getCar(state.activeCar);
+  if (!playerCar) playerCar = CARS[0];
+
+  var aiCars = pickAIOpponents(playerCar);
+
+  racers.push({
+    isPlayer: true,
+    car: playerCar,
+    t: -0.15,
+    lane: -14,
+    laps: 0,
+    place: 1,
+    lapTime: getCarLapTime(playerCar),
+    color: playerCar.color,
+    progress: 0
+  });
+
+  for (var i = 0; i < aiCars.length; i++) {
+    var car = aiCars[i];
+    var idx = i + 1;
+    var row = Math.floor(idx / 2);
+    var col = idx % 2;
+    var t0 = -0.15 - row * 0.18;
+    var lane = col === 0 ? -14 : 14;
+
+    racers.push({
+      isPlayer: false,
+      car: car,
+      t: t0,
+      lane: lane,
+      laps: 0,
+      place: idx + 1,
+      lapTime: getCarLapTime(car),
+      color: car.color,
+      progress: 0
+    });
+  }
+
+  sessionStart = performance.now();
+  refreshLeaderboard();
+}
+
+/* =========== ИГРОВОЙ ЦИКЛ =========== */
+var lastTime = 0;
+var lastLeaderboardUpdate = 0;
+
+function gameLoop(time) {
+  try {
+    var dt = (time - lastTime) / 1000;
+    if (dt > 0.05) dt = 0.05;
+    if (dt < 0) dt = 0;
+    lastTime = time;
+
+    updateGame(dt);
+    renderGame();
+    updateHUD();
+
+    if (time - lastLeaderboardUpdate > 200) {
+      lastLeaderboardUpdate = time;
+      refreshLeaderboard();
+    }
+  } catch (e) {
+    var ov = document.getElementById('error-overlay');
+    ov.style.display = 'block';
+    ov.textContent += 'LOOP ERROR: ' + e.message + '\n' + (e.stack || '') + '\n\n';
+  }
+
+  requestAnimationFrame(gameLoop);
+}
+
+function updateGame(dt) {
+  if (racers.length === 0) return;
+  var TWO_PI = Math.PI * 2;
+  var i, r;
+
+  for (i = 0; i < racers.length; i++) {
+    r = racers[i];
+    r.t += (TWO_PI / r.lapTime) * dt;
+    while (r.t >= TWO_PI) {
+      r.t -= TWO_PI;
+      r.laps += 1;
+      onLapComplete(r);
+    }
+    r.progress = r.laps * TWO_PI + r.t;
+  }
+
+  var sorted = racers.slice().sort(function(a, b) { return b.progress - a.progress; });
+  for (i = 0; i < sorted.length; i++) {
+    sorted[i].place = i + 1;
+  }
+}
+
+function onLapComplete(r) {
+  if (!r.isPlayer) return;
+  var track = getTrack(state.activeTrack);
+  var classMult = getCarClass(r.car).multiplier;
+  var placeBonus = PLACE_BONUS[r.place] || 1.0;
+  var reward = Math.floor(BASE_REWARD * track.rewardMult * classMult * placeBonus);
+
+  state.money += reward;
+  state.laps += 1;
+  if (r.place === 1) state.wins += 1;
+
+  updateMoneyDisplay(true);
+  updateMiniStats();
+  save();
+
+  var placeLabels = ['', '1-е', '2-е', '3-е', '4-е', '5-е', '6-е'];
+  var placeLabel = placeLabels[r.place] || (r.place + '-е');
+  showToast('+$' + reward.toLocaleString('ru-RU'), r.place === 1 ? 'win' : '');
+  showToast(placeLabel + ' место · круг ' + r.laps, 'info');
+}
+
+/* =========== ОТРИСОВКА =========== */
+function renderGame() {
+  var track = getTrack(state.activeTrack);
+  if (!track) return;
+  var c = PALETTES[track.style] || PALETTES.country;
+  var i;
+
+  ctx.fillStyle = c.bg;
+  ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+
+  ctx.fillStyle = c.accent;
+  for (i = 0; i < 400; i++) {
+    var x = (i * 137) % CANVAS_W;
+    var y = (i * 89) % CANVAS_H;
+    var dx = (x - TRACK.cx) / (TRACK.rx + TRACK.width);
+    var dy = (y - TRACK.cy) / (TRACK.ry + TRACK.width);
+    if (dx * dx + dy * dy > 1.15) {
+      ctx.fillRect(Math.floor(x / 8) * 8, Math.floor(y / 8) * 8, 4, 4);
+    }
+  }
+
+  ctx.strokeStyle = c.border;
+  ctx.lineWidth = TRACK.width + 6;
+  ctx.beginPath();
+  ctx.ellipse(TRACK.cx, TRACK.cy, TRACK.rx, TRACK.ry, 0, 0, Math.PI * 2);
+  ctx.stroke();
+
+  ctx.strokeStyle = c.road;
+  ctx.lineWidth = TRACK.width;
+  ctx.beginPath();
+  ctx.ellipse(TRACK.cx, TRACK.cy, TRACK.rx, TRACK.ry, 0, 0, Math.PI * 2);
+  ctx.stroke();
+
+  ctx.strokeStyle = c.line;
+  ctx.lineWidth = 2;
+  ctx.setLineDash([10, 14]);
+  ctx.beginPath();
+  ctx.ellipse(TRACK.cx, TRACK.cy, TRACK.rx, TRACK.ry, 0, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  var st = trackPos(0, -TRACK.width / 2);
+  var sb = trackPos(0, TRACK.width / 2);
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 4;
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath();
+  ctx.moveTo(st.x, st.y);
+  ctx.lineTo(sb.x, sb.y);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  var sorted = racers.slice().sort(function(a, b) {
+    return trackPos(a.t, a.lane).y - trackPos(b.t, b.lane).y;
+  });
+  for (i = 0; i < sorted.length; i++) {
+    var r = sorted[i];
+    var p = trackPos(r.t, r.lane);
+    var angle = trackAngle(r.t);
+    drawCar(p.x, p.y, angle, r.color, r.isPlayer, r.car.rarity, r.car.id);
+  }
+}
+
+/* Отрисовка одной машинки.
+   Если есть спрайт — рисуем спрайт, иначе процедурную.
+   Обводки нет. У игрока — только указатель-стрелка сверху.
+*/
+function drawCar(x, y, angle, color, isPlayer, rarity, carId) {
+  x = Math.round(x);
+  y = Math.round(y);
+
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(angle);
+
+  // Тень (общая для спрайта и процедурной)
+  ctx.fillStyle = 'rgba(0,0,0,0.35)';
+  ctx.fillRect(-7, -3, 16, 10);
+
+  var sprite = getSprite(carId);
+  var usedSprite = false;
+
+  if (sprite && sprite.ready && sprite.img && sprite.img.naturalWidth > 0) {
+    // Спрайт рисуем размером 16×10 без сглаживания
+    ctx.imageSmoothingEnabled = false;
+    try {
+      ctx.drawImage(sprite.img, -8, -5, 16, 10);
+      usedSprite = true;
+    } catch (e) {
+      usedSprite = false;
+    }
+  }
+
+  if (!usedSprite) {
+    // Процедурная пиксельная машинка (fallback)
+    ctx.fillStyle = color;
+    ctx.fillRect(-8, -5, 16, 10);
+
+    ctx.fillStyle = '#7eaac9';
+    ctx.fillRect(3, -4, 4, 8);
+
+    ctx.fillStyle = '#4a6d88';
+    ctx.fillRect(-6, -3, 3, 6);
+
+    ctx.fillStyle = '#111';
+    ctx.fillRect(-6, -6, 4, 2);
+    ctx.fillRect(2, -6, 4, 2);
+    ctx.fillRect(-6, 4, 4, 2);
+    ctx.fillRect(2, 4, 4, 2);
+  }
+
+  ctx.restore();
+
+  // Указатель над игроком (единственный маркер, обводки нет)
+  if (isPlayer) {
+    ctx.fillStyle = '#ffcc00';
+    ctx.beginPath();
+    ctx.moveTo(x, y - 14);
+    ctx.lineTo(x - 5, y - 21);
+    ctx.lineTo(x + 5, y - 21);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.strokeStyle = 'rgba(0,0,0,0.8)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+}
+
+/* Превью для карточки в гараже: спрайт если есть, иначе процедурный */
+function drawCarPreview(canvasEl, color, rarity, carId) {
+  var c = canvasEl.getContext('2d');
+  canvasEl.width = 52;
+  canvasEl.height = 36;
+  c.imageSmoothingEnabled = false;
+  c.clearRect(0, 0, 52, 36);
+
+  c.save();
+  c.translate(26, 18);
+  c.scale(1.6, 1.6);
+
+  // Тень
+  c.fillStyle = 'rgba(0,0,0,0.3)';
+  c.fillRect(-7, -3, 16, 10);
+
+  var sprite = getSprite(carId);
+  var usedSprite = false;
+
+  if (sprite && sprite.ready && sprite.img && sprite.img.naturalWidth > 0) {
+    c.imageSmoothingEnabled = false;
+    try {
+      c.drawImage(sprite.img, -8, -5, 16, 10);
+      usedSprite = true;
+    } catch (e) { usedSprite = false; }
+  }
+
+  if (!usedSprite) {
+    c.fillStyle = color;
+    c.fillRect(-8, -5, 16, 10);
+    c.fillStyle = '#7eaac9';
+    c.fillRect(3, -4, 4, 8);
+    c.fillStyle = '#4a6d88';
+    c.fillRect(-6, -3, 3, 6);
+    c.fillStyle = '#111';
+    c.fillRect(-6, -6, 4, 2);
+    c.fillRect(2, -6, 4, 2);
+    c.fillRect(-6, 4, 4, 2);
+    c.fillRect(2, 4, 4, 2);
+  }
+
+  c.restore();
+}
+
+function drawTrackPreview(canvasEl, style) {
+  var c = canvasEl.getContext('2d');
+  canvasEl.width = 52;
+  canvasEl.height = 36;
+  c.imageSmoothingEnabled = false;
+
+  var pal = PALETTES[style] || PALETTES.country;
+  c.fillStyle = pal.bg;
+  c.fillRect(0, 0, 52, 36);
+
+  c.strokeStyle = pal.road;
+  c.lineWidth = 8;
+  c.beginPath();
+  c.ellipse(26, 18, 18, 10, 0, 0, Math.PI * 2);
+  c.stroke();
+
+  c.strokeStyle = pal.line;
+  c.lineWidth = 1;
+  c.beginPath();
+  c.ellipse(26, 18, 18, 10, 0, 0, Math.PI * 2);
+  c.stroke();
+}
+
+/* =========== HUD =========== */
+function updateHUD() {
+  var player = null;
+  for (var i = 0; i < racers.length; i++) if (racers[i].isPlayer) { player = racers[i]; break; }
+  if (!player) return;
+
+  var track = getTrack(state.activeTrack);
+  document.getElementById('hud-track').textContent = track ? track.name : '—';
+  document.getElementById('hud-lap').textContent = player.laps;
+  document.getElementById('hud-place').textContent = player.place + '/' + racers.length;
+}
+
+function refreshLeaderboard() {
+  var el = document.getElementById('hud-topright');
+  var sorted = racers.slice().sort(function(a, b) { return a.place - b.place; });
+  var html = '<div class="hud-title">ПОЗИЦИИ</div>';
+  for (var i = 0; i < sorted.length; i++) {
+    var r = sorted[i];
+    var cls = getCarClass(r.car);
+    html += '<div class="row' + (r.isPlayer ? ' player' : '') + '">' +
+              '<span>' + r.car.name + '<span class="rank rank-' + cls.rank + '">' + cls.rank + '</span></span>' +
+              '<span>' + r.place + '</span>' +
+            '</div>';
+  }
+  el.innerHTML = html;
+}
+
+/* =========== TOAST =========== */
+function showToast(text, type) {
+  var box = document.getElementById('toast-container');
+  var el = document.createElement('div');
+  el.className = 'toast' + (type ? ' ' + type : '');
+  el.textContent = text;
+  box.appendChild(el);
+  while (box.children.length > 3) box.removeChild(box.firstChild);
+  setTimeout(function() { if (el.parentNode) el.parentNode.removeChild(el); }, 2000);
+}
+
+/* =========== ДЕНЬГИ =========== */
+function updateMoneyDisplay(pulse) {
+  var el = document.getElementById('money');
+  el.textContent = state.money.toLocaleString('ru-RU');
+  if (pulse) {
+    el.classList.add('pulse');
+    setTimeout(function() { el.classList.remove('pulse'); }, 400);
+  }
+  for (var i = 0; i < shopButtonRefreshers.length; i++) shopButtonRefreshers[i]();
+}
+
+function updateMiniStats() {
+  document.getElementById('mini-laps').textContent = state.laps;
+  document.getElementById('mini-wins').textContent = state.wins;
+}
+
+/* =========== МОДАЛКА =========== */
+var modalResolve = null;
+function showModal(title, text, onConfirm) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-text').textContent = text;
+  document.getElementById('modal-overlay').classList.add('show');
+  modalResolve = onConfirm;
+}
+document.getElementById('modal-cancel').addEventListener('click', function() {
+  document.getElementById('modal-overlay').classList.remove('show');
+  modalResolve = null;
+});
+document.getElementById('modal-confirm').addEventListener('click', function() {
+  document.getElementById('modal-overlay').classList.remove('show');
+  if (modalResolve) modalResolve();
+  modalResolve = null;
+});
+
+/* =========== ВКЛАДКИ =========== */
+function setupTabs() {
+  var tabs = document.querySelectorAll('.tab');
+  for (var i = 0; i < tabs.length; i++) {
+    (function(tab) {
+      tab.addEventListener('click', function() {
+        var all = document.querySelectorAll('.tab');
+        for (var j = 0; j < all.length; j++) all[j].classList.remove('active');
+        tab.classList.add('active');
+        state.activeTab = tab.dataset.tab;
+        renderTab();
+      });
+    })(tabs[i]);
+  }
+}
+
+function renderTab() {
+  var c = document.getElementById('content');
+  c.innerHTML = '';
+  c.scrollTop = 0;
+  shopButtonRefreshers = [];
+
+  if (state.activeTab === 'race')         renderRaceTab(c);
+  else if (state.activeTab === 'cars')    renderCarsTab(c);
+  else if (state.activeTab === 'tracks')  renderTracksTab(c);
+  else if (state.activeTab === 'profile') renderProfileTab(c);
+}
+
+/* =========== RACE TAB =========== */
+function renderRaceTab(c) {
+  var player = null;
+  for (var i = 0; i < racers.length; i++) if (racers[i].isPlayer) { player = racers[i]; break; }
+  var track = getTrack(state.activeTrack);
+  var car = getCar(state.activeCar);
+  var cls = getCarClass(car);
+
+  var reward1 = Math.floor(BASE_REWARD * track.rewardMult * cls.multiplier * PLACE_BONUS[1]);
+  var reward6 = Math.floor(BASE_REWARD * track.rewardMult * cls.multiplier * PLACE_BONUS[6]);
+  var lapTime = getCarLapTime(car);
+
+  var faster = 0, slower = 0, same = 0;
+  for (var k = 0; k < racers.length; k++) {
+    if (racers[k].isPlayer) continue;
+    var otherLap = racers[k].lapTime;
+    if (otherLap < lapTime - 0.01) faster++;
+    else if (otherLap > lapTime + 0.01) slower++;
+    else same++;
+  }
+
+  var div = document.createElement('div');
+
+  div.innerHTML =
+    '<h2>🏁 Текущая гонка</h2>' +
+    '<div class="race-info">' +
+      '<div class="row"><span class="label">Трасса</span><span class="value gold">' + track.name + '</span></div>' +
+      '<div class="row"><span class="label">Машина</span><span class="value" style="color:' + car.color + '">' + car.name + ' <span class="rank-badge rank-' + cls.rank + '">' + cls.rank + '</span></span></div>' +
+      '<div class="row"><span class="label">Класс</span><span class="value" style="color:' + cls.color + '">' + cls.label + '</span></div>' +
+      '<div class="row"><span class="label">Время круга</span><span class="value">' + lapTime.toFixed(2) + ' сек</span></div>' +
+      '<div class="row"><span class="label">Награда за 1 место</span><span class="value green">💰 ' + reward1.toLocaleString('ru-RU') + '</span></div>' +
+      '<div class="row"><span class="label">Награда за 6 место</span><span class="value">💰 ' + reward6.toLocaleString('ru-RU') + '</span></div>' +
+      '<div class="row"><span class="label">Ваша позиция</span><span class="value">' + (player ? player.place : '—') + ' / ' + racers.length + '</span></div>' +
+    '</div>' +
+    '<div class="hint">' +
+      '⚡ Соперники: <b style="color:#f59e0b">' + faster + '</b> быстрее · ' +
+      '<b style="color:#4caf50">' + same + '</b> наравне · ' +
+      '<b style="color:#888">' + slower + '</b> медленнее.' +
+    '</div>' +
+    '<button class="big-btn" id="btn-restart-race">🔄 Перезапустить гонку</button>';
+
+  c.appendChild(div);
+
+  var btn = document.getElementById('btn-restart-race');
+  if (btn) btn.addEventListener('click', restartRace);
+}
+
+/* =========== CARS TAB =========== */
+function renderCarsTab(c) {
+  var h = document.createElement('h2');
+  h.textContent = '🚗 Гараж';
+  c.appendChild(h);
+
+  var hint = document.createElement('div');
+  hint.className = 'hint warn';
+  hint.innerHTML =
+    '<b>Иерархия скорости:</b><br>' +
+    'Обычная (C) никогда не догонит Редкую (B), Редкая — Эпическую (A), Эпическая — Легендарную (S).<br>' +
+    'Внутри класса машины различаются на ±3%.';
+  c.appendChild(hint);
+
+  var table = document.createElement('div');
+  table.className = 'class-table';
+  var tableHtml = '<div class="hud-title" style="color:#888;font-size:10px;margin-bottom:6px;">КЛАССЫ СКОРОСТИ</div>';
+  for (var ri = RARITY_ORDER.length - 1; ri >= 0; ri--) {
+    var key = RARITY_ORDER[ri];
+    var cl = CLASSES[key];
+    var isCurrent = state.activeCar && getCar(state.activeCar).rarity === key;
+    tableHtml += '<div class="class-row' + (isCurrent ? ' current' : '') + '">' +
+      '<span class="class-rank rank-' + cl.rank + '">' + cl.rank + '</span>' +
+      '<span class="class-name">' + cl.label + '</span>' +
+      '<span class="class-speed">' + cl.baseLapTime.toFixed(1) + 'с / круг</span>' +
+      '</div>';
+  }
+  table.innerHTML = tableHtml;
+  c.appendChild(table);
+
+  for (var ci = 0; ci < CARS.length; ci++) {
+    (function(car) {
+      var owned = state.ownedCars.indexOf(car.id) !== -1;
+      var active = state.activeCar === car.id;
+      var cls = getCarClass(car);
+      var lapTime = getCarLapTime(car);
+
+      var el = document.createElement('div');
+      el.className = 'item rarity-' + car.rarity +
+                     (owned ? ' owned' : '') +
+                     (active ? ' active' : '');
+
+      var preview = document.createElement('div');
+      preview.className = 'item-preview';
+      var pCanvas = document.createElement('canvas');
+      preview.appendChild(pCanvas);
+
+      var info = document.createElement('div');
+      info.className = 'item-info';
+      info.innerHTML =
+        '<div class="item-name" style="color:' + car.color + '">' + car.name + '</div>' +
+        '<div class="item-rarity" style="color:' + cls.color + '">' +
+          cls.label +
+          ' <span class="rank-badge rank-' + cls.rank + '">' + cls.rank + '</span>' +
+        '</div>' +
+        '<div class="item-stats">Круг <b>' + lapTime.toFixed(2) + 'с</b> · Множитель <b>x' + cls.multiplier + '</b></div>';
+
+      var action = document.createElement('div');
+      action.className = 'item-action';
+
+      var priceEl = document.createElement('div');
+      priceEl.className = 'item-price' + (owned ? ' owned' : '');
+      priceEl.textContent = owned ? '✅ Есть' : '💰 ' + car.price.toLocaleString('ru-RU');
+      action.appendChild(priceEl);
+
+      if (active) {
+        var btn = document.createElement('button');
+        btn.textContent = '✅ Активна';
+        btn.disabled = true;
+        action.appendChild(btn);
+      } else if (owned) {
+        var btn2 = document.createElement('button');
+        btn2.className = 'equip';
+        btn2.textContent = 'Выбрать';
+        btn2.addEventListener('click', function() {
+          state.activeCar = car.id;
+          save();
+          setupRacers();
+          renderTab();
+        });
+        action.appendChild(btn2);
+      } else {
+        var btn3 = document.createElement('button');
+        var upd = function() {
+          if (state.money >= car.price) {
+            btn3.disabled = false;
+            btn3.textContent = 'Купить';
+          } else {
+            btn3.disabled = true;
+            btn3.textContent = 'Не хватает';
+          }
+        };
+        upd();
+        shopButtonRefreshers.push(upd);
+        btn3.addEventListener('click', function() {
+          if (state.money < car.price) return;
+          showModal(
+            'Купить машину?',
+            'Купить ' + car.name + ' за 💰 ' + car.price.toLocaleString('ru-RU') + '?',
+            function() {
+              state.money -= car.price;
+              state.ownedCars.push(car.id);
+              state.activeCar = car.id;
+              save();
+              updateMoneyDisplay(true);
+              setupRacers();
+              renderTab();
+              showToast('Куплено: ' + car.name, 'win');
+            }
+          );
+        });
+        action.appendChild(btn3);
+      }
+
+      el.appendChild(preview);
+      el.appendChild(info);
+      el.appendChild(action);
+      c.appendChild(el);
+
+      drawCarPreview(pCanvas, car.color, car.rarity, car.id);
+    })(CARS[ci]);
+  }
+}
+
+/* =========== TRACKS TAB =========== */
+function renderTracksTab(c) {
+  var h = document.createElement('h2');
+  h.textContent = '🛣️ Трассы';
+  c.appendChild(h);
+
+  var hint = document.createElement('div');
+  hint.className = 'hint';
+  hint.innerHTML = 'Трассы не влияют на скорость машин — только на размер награды за круг.';
+  c.appendChild(hint);
+
+  for (var ti = 0; ti < TRACKS.length; ti++) {
+    (function(track) {
+      var owned = state.ownedTracks.indexOf(track.id) !== -1;
+      var active = state.activeTrack === track.id;
+      var r = CLASSES[track.rarity] || CLASSES.common;
+
+      var el = document.createElement('div');
+      el.className = 'item rarity-' + track.rarity +
+                     (owned ? ' owned' : '') +
+                     (active ? ' active' : '');
+
+      var preview = document.createElement('div');
+      preview.className = 'item-preview';
+      var pCanvas = document.createElement('canvas');
+      preview.appendChild(pCanvas);
+
+      var info = document.createElement('div');
+      info.className = 'item-info';
+      info.innerHTML =
+        '<div class="item-name">' + track.name + '</div>' +
+        '<div class="item-rarity" style="color:' + r.color + '">' + r.label + '</div>' +
+        '<div class="item-stats">Множитель награды <b>x' + track.rewardMult + '</b></div>';
+
+      var action = document.createElement('div');
+      action.className = 'item-action';
+
+      var priceEl = document.createElement('div');
+      priceEl.className = 'item-price' + (owned ? ' owned' : '');
+      priceEl.textContent = owned ? '✅ Есть' : '💰 ' + track.price.toLocaleString('ru-RU');
+      action.appendChild(priceEl);
+
+      if (active) {
+        var btn = document.createElement('button');
+        btn.textContent = '✅ Активна';
+        btn.disabled = true;
+        action.appendChild(btn);
+      } else if (owned) {
+        var btn2 = document.createElement('button');
+        btn2.className = 'equip';
+        btn2.textContent = 'Выбрать';
+        btn2.addEventListener('click', function() {
+          state.activeTrack = track.id;
+          save();
+          setupRacers();
+          renderTab();
+        });
+        action.appendChild(btn2);
+      } else {
+        var btn3 = document.createElement('button');
+        var upd = function() {
+          if (state.money >= track.price) {
+            btn3.disabled = false;
+            btn3.textContent = 'Купить';
+          } else {
+            btn3.disabled = true;
+            btn3.textContent = 'Не хватает';
+          }
+        };
+        upd();
+        shopButtonRefreshers.push(upd);
+        btn3.addEventListener('click', function() {
+          if (state.money < track.price) return;
+          showModal(
+            'Открыть трассу?',
+            'Купить «' + track.name + '» за 💰 ' + track.price.toLocaleString('ru-RU') + '?',
+            function() {
+              state.money -= track.price;
+              state.ownedTracks.push(track.id);
+              state.activeTrack = track.id;
+              save();
+              updateMoneyDisplay(true);
+              setupRacers();
+              renderTab();
+              showToast('Открыто: ' + track.name, 'win');
+            }
+          );
+        });
+        action.appendChild(btn3);
+      }
+
+      el.appendChild(preview);
+      el.appendChild(info);
+      el.appendChild(action);
+      c.appendChild(el);
+
+      drawTrackPreview(pCanvas, track.style);
+    })(TRACKS[ti]);
+  }
+}
+
+/* =========== PROFILE TAB =========== */
+function renderProfileTab(c) {
+  var activeCar = getCar(state.activeCar);
+  var cls = getCarClass(activeCar);
+
+  var div = document.createElement('div');
+  div.innerHTML =
+    '<h2>👤 Профиль</h2>' +
+    '<div class="stat-row"><span class="label">💰 Деньги</span><span class="value gold">' + state.money.toLocaleString('ru-RU') + '</span></div>' +
+    '<div class="stat-row"><span class="label">🏁 Всего кругов</span><span class="value">' + state.laps + '</span></div>' +
+    '<div class="stat-row"><span class="label">🏆 Побед</span><span class="value green">' + state.wins + '</span></div>' +
+    '<div class="stat-row"><span class="label">🚗 Машин в гараже</span><span class="value">' + state.ownedCars.length + ' / ' + CARS.length + '</span></div>' +
+    '<div class="stat-row"><span class="label">🛣️ Трасс открыто</span><span class="value">' + state.ownedTracks.length + ' / ' + TRACKS.length + '</span></div>' +
+    '<div class="stat-row"><span class="label">⭐ Активная машина</span><span class="value">' + activeCar.name + ' <span class="rank-badge rank-' + cls.rank + '">' + cls.rank + '</span></span></div>' +
+    '<div class="stat-row"><span class="label">📍 Активная трасса</span><span class="value">' + getTrack(state.activeTrack).name + '</span></div>' +
+    '<button class="big-btn danger" id="btn-reset" style="margin-top:14px;">🗑 Сбросить прогресс</button>';
+  c.appendChild(div);
+
+  var btn = document.getElementById('btn-reset');
+  if (btn) btn.addEventListener('click', function() {
+    showModal(
+      'Сбросить прогресс?',
+      'Весь прогресс: деньги, машины, трассы — будут удалены навсегда.',
+      resetGame
+    );
+  });
+}
+
+/* =========== ДЕЙСТВИЯ =========== */
+function restartRace() {
+  setupRacers();
+  showToast('🏁 Новая гонка!', 'info');
+}
+
+function resetGame() {
+  try { localStorage.removeItem('pixelRacingTycoon'); } catch (e) {}
+  state.money = 500;
+  state.laps = 0;
+  state.wins = 0;
+  state.ownedCars = ['lada'];
+  state.ownedTracks = ['oval'];
+  state.activeCar = 'lada';
+  state.activeTrack = 'oval';
+  save();
+  updateMoneyDisplay();
+  updateMiniStats();
+  setupRacers();
+  renderTab();
+  showToast('Прогресс сброшен', 'info');
+}
+
+/* =========== СТАРТ =========== */
+var loopStarted = false;
+var spritesLoaded = false;
+
+function startLoop() {
+  if (loopStarted) return;
+  loopStarted = true;
+  lastTime = performance.now();
+  requestAnimationFrame(gameLoop);
+}
+
+function startGame() {
+  load();
+  setupTabs();
+  updateMoneyDisplay();
+  updateMiniStats();
+  updateHUD();
+
+  // Сначала показываем UI с процедурными машинками,
+  // параллельно грузим спрайты. Как только спрайты загружены —
+  // они автоматически появятся (в drawCar мы каждый кадр проверяем sprite.ready).
+  setupRacers();
+  renderTab();
+  startLoop();
+
+  preloadAllSprites(function() {
+    spritesLoaded = true;
+    // Перерисуем текущую вкладку, чтобы превью в гараже подхватили спрайты
+    renderTab();
+  });
+}
+
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  requestAnimationFrame(startGame);
+} else {
+  window.addEventListener('DOMContentLoaded', function() {
+    requestAnimationFrame(startGame);
+  });
+}
+</script>
+</body>
+</html>
