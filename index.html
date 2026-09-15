@@ -602,6 +602,10 @@ var TRACK = {
   width: 56
 };
 
+/* Размер машинки на canvas (внутренние пиксели) */
+var CAR_W = 48;
+var CAR_H = 30;
+
 var CLASSES = {
   legendary: { rank: 'S', label: 'Легендарная', color: '#f59e0b', baseLapTime: 4.0, multiplier: 3.5 },
   epic:      { rank: 'A', label: 'Эпическая',   color: '#a855f7', baseLapTime: 5.4, multiplier: 2.2 },
@@ -654,22 +658,77 @@ var PALETTES = {
 /* =========================================================
    СПРАЙТЫ МАШИН
    =========================================================
-   Ищем спрайт в images/<id>.png.
-   Если найден — рисуем его вместо процедурной пиксельной машинки.
-   Размер на canvas: 16×10 пикселей (как у процедурной).
-   Ориентация спрайта: нос смотрит ВПРАВО.
+   Проблема «зашакаленности» была из-за того, что большой PNG
+   сжимался сразу в 16×10 с дробным масштабом и интерполяцией
+   «ближайший сосед», которая при уменьшении даёт потерю строк.
+
+   Решение: при загрузке сразу готовим уменьшенную копию
+   на offscreen-canvas через ЦЕЛОЧИСЛЕННЫЙ коэффициент,
+   с сохранением пропорций и центрированием.
+   Готовый «спрайт-подарок» кэшируется и используется в drawImage 1:1.
    ========================================================= */
 var SPRITE_DIR = 'images/';
 var SPRITE_EXT = '.png';
-var spriteCache = {}; // id -> { img, ready, failed }
+var spriteCache = {}; // id -> { ready, failed, canvas }
 
 function getSprite(id) {
   return spriteCache[id] || null;
 }
 
-// Загружает спрайт, возвращает промис-подобную структуру через колбэк onDone(ready)
+/* Из готового image делает canvas размера CAR_W×CAR_H:
+   1) считает целочисленный коэффициент уменьшения,
+   2) уменьшает до промежуточного размера (ближайший сосед),
+   3) центрирует в CAR_W×CAR_H с прозрачным фоном. */
+function bakeSprite(img) {
+  var iw = img.naturalWidth;
+  var ih = img.naturalHeight;
+  if (!iw || !ih) return null;
+
+  // 1) Подбираем целочисленный масштаб так, чтобы картинка влезла в CAR_W×CAR_H
+  var scale = Math.min(CAR_W / iw, CAR_H / ih);
+  // Работаем только с целыми 1..N. Если спрайт меньше целевого — увеличим (тоже целым).
+  var intScale;
+  if (scale >= 1) {
+    intScale = Math.floor(scale);
+    if (intScale < 1) intScale = 1;
+  } else {
+    // Уменьшение: 1/2, 1/3, 1/4...  (обратное значение)
+    intScale = 1 / Math.ceil(1 / scale);
+  }
+
+  var sw = Math.max(1, Math.round(iw * intScale));
+  var sh = Math.max(1, Math.round(ih * intScale));
+
+  // 2) Промежуточный canvas — рисуем с отключённым сглаживанием
+  var tmp = document.createElement('canvas');
+  tmp.width = sw;
+  tmp.height = sh;
+  var tctx = tmp.getContext('2d');
+  tctx.imageSmoothingEnabled = false;
+  tctx.mozImageSmoothingEnabled = false;
+  tctx.webkitImageSmoothingEnabled = false;
+  tctx.msImageSmoothingEnabled = false;
+  tctx.drawImage(img, 0, 0, iw, ih, 0, 0, sw, sh);
+
+  // 3) Финальный canvas ровно CAR_W×CAR_H с центрированием
+  var out = document.createElement('canvas');
+  out.width = CAR_W;
+  out.height = CAR_H;
+  var octx = out.getContext('2d');
+  octx.imageSmoothingEnabled = false;
+  octx.mozImageSmoothingEnabled = false;
+  octx.webkitImageSmoothingEnabled = false;
+  octx.msImageSmoothingEnabled = false;
+
+  var dx = Math.floor((CAR_W - sw) / 2);
+  var dy = Math.floor((CAR_H - sh) / 2);
+  octx.drawImage(tmp, 0, 0, sw, sh, dx, dy, sw, sh);
+
+  return out;
+}
+
 function loadSprite(car, onDone) {
-  var entry = { img: new Image(), ready: false, failed: false };
+  var entry = { img: new Image(), ready: false, failed: false, canvas: null };
   spriteCache[car.id] = entry;
 
   var finished = false;
@@ -682,16 +741,18 @@ function loadSprite(car, onDone) {
   }
 
   entry.img.onload = function() {
-    // Проверим, что картинка хоть как-то загрузилась
     if (entry.img.naturalWidth > 0) {
-      finish(true);
+      try {
+        entry.canvas = bakeSprite(entry.img);
+        finish(!!entry.canvas);
+      } catch (e) {
+        finish(false);
+      }
     } else {
       finish(false);
     }
   };
   entry.img.onerror = function() { finish(false); };
-
-  // Fallback через 3 секунды, чтобы игра не залипала
   setTimeout(function() { finish(false); }, 3000);
 
   try {
@@ -1038,9 +1099,9 @@ function renderGame() {
 }
 
 /* Отрисовка одной машинки.
-   Если есть спрайт — рисуем спрайт, иначе процедурную.
-   Обводки нет. У игрока — только указатель-стрелка сверху.
-*/
+   У игрока тень НЕ рисуется — она конфликтует с самим спрайтом
+   (у спрайта своя тень нарисована автором).
+   У ИИ рисуем процедурную тень под процедурной машинкой. */
 function drawCar(x, y, angle, color, isPlayer, rarity, carId) {
   x = Math.round(x);
   y = Math.round(y);
@@ -1049,26 +1110,23 @@ function drawCar(x, y, angle, color, isPlayer, rarity, carId) {
   ctx.translate(x, y);
   ctx.rotate(angle);
 
-  // Тень (общая для спрайта и процедурной)
-  ctx.fillStyle = 'rgba(0,0,0,0.35)';
-  ctx.fillRect(-7, -3, 16, 10);
-
   var sprite = getSprite(carId);
   var usedSprite = false;
 
-  if (sprite && sprite.ready && sprite.img && sprite.img.naturalWidth > 0) {
-    // Спрайт рисуем размером 16×10 без сглаживания
+  if (sprite && sprite.ready && sprite.canvas) {
+    // canvas уже ровно CAR_W×CAR_H, рисуем 1:1 с округлением в целые координаты
     ctx.imageSmoothingEnabled = false;
-    try {
-      ctx.drawImage(sprite.img, -8, -5, 16, 10);
-      usedSprite = true;
-    } catch (e) {
-      usedSprite = false;
-    }
+    var dx = -Math.floor(CAR_W / 2);
+    var dy = -Math.floor(CAR_H / 2);
+    ctx.drawImage(sprite.canvas, dx, dy);
+    usedSprite = true;
   }
 
   if (!usedSprite) {
-    // Процедурная пиксельная машинка (fallback)
+    // Процедурная пиксельная машинка (fallback) — только ей нужна тень
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    ctx.fillRect(-7, -3, 16, 10);
+
     ctx.fillStyle = color;
     ctx.fillRect(-8, -5, 16, 10);
 
@@ -1087,7 +1145,7 @@ function drawCar(x, y, angle, color, isPlayer, rarity, carId) {
 
   ctx.restore();
 
-  // Указатель над игроком (единственный маркер, обводки нет)
+  // Указатель над игроком — единственный маркер, обводки и тени нет
   if (isPlayer) {
     ctx.fillStyle = '#ffcc00';
     ctx.beginPath();
@@ -1103,7 +1161,8 @@ function drawCar(x, y, angle, color, isPlayer, rarity, carId) {
   }
 }
 
-/* Превью для карточки в гараже: спрайт если есть, иначе процедурный */
+/* Превью для карточки в гараже: спрайт если есть, иначе процедурный.
+   Тоже без тени у спрайта, но с тенью у процедурного. */
 function drawCarPreview(canvasEl, color, rarity, carId) {
   var c = canvasEl.getContext('2d');
   canvasEl.width = 52;
@@ -1115,22 +1174,20 @@ function drawCarPreview(canvasEl, color, rarity, carId) {
   c.translate(26, 18);
   c.scale(1.6, 1.6);
 
-  // Тень
-  c.fillStyle = 'rgba(0,0,0,0.3)';
-  c.fillRect(-7, -3, 16, 10);
-
   var sprite = getSprite(carId);
   var usedSprite = false;
 
-  if (sprite && sprite.ready && sprite.img && sprite.img.naturalWidth > 0) {
+  if (sprite && sprite.ready && sprite.canvas) {
     c.imageSmoothingEnabled = false;
-    try {
-      c.drawImage(sprite.img, -8, -5, 16, 10);
-      usedSprite = true;
-    } catch (e) { usedSprite = false; }
+    var dx = -Math.floor(CAR_W / 2);
+    var dy = -Math.floor(CAR_H / 2);
+    c.drawImage(sprite.canvas, dx, dy);
+    usedSprite = true;
   }
 
   if (!usedSprite) {
+    c.fillStyle = 'rgba(0,0,0,0.3)';
+    c.fillRect(-7, -3, 16, 10);
     c.fillStyle = color;
     c.fillRect(-8, -5, 16, 10);
     c.fillStyle = '#7eaac9';
@@ -1595,7 +1652,6 @@ function resetGame() {
 
 /* =========== СТАРТ =========== */
 var loopStarted = false;
-var spritesLoaded = false;
 
 function startLoop() {
   if (loopStarted) return;
@@ -1611,16 +1667,13 @@ function startGame() {
   updateMiniStats();
   updateHUD();
 
-  // Сначала показываем UI с процедурными машинками,
-  // параллельно грузим спрайты. Как только спрайты загружены —
-  // они автоматически появятся (в drawCar мы каждый кадр проверяем sprite.ready).
   setupRacers();
   renderTab();
   startLoop();
 
   preloadAllSprites(function() {
-    spritesLoaded = true;
-    // Перерисуем текущую вкладку, чтобы превью в гараже подхватили спрайты
+    // После загрузки спрайтов перерисовываем текущую вкладку,
+    // чтобы превью в гараже подхватили их
     renderTab();
   });
 }
