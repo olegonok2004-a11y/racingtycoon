@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Змейка">
-<title>🐍 Змейка — Telegram Edition v2.9</title>
+<title>🐍 Змейка — Telegram Edition v3.0</title>
 <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22%D0%97%D0%BC%D0%B5%D0%B9%D0%BA%D0%B0%22%2C%22short_name%22%3A%22Snake%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230f0f17%22%2C%22theme_color%22%3A%22%230f0f17%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%253D%2527http%253A%2F%2Fwww.w3.org%2F2000%2Fsvg%2527%2520viewBox%253D%25270%25200%252064%252064%2527%253E%253Crect%2520width%253D%252764%2527%2520height%253D%252764%2527%2520rx%253D%252714%2527%2520fill%253D%2527%25230f0f17%2527%2F%253E%253Ctext%2520x%253D%252732%2527%2520y%253D%252744%2527%2520font-size%253D%252740%2527%2520text-anchor%253D%2527middle%2527%253E%25F0%259F%2590%258D%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
@@ -31,6 +31,7 @@
     --accent: #7c8aff;
     --accent-2: #b5a4d4;
     --accent-3: #e0a47a;
+    --diamond: #4ecdf0;
     --success: #7fb87f;
     --danger: #d07a7a;
     --common: #8a8e96;
@@ -54,25 +55,19 @@
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', Roboto, sans-serif;
     background: var(--bg-deep);
     color: var(--text-primary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     -webkit-font-smoothing: antialiased;
-    -webkit-user-select: none;
-    user-select: none;
+    -webkit-user-select: none; user-select: none;
     position: relative;
     touch-action: manipulation;
   }
 
   body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
+    content: ''; position: fixed; inset: 0;
     background-image:
       radial-gradient(circle at 20% 30%, rgba(255,255,255,.025) 0%, transparent 50%),
       radial-gradient(circle at 80% 70%, rgba(255,255,255,.018) 0%, transparent 50%);
-    pointer-events: none;
-    z-index: 0;
+    pointer-events: none; z-index: 0;
   }
 
   .corner-btn {
@@ -85,9 +80,7 @@
     font-size: 20px;
     cursor: pointer;
     z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     transition: transform .1s, background .15s, border-color .15s;
     box-shadow: var(--shadow-btn);
     font-family: inherit;
@@ -109,6 +102,7 @@
     background: linear-gradient(180deg, #3a3c4e 0%, #262833 100%);
     border-color: rgba(124,138,255,.35);
     font-size: 22px;
+    position: fixed;
   }
   .radio-toggle:hover { background: linear-gradient(180deg, #44465a 0%, #2d2f3d 100%); border-color: rgba(124,138,255,.55); }
   .radio-toggle.playing::before {
@@ -146,13 +140,13 @@
 
   .hud {
     display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 8px; padding: 0 2px; gap: 6px; flex-wrap: wrap;
+    margin-bottom: 8px; padding: 0 2px; gap: 5px; flex-wrap: wrap;
   }
   .hud .stat {
-    display: flex; align-items: center; gap: 5px;
-    font-size: 13px; font-weight: 600;
+    display: flex; align-items: center; gap: 4px;
+    font-size: 12.5px; font-weight: 600;
     background: var(--bg-elevated);
-    padding: 6px 11px; border-radius: 10px;
+    padding: 5px 10px; border-radius: 10px;
     border: 1px solid var(--border-soft);
     white-space: nowrap;
     color: var(--text-secondary);
@@ -160,10 +154,15 @@
   }
   .hud .stat .val { color: var(--text-primary); font-variant-numeric: tabular-nums; }
   .hud .stat .val.apples { color: var(--accent-3); }
+  .hud .stat .val.diamonds { color: var(--diamond); text-shadow: 0 0 6px rgba(78,205,240,.4); }
   .hud .stat .val.timer { color: var(--accent); }
   .hud .stat .val.timer.warning { color: var(--danger); animation: timerPulse .6s infinite alternate; }
   @keyframes timerPulse { from { opacity: 1; } to { opacity: .4; } }
   .hud .stat .val.score { color: var(--accent-2); }
+  .hud .stat.diamond-stat {
+    background: linear-gradient(135deg, rgba(78,205,240,.15), rgba(78,205,240,.05));
+    border-color: rgba(78,205,240,.35);
+  }
   .hud .stat.combo {
     background: linear-gradient(90deg, rgba(255,181,69,.2), rgba(255,215,120,.1));
     border-color: rgba(255,181,69,.4);
@@ -195,15 +194,13 @@
     margin-top: 8px; padding: 6px 2px 0 2px;
     min-height: 56px;
     justify-content: center;
-    flex-wrap: wrap;
-    align-items: center;
+    flex-wrap: wrap; align-items: center;
     transition: all .25s;
   }
   .buffs-bar.empty::after {
     content: 'Здесь появятся активные усилители';
     color: var(--text-muted);
-    font-size: 11.5px;
-    font-style: italic;
+    font-size: 11.5px; font-style: italic;
   }
 
   .buff-chip {
@@ -247,16 +244,12 @@
   .buff-chip.multifruit { --buff-color-a: #7fb87f; --buff-color-b: #4a8a4a; }
 
   .dpad {
-    display: none;
-    position: fixed;
+    display: none; position: fixed;
     bottom: calc(70px + env(safe-area-inset-bottom) + var(--tg-safe-bottom));
-    left: 50%;
-    transform: translateX(-50%);
+    left: 50%; transform: translateX(-50%);
     width: 215px; height: 215px;
-    margin: 0;
-    flex-shrink: 0;
-    touch-action: none;
-    user-select: none;
+    margin: 0; flex-shrink: 0;
+    touch-action: none; user-select: none;
     z-index: 45;
     opacity: .55;
     transition: opacity .2s;
@@ -264,7 +257,6 @@
   }
   .dpad.hidden { display: none !important; }
   .dpad:active, .dpad.pressed { opacity: .95; }
-
   .dpad-base {
     position: absolute; inset: 0;
     border-radius: 50%;
@@ -280,8 +272,7 @@
     border: 2px solid rgba(255,255,255,.12);
   }
   .dpad-base::after {
-    content: '';
-    position: absolute; inset: 24px;
+    content: ''; position: absolute; inset: 24px;
     border-radius: 50%;
     background:
       radial-gradient(circle at 40% 35%, rgba(255,255,255,.06), transparent 55%),
@@ -290,8 +281,7 @@
   }
   .dpad-cross { position: absolute; inset: 0; pointer-events: none; }
   .dpad-center {
-    position: absolute;
-    top: 50%; left: 50%;
+    position: absolute; top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     width: 62px; height: 62px;
     border-radius: 50%;
@@ -305,8 +295,7 @@
     z-index: 3; pointer-events: none;
   }
   .dpad-center::after {
-    content: '';
-    position: absolute;
+    content: ''; position: absolute;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     width: 13px; height: 13px;
@@ -315,17 +304,14 @@
     box-shadow: inset 0 -1px 2px rgba(0,0,0,.7), 0 1px 2px rgba(255,255,255,.08);
   }
   .dpad-btn {
-    position: absolute;
-    background: transparent; border: none;
-    cursor: pointer; padding: 0;
+    position: absolute; background: transparent;
+    border: none; cursor: pointer; padding: 0;
     z-index: 2; transition: transform .08s;
     -webkit-tap-highlight-color: transparent;
-    pointer-events: auto;
-    touch-action: none;
+    pointer-events: auto; touch-action: none;
   }
   .dpad-btn::before {
-    content: '';
-    position: absolute;
+    content: ''; position: absolute;
     background:
       radial-gradient(circle at 35% 30%, rgba(255,255,255,.18), transparent 50%),
       linear-gradient(145deg, #4a4b58 0%, #2c2d38 60%, #22232b 100%);
@@ -347,44 +333,25 @@
       0 0 14px rgba(124,138,255,.5);
   }
   .dpad-btn:active, .dpad-btn.pressed { transform: scale(.96); }
-  .dpad-up {
-    top: 4px; left: 50%;
-    transform: translateX(-50%);
-    width: 75px; height: 81px;
-  }
+  .dpad-up { top: 4px; left: 50%; transform: translateX(-50%); width: 75px; height: 81px; }
   .dpad-up::before { inset: 0; border-radius: 36px 36px 13px 13px; }
   .dpad-up:active, .dpad-up.pressed { transform: translateX(-50%) scale(.96); }
-  .dpad-down {
-    bottom: 4px; left: 50%;
-    transform: translateX(-50%);
-    width: 75px; height: 81px;
-  }
+  .dpad-down { bottom: 4px; left: 50%; transform: translateX(-50%); width: 75px; height: 81px; }
   .dpad-down::before { inset: 0; border-radius: 13px 13px 36px 36px; }
   .dpad-down:active, .dpad-down.pressed { transform: translateX(-50%) scale(.96); }
-  .dpad-left {
-    left: 4px; top: 50%;
-    transform: translateY(-50%);
-    width: 81px; height: 75px;
-  }
+  .dpad-left { left: 4px; top: 50%; transform: translateY(-50%); width: 81px; height: 75px; }
   .dpad-left::before { inset: 0; border-radius: 36px 13px 13px 36px; }
   .dpad-left:active, .dpad-left.pressed { transform: translateY(-50%) scale(.96); }
-  .dpad-right {
-    right: 4px; top: 50%;
-    transform: translateY(-50%);
-    width: 81px; height: 75px;
-  }
+  .dpad-right { right: 4px; top: 50%; transform: translateY(-50%); width: 81px; height: 75px; }
   .dpad-right::before { inset: 0; border-radius: 13px 36px 36px 13px; }
   .dpad-right:active, .dpad-right.pressed { transform: translateY(-50%) scale(.96); }
   .dpad-btn .dpad-arrow {
-    position: absolute;
-    top: 50%; left: 50%;
+    position: absolute; top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 21px;
-    font-weight: 900;
+    font-size: 21px; font-weight: 900;
     color: rgba(255,255,255,.6);
     text-shadow: 0 -1px 0 rgba(0,0,0,.6), 0 1px 1px rgba(255,255,255,.1);
-    pointer-events: none;
-    z-index: 1;
+    pointer-events: none; z-index: 1;
   }
   .dpad-btn:active .dpad-arrow, .dpad-btn.pressed .dpad-arrow {
     color: rgba(124,138,255,.95);
@@ -438,6 +405,7 @@
     margin-bottom: 12px; flex-shrink: 0; gap: 8px;
   }
   .shop h2 { font-size: 15px; color: var(--text-primary); letter-spacing: .3px; font-weight: 600; }
+  .shop-wallets { display: flex; gap: 6px; }
   .shop-wallet {
     display: flex; align-items: center; gap: 4px;
     font-size: 12px; font-weight: 600; color: var(--accent-3);
@@ -445,6 +413,11 @@
     padding: 4px 9px; border-radius: 8px;
     border: 1px solid var(--border-soft);
     font-variant-numeric: tabular-nums;
+  }
+  .shop-wallet.diamond-wallet {
+    color: var(--diamond);
+    background: linear-gradient(135deg, rgba(78,205,240,.15), rgba(78,205,240,.05));
+    border-color: rgba(78,205,240,.35);
   }
 
   .shop-tabs {
@@ -497,7 +470,6 @@
   .mode-card.classic  { --mode-color-a: #7fb87f; --mode-color-b: #4a8a4a; }
   .mode-card.hardcore { --mode-color-a: #d07a7a; --mode-color-b: #8a2020; }
   .mode-card.endless  { --mode-color-a: #7c8aff; --mode-color-b: #4a4fc4; }
-
   .mode-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
   .mode-icon {
     width: 44px; height: 44px; border-radius: 11px;
@@ -544,6 +516,7 @@
   .case-card.ruby     { --case-color-a: #ff4a6e; --case-color-b: #b02040; }
   .case-card.sapphire { --case-color-a: #4a9eff; --case-color-b: #1a4fb8; }
   .case-card.amethyst { --case-color-a: #b57aff; --case-color-b: #6a2fc4; }
+  .case-card.diamond  { --case-color-a: #4ecdf0; --case-color-b: #1a8fbf; }
   .case-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
   .case-icon {
     width: 48px; height: 48px; border-radius: 12px;
@@ -568,6 +541,7 @@
   }
   .case-price-label { color: var(--text-muted); }
   .case-price-val { color: var(--accent-3); font-weight: 700; font-size: 13px; font-variant-numeric: tabular-nums; }
+  .case-price-val.diamonds { color: var(--diamond); }
   .case-price-val.cant-afford { color: var(--danger); }
 
   .collection-grid {
@@ -645,11 +619,7 @@
     border: 2px solid rgba(255,255,255,.15);
   }
   .profile-avatar:hover { transform: scale(1.05); }
-  .profile-avatar img {
-    width: 100%; height: 100%;
-    object-fit: cover;
-    border-radius: inherit;
-  }
+  .profile-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
   .profile-avatar.has-photo::after { display: none; }
   .profile-avatar::after {
     content: ''; position: absolute; top: 6px; left: 10px;
@@ -698,6 +668,11 @@
   .profile-stat .value.gold { color: var(--legendary); }
   .profile-stat .value.blue { color: var(--accent); }
   .profile-stat .value.green { color: var(--success); }
+  .profile-stat .value.diamond { color: var(--diamond); text-shadow: 0 0 8px rgba(78,205,240,.5); }
+  .profile-stat.diamond-stat {
+    background: linear-gradient(135deg, rgba(78,205,240,.1), rgba(78,205,240,.02));
+    border-color: rgba(78,205,240,.3);
+  }
 
   .profile-section-title {
     font-size: 11px; font-weight: 700; letter-spacing: 1.2px;
@@ -716,6 +691,108 @@
   .rarity-row .label { color: var(--text-secondary); flex: 1; font-weight: 600; }
   .rarity-row .count { color: var(--text-primary); font-weight: 700; font-variant-numeric: tabular-nums; }
   .rarity-row .count.done { color: var(--success); }
+
+  /* ===== SYNC BLOCK ===== */
+  .sync-block {
+    background: linear-gradient(135deg, rgba(41,169,235,.1), rgba(124,138,255,.05));
+    border: 1.5px solid rgba(41,169,235,.3);
+    border-radius: 12px;
+    padding: 11px 12px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .sync-indicator {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--success);
+    box-shadow: 0 0 8px rgba(127,184,127,.7);
+    flex-shrink: 0;
+    animation: syncPulse 2s infinite alternate;
+  }
+  .sync-indicator.syncing {
+    background: var(--tg-blue);
+    box-shadow: 0 0 8px rgba(41,169,235,.7);
+    animation: syncSpin 1s infinite;
+  }
+  .sync-indicator.error {
+    background: var(--danger);
+    box-shadow: 0 0 8px rgba(208,122,122,.7);
+    animation: none;
+  }
+  @keyframes syncPulse {
+    from { opacity: 1; }
+    to { opacity: .5; }
+  }
+  @keyframes syncSpin {
+    0% { transform: scale(.7); opacity: .4; }
+    50% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(.7); opacity: .4; }
+  }
+  .sync-info { flex: 1; min-width: 0; }
+  .sync-label {
+    font-size: 12px; font-weight: 700;
+    color: var(--tg-blue);
+    display: flex; align-items: center; gap: 4px;
+  }
+  .sync-time {
+    font-size: 10.5px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .sync-btn {
+    width: 34px; height: 34px;
+    border-radius: 9px;
+    background: var(--bg-elevated);
+    border: 1.5px solid var(--border-mid);
+    color: var(--text-primary);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    transition: background .15s, transform .15s;
+    font-family: inherit;
+    flex-shrink: 0;
+    box-shadow: var(--shadow-btn);
+  }
+  .sync-btn:hover { background: var(--bg-hover); }
+  .sync-btn:active { transform: scale(.9); }
+  .sync-btn.spinning { animation: syncSpinBtn 1s infinite linear; }
+  @keyframes syncSpinBtn {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  /* ===== DATA ACTIONS ===== */
+  .data-actions {
+    display: flex; gap: 6px;
+    flex-shrink: 0;
+  }
+  .data-actions button {
+    flex: 1;
+    padding: 10px;
+    border-radius: 10px;
+    background: var(--bg-elevated);
+    border: 1.5px solid var(--border-mid);
+    color: var(--text-primary);
+    font-size: 11.5px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background .15s, transform .1s;
+    box-shadow: var(--shadow-btn);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+  .data-actions button:hover { background: var(--bg-hover); }
+  .data-actions button:active {
+    transform: translateY(1px);
+    box-shadow: var(--shadow-btn-active);
+  }
+  .data-actions button input { display: none; }
 
   .btn-danger {
     padding: 10px; font-size: 12px; font-weight: 700;
@@ -783,7 +860,6 @@
   .case-open-header { text-align: center; margin-bottom: 30px; flex-shrink: 0; }
   .case-open-title { font-size: 20px; font-weight: 700; color: var(--text-primary); letter-spacing: .5px; }
   .case-open-sub { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
-
   .roulette-wrap {
     position: relative; width: 100%; max-width: 720px;
     height: 130px; margin-bottom: 30px;
@@ -915,9 +991,7 @@
     100% { opacity: 0; transform: translate(var(--dx, 0px), 100vh) rotate(720deg); }
   }
 
-  /* ============================================================
-     ДРУЗЬЯ
-  ============================================================ */
+  /* ===== ДРУЗЬЯ ===== */
   .friends-pane {
     display: flex; flex-direction: column;
     gap: 10px;
@@ -949,9 +1023,7 @@
     -webkit-user-select: text;
     user-select: text;
   }
-  .friends-search input::placeholder {
-    color: var(--text-muted);
-  }
+  .friends-search input::placeholder { color: var(--text-muted); }
   .friends-search input:focus {
     border-color: var(--accent);
     background: var(--bg-hover);
@@ -962,17 +1034,14 @@
     background: linear-gradient(180deg, #8b97ff 0%, #7c8aff 100%);
     color: #0a0a12;
     border: 1.5px solid rgba(255,255,255,.2);
-    font-size: 13px;
-    font-weight: 800;
+    font-size: 13px; font-weight: 800;
     cursor: pointer;
     transition: transform .1s, background .15s;
     font-family: inherit;
     white-space: nowrap;
     box-shadow: 0 3px 0 #4a4fb8, 0 4px 12px rgba(124,138,255,.4);
   }
-  .friends-search button:hover {
-    background: linear-gradient(180deg, #98a2ff 0%, #8b97ff 100%);
-  }
+  .friends-search button:hover { background: linear-gradient(180deg, #98a2ff 0%, #8b97ff 100%); }
   .friends-search button:active {
     transform: translateY(2px);
     box-shadow: 0 1px 0 #4a4fb8, 0 2px 6px rgba(124,138,255,.3);
@@ -986,25 +1055,17 @@
     flex-shrink: 0;
   }
   .friends-invite-card .title {
-    font-size: 12px;
-    font-weight: 700;
+    font-size: 12px; font-weight: 700;
     color: var(--tg-blue);
     letter-spacing: .3px;
     margin-bottom: 6px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
+    display: flex; align-items: center; gap: 6px;
   }
   .friends-invite-card .desc {
-    font-size: 11px;
-    color: var(--text-secondary);
-    line-height: 1.5;
-    margin-bottom: 10px;
+    font-size: 11px; color: var(--text-secondary);
+    line-height: 1.5; margin-bottom: 10px;
   }
-  .friends-invite-card .actions {
-    display: flex;
-    gap: 6px;
-  }
+  .friends-invite-card .actions { display: flex; gap: 6px; }
   .friends-invite-card .actions button {
     flex: 1;
     padding: 9px 12px;
@@ -1012,15 +1073,12 @@
     background: var(--bg-elevated);
     border: 1.5px solid var(--border-mid);
     color: var(--text-primary);
-    font-size: 11.5px;
-    font-weight: 700;
+    font-size: 11.5px; font-weight: 700;
     font-family: inherit;
     cursor: pointer;
     transition: background .15s, transform .1s;
     box-shadow: var(--shadow-btn);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     gap: 4px;
   }
   .friends-invite-card .actions button.share {
@@ -1041,11 +1099,8 @@
     display: flex; flex-direction: column; gap: 8px;
     flex: 1; min-height: 0;
   }
-
   .friend-card {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    display: flex; align-items: center; gap: 10px;
     padding: 10px 12px;
     border-radius: 12px;
     background: var(--bg-elevated);
@@ -1061,19 +1116,12 @@
     border-radius: 50%;
     background: linear-gradient(135deg, var(--accent), var(--accent-2));
     display: flex; align-items: center; justify-content: center;
-    font-size: 19px;
-    font-weight: 700;
+    font-size: 19px; font-weight: 700;
     color: #fff;
-    flex-shrink: 0;
-    overflow: hidden;
+    flex-shrink: 0; overflow: hidden;
     border: 2px solid rgba(255,255,255,.15);
   }
-  .friend-avatar img {
-    width: 100%; height: 100%; object-fit: cover;
-  }
-  .friend-info {
-    flex: 1; min-width: 0;
-  }
+  .friend-info { flex: 1; min-width: 0; }
   .friend-name {
     font-size: 13px; font-weight: 700;
     color: var(--text-primary);
@@ -1081,14 +1129,10 @@
   }
   .friend-username {
     font-size: 11px; font-weight: 500;
-    color: var(--text-muted);
-    margin-top: 2px;
+    color: var(--text-muted); margin-top: 2px;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  .friend-actions {
-    display: flex; gap: 5px;
-    flex-shrink: 0;
-  }
+  .friend-actions { display: flex; gap: 5px; flex-shrink: 0; }
   .friend-actions button {
     width: 32px; height: 32px;
     border-radius: 9px;
@@ -1119,29 +1163,21 @@
     border-color: rgba(208,122,122,.4);
     color: var(--danger);
   }
-  .friend-actions button.remove:hover {
-    background: rgba(208,122,122,.3);
-  }
+  .friend-actions button.remove:hover { background: rgba(208,122,122,.3); }
 
   .friends-empty {
     text-align: center;
     padding: 24px 16px;
     color: var(--text-muted);
-    font-size: 12px;
-    line-height: 1.6;
+    font-size: 12px; line-height: 1.6;
     background: rgba(0,0,0,.15);
     border-radius: 12px;
     border: 1px dashed var(--border-mid);
   }
-  .friends-empty-icon {
-    font-size: 40px;
-    margin-bottom: 10px;
-    opacity: .6;
-  }
+  .friends-empty-icon { font-size: 40px; margin-bottom: 10px; opacity: .6; }
   .friends-empty-title {
     color: var(--text-secondary);
-    font-weight: 700;
-    font-size: 13px;
+    font-weight: 700; font-size: 13px;
     margin-bottom: 4px;
   }
 
@@ -1162,13 +1198,18 @@
     flex-shrink: 0;
   }
   .mobile-shop-header h2 { font-size: 20px; font-weight: 700; color: var(--text-primary); letter-spacing: -.3px; }
-  .mobile-shop-header .header-left { display: flex; align-items: center; gap: 10px; }
-  .mobile-shop-header .apples-badge {
-    display: flex; align-items: center; gap: 5px;
-    font-size: 13px; font-weight: 600; color: var(--accent-3);
-    background: var(--bg-elevated); padding: 6px 12px;
-    border-radius: 10px; border: 1px solid var(--border-soft);
+  .mobile-shop-header .header-left { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .mobile-shop-header .wallet-badge {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 12px; font-weight: 600; color: var(--accent-3);
+    background: var(--bg-elevated); padding: 5px 10px;
+    border-radius: 9px; border: 1px solid var(--border-soft);
     font-variant-numeric: tabular-nums;
+  }
+  .mobile-shop-header .wallet-badge.diamonds {
+    color: var(--diamond);
+    background: linear-gradient(135deg, rgba(78,205,240,.15), rgba(78,205,240,.05));
+    border-color: rgba(78,205,240,.35);
   }
   .mobile-close-btn {
     width: 42px; height: 42px; border-radius: 12px;
@@ -1412,6 +1453,7 @@
   .toast.success { border-color: var(--success); color: var(--success); }
   .toast.error   { border-color: var(--danger); color: var(--danger); }
   .toast.info    { border-color: var(--accent); color: var(--accent); }
+  .toast.diamond { border-color: var(--diamond); color: var(--diamond); font-size: 14px; padding: 13px 20px; }
   .toast.buff    { border-color: var(--legendary); color: var(--legendary); font-size: 14px; padding: 13px 20px; }
   .toast.combo   { border-color: var(--legendary); color: var(--legendary); font-size: 16px; padding: 12px 22px; }
   .toast.fade-out { animation: toastOut .3s forwards; }
@@ -1431,8 +1473,8 @@
     max-height: 100%;
   }
   .device-phone .hud { margin-bottom: 5px; gap: 4px; }
-  .device-phone .hud .stat { font-size: 11px; padding: 4px 8px; gap: 3px; border-radius: 8px; }
-  .device-phone .hud .stat .val { font-size: 11px; }
+  .device-phone .hud .stat { font-size: 10.5px; padding: 4px 8px; gap: 3px; border-radius: 8px; }
+  .device-phone .hud .stat .val { font-size: 10.5px; }
   .device-phone .canvas-wrap { max-width: 100%; margin: 0 auto; width: 100%; }
   .device-phone .shop { display: none; }
   .device-phone .mobile-shop-toggle { display: flex; }
@@ -1484,7 +1526,7 @@
     width: min(560px, calc(100vh - 190px), 60vw);
     height: min(560px, calc(100vh - 190px), 60vw);
   }
-  .device-desktop .shop { width: 360px; max-height: min(560px, calc(100vh - 36px)); }
+  .device-desktop .shop { width: 380px; max-height: min(620px, calc(100vh - 36px)); }
 
   @media (max-height: 640px) {
     .device-desktop canvas {
@@ -1494,7 +1536,7 @@
   }
   @media (max-width: 900px) {
     .device-desktop .game-wrap { gap: 14px; }
-    .device-desktop .shop { width: 310px; }
+    .device-desktop .shop { width: 320px; }
   }
 
   body.tg-webapp .corner-btn { backdrop-filter: blur(10px); }
@@ -1510,6 +1552,7 @@
   <div class="board-panel">
     <div class="hud">
       <div class="stat">🍎 <span class="val apples" id="hudApples">0</span></div>
+      <div class="stat diamond-stat">💎 <span class="val diamonds" id="hudDiamonds">0</span></div>
       <div class="stat">⏱ <span class="val timer" id="hudTimer">0.0</span></div>
       <div class="stat">🏆 <span class="val score" id="hudScore">0</span></div>
       <div class="stat combo" id="hudCombo">×<span class="val" id="hudComboVal">1</span></div>
@@ -1535,7 +1578,10 @@
   <div class="shop" id="shop">
     <div class="shop-header">
       <h2>Меню</h2>
-      <div class="shop-wallet">🍎 <span id="shopApples">0</span></div>
+      <div class="shop-wallets">
+        <div class="shop-wallet">🍎 <span id="shopApples">0</span></div>
+        <div class="shop-wallet diamond-wallet">💎 <span id="shopDiamonds">0</span></div>
+      </div>
     </div>
     <div class="shop-tabs">
       <button class="shop-tab active" data-tab="modes">🎮</button>
@@ -1572,7 +1618,8 @@
   <div class="mobile-shop-header">
     <div class="header-left">
       <h2>Меню</h2>
-      <div class="apples-badge">🍎 <span id="mobileApples">0</span></div>
+      <div class="wallet-badge">🍎 <span id="mobileApples">0</span></div>
+      <div class="wallet-badge diamonds">💎 <span id="mobileDiamonds">0</span></div>
     </div>
     <button class="mobile-close-btn" id="mobileCloseBtn">✕</button>
   </div>
@@ -1685,10 +1732,10 @@
 
 <script>
 /* ============================================================
-   v2.9 — Друзья + аватарка из Telegram
+   v3.0 — СИНХРОНИЗАЦИЯ + АЛМАЗЫ + JSON
 ============================================================ */
 
-/* ⚠️ ВАЖНО: замени на имя своего бота (без @) */
+/* ⚠️ ВАЖНО: имя бота */
 const BOT_USERNAME = 'DeepveinX_bot';
 
 /* ============================================================
@@ -1718,8 +1765,6 @@ const TelegramApp = (() => {
           if (mobileShopScreen.classList.contains('open')) { closeMobileShop(); return; }
         });
       }
-      // Загружаем друзей из CloudStorage
-      loadFriendsFromCloud();
     } catch(e) {
       console.warn('Telegram WebApp init error:', e);
     }
@@ -1732,40 +1777,35 @@ const TelegramApp = (() => {
 
     const userEditedName = profile.customName === true;
 
-    // ==== ИМЯ ====
     if (!userEditedName) {
       let newName = null;
       if (user.username) newName = '@' + user.username;
       else if (user.first_name) newName = user.first_name + (user.last_name ? ' ' + user.last_name : '');
       if (newName) {
         profile.name = newName.slice(0, 20);
-        saveProfile();
-        if (typeof renderProfile === 'function') renderProfile();
-        if (typeof renderFriends === 'function') renderFriends();
-        if (typeof showStartOverlay === 'function' && !running) showStartOverlay();
+        saveAll(false); // без синка — только локально
       }
     }
 
-    // ==== АВАТАРКА ИЗ TELEGRAM ====
     if (user.photo_url) {
       profile.photoUrl = user.photo_url;
-      saveProfile();
+      saveAll(false);
     }
 
-    // ==== USERNAME для друзей ====
     if (user.username) {
       profile.username = user.username;
-      saveProfile();
+      saveAll(false);
     }
 
-    // ==== ID ====
     if (user.id && !profile.tgId) {
       profile.tgId = user.id;
-      saveProfile();
+      saveAll(false);
     }
 
-    // Перерисуем профиль если он уже отрисован
+    // Перерисуем UI
     if (typeof renderProfile === 'function') renderProfile();
+    if (typeof renderFriends === 'function') renderFriends();
+    if (typeof showStartOverlay === 'function' && !running) showStartOverlay();
   }
 
   function applyTheme(){ if (tg.viewportStableHeight) onViewportChanged(); }
@@ -1779,31 +1819,19 @@ const TelegramApp = (() => {
     if (!tg || !tg.HapticFeedback) return;
     try { tg.HapticFeedback.notificationOccurred(type); } catch(e){}
   }
-
-  // ==== Открыть профиль в Telegram ====
   function openTelegramProfile(username){
-    if (!tg) return false;
-    try {
-      if (username) {
-        tg.openTelegramLink(`https://t.me/${username}`);
-        return true;
-      }
-    } catch(e) { console.warn('openTelegramLink error:', e); }
-    return false;
+    if (!tg || !username) return false;
+    try { tg.openTelegramLink(`https://t.me/${username}`); return true; }
+    catch(e) { return false; }
   }
-
-  // ==== Поделиться ссылкой (через диалог Telegram) ====
   function shareInviteLink(text, url){
     if (!tg || !tg.openTelegramLink) return false;
     try {
-      // Формируем ссылку "поделиться"
       const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
       tg.openTelegramLink(shareUrl);
       return true;
     } catch(e) { return false; }
   }
-
-  // ==== CloudStorage helpers ====
   function cloudSet(key, value, callback){
     if (!tg || !tg.CloudStorage) { if (callback) callback(false); return; }
     try {
@@ -1904,6 +1932,8 @@ const SFX = (() => {
     comboBreak(){ play(300, 0.1, 'sawtooth', 0.06); setTimeout(() => play(200, 0.12, 'sawtooth', 0.06), 70); },
     demonRoar(){ play(120, 0.4, 'sawtooth', 0.1); setTimeout(() => play(90, 0.5, 'sawtooth', 0.1), 200); setTimeout(() => play(60, 0.7, 'sine', 0.08), 450); },
     friend(){ play(660, 0.08, 'triangle', 0.12); setTimeout(() => play(990, 0.1, 'triangle', 0.12), 60); setTimeout(() => play(1320, 0.12, 'triangle', 0.10), 120); },
+    diamond(){ play(1046, 0.12, 'sine', 0.15); setTimeout(() => play(1568, 0.14, 'sine', 0.14), 90); setTimeout(() => play(2093, 0.2, 'sine', 0.12), 180); },
+    sync(){ play(880, 0.08, 'triangle', 0.10); setTimeout(() => play(1174, 0.1, 'triangle', 0.10), 60); },
   };
   return { play, arp, sfx, resume };
 })();
@@ -2045,14 +2075,17 @@ const SKINS = [
 ];
 
 const CASES = [
-  { id:'emerald', name:'Изумрудный кейс', sub:'Зелёный свет удачи', icon:'💚', colorA:'#2fbf71', colorB:'#0f7a4a', price:30,
+  { id:'emerald', name:'Изумрудный кейс', sub:'Зелёный свет удачи', icon:'💚', colorA:'#2fbf71', colorB:'#0f7a4a', price:30, priceType:'apples',
     pool:['gummy','mint','banana','peach','bubble','candy','lime','orange','panda','strawberry','lemon','emerald'] },
-  { id:'ruby', name:'Рубиновый кейс', sub:'Огненный блеск', icon:'❤️', colorA:'#ff4a6e', colorB:'#b02040', price:60,
+  { id:'ruby', name:'Рубиновый кейс', sub:'Огненный блеск', icon:'❤️', colorA:'#ff4a6e', colorB:'#b02040', price:60, priceType:'apples',
     pool:['gummy','mint','banana','peach','bubble','candy','lime','orange','strawberry','blueberry','watermelon','phoenix','ruby'] },
-  { id:'sapphire', name:'Сапфировый кейс', sub:'Ледяная глубина', icon:'💙', colorA:'#4a9eff', colorB:'#1a4fb8', price:120,
+  { id:'sapphire', name:'Сапфировый кейс', sub:'Ледяная глубина', icon:'💙', colorA:'#4a9eff', colorB:'#1a4fb8', price:120, priceType:'apples',
     pool:['gummy','mint','banana','peach','bubble','candy','lime','orange','panda','blueberry','watermelon','dragon','sapphire'] },
-  { id:'amethyst', name:'Аметистовый кейс', sub:'Тайна фиолета', icon:'💜', colorA:'#b57aff', colorB:'#6a2fc4', price:250,
+  { id:'amethyst', name:'Аметистовый кейс', sub:'Тайна фиолета', icon:'💜', colorA:'#b57aff', colorB:'#6a2fc4', price:250, priceType:'apples',
     pool:['gummy','mint','banana','peach','bubble','candy','lime','orange','panda','strawberry','blueberry','watermelon','lemon','unicorn','dragon','phoenix','amethyst'] },
+  // Донатный кейс (за алмазы) — 100% эпик или легендарный скин
+  { id:'diamond', name:'💎 Алмазный кейс', sub:'Только лучшие скины', icon:'💎', colorA:'#4ecdf0', colorB:'#1a8fbf', price:50, priceType:'diamonds',
+    pool:['lemon','unicorn','dragon','phoenix','emerald','ruby','sapphire','amethyst'] },
 ];
 
 const MODES = {
@@ -2083,110 +2116,345 @@ function getCase(id){ return CASES.find(c => c.id === id); }
 function getSkin(id){ return SKINS.find(s => s.id === id) || SKINS[0]; }
 
 /* ============================================================
-   СОСТОЯНИЕ + ПРОФИЛЬ + ДРУЗЬЯ
+   СОСТОЯНИЕ + ЕДИНЫЙ JSON-СОХРАНЯЕМЫЙ ОБЪЕКТ
 ============================================================ */
-const STORAGE_KEY = 'snake_v2_save';
+const STORAGE_KEY = 'snake_save_v3';
+const CLOUD_KEY = 'snake_cloud_save_v3';
 const AUDIO_KEY = 'snake_v24_audio_muted';
-const PROFILE_KEY = 'snake_v29_profile';
 const MODE_KEY = 'snake_v26_mode';
-const FRIENDS_KEY = 'snake_v29_friends';
 
 let state = {
-  apples: 50, owned: ['gummy'], active: 'gummy',
-  bestScore: 0, totalApples: 0, gamesPlayed: 0,
-  casesOpened: 0, buffsPicked: 0,
+  apples: 50,
+  diamonds: 0,
+  owned: ['gummy'],
+  active: 'gummy',
+  bestScore: 0,
+  totalApples: 0,
+  gamesPlayed: 0,
+  casesOpened: 0,
+  buffsPicked: 0,
   bestByMode: { classic: 0, hardcore: 0, endless: 0 },
-  version: '2.9',
+  version: '3.0',
 };
 
 let profile = {
   name: 'Игрок',
   avatar: '🐍',
-  photoUrl: null,     // ← аватарка из Telegram
-  username: null,     // ← @username из Telegram
+  photoUrl: null,
+  username: null,
   tgId: null,
   customName: false,
   created: Date.now(),
 };
 
-// Список друзей: [{ id?, name, username, addedAt }]
 let friends = [];
 let selectedMode = 'classic';
 let fractionalApples = 0;
 
-function save() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e){} }
-function saveProfile() { try { localStorage.setItem(PROFILE_KEY, JSON.stringify(profile)); } catch(e){} }
-function saveMode() { try { localStorage.setItem(MODE_KEY, selectedMode); } catch(e){} }
-function saveFriends() {
-  try { localStorage.setItem(FRIENDS_KEY, JSON.stringify(friends)); } catch(e){}
-  // Синхронизация с Telegram CloudStorage
-  TelegramApp.cloudSet('snake_friends', JSON.stringify(friends));
+/* ==== Единый объект сохранения ==== */
+function getFullSaveObject(){
+  return {
+    version: '3.0',
+    savedAt: Date.now(),
+    profile: {
+      name: profile.name,
+      avatar: profile.avatar,
+      photoUrl: profile.photoUrl,
+      username: profile.username,
+      tgId: profile.tgId,
+      customName: profile.customName,
+      created: profile.created,
+    },
+    progress: {
+      apples: state.apples,
+      diamonds: state.diamonds,
+      owned: state.owned.slice(),
+      active: state.active,
+      bestScore: state.bestScore,
+      totalApples: state.totalApples,
+      gamesPlayed: state.gamesPlayed,
+      casesOpened: state.casesOpened,
+      buffsPicked: state.buffsPicked,
+      bestByMode: { ...state.bestByMode },
+    },
+    friends: friends.slice(),
+  };
 }
 
-function load() {
+/* ==== Применить данные из облака или файла ==== */
+function applySaveObject(data, options = {}){
+  if (!data || typeof data !== 'object') return false;
+  const { fromCloud = false, silent = false } = options;
+
+  // Profile
+  if (data.profile && typeof data.profile === 'object') {
+    const p = data.profile;
+    if (typeof p.name === 'string' && p.name.trim()) profile.name = p.name.trim().slice(0, 20);
+    if (typeof p.avatar === 'string') profile.avatar = p.avatar;
+    if (typeof p.photoUrl === 'string' || p.photoUrl === null) profile.photoUrl = p.photoUrl;
+    if (typeof p.username === 'string' || p.username === null) profile.username = p.username;
+    if (typeof p.tgId === 'number' || p.tgId === null) profile.tgId = p.tgId;
+    if (typeof p.customName === 'boolean') profile.customName = p.customName;
+    if (typeof p.created === 'number') profile.created = p.created;
+  }
+
+  // Progress
+  if (data.progress && typeof data.progress === 'object') {
+    const p = data.progress;
+    state.apples      = Number.isFinite(p.apples) ? Math.floor(p.apples) : state.apples;
+    state.diamonds    = Number.isFinite(p.diamonds) ? Math.floor(p.diamonds) : 0;
+    state.owned       = Array.isArray(p.owned) && p.owned.length ? p.owned.filter(id => SKINS.some(s => s.id === id)) : ['gummy'];
+    if (!state.owned.includes('gummy')) state.owned.unshift('gummy');
+    state.active      = state.owned.includes(p.active) ? p.active : 'gummy';
+    state.bestScore   = Number.isFinite(p.bestScore) ? p.bestScore : 0;
+    state.totalApples = Number.isFinite(p.totalApples) ? Math.floor(p.totalApples) : 0;
+    state.gamesPlayed = Number.isFinite(p.gamesPlayed) ? p.gamesPlayed : 0;
+    state.casesOpened = Number.isFinite(p.casesOpened) ? p.casesOpened : 0;
+    state.buffsPicked = Number.isFinite(p.buffsPicked) ? p.buffsPicked : 0;
+    if (p.bestByMode && typeof p.bestByMode === 'object') {
+      state.bestByMode = {
+        classic: Number.isFinite(p.bestByMode.classic) ? p.bestByMode.classic : 0,
+        hardcore: Number.isFinite(p.bestByMode.hardcore) ? p.bestByMode.hardcore : 0,
+        endless: Number.isFinite(p.bestByMode.endless) ? p.bestByMode.endless : 0,
+      };
+    }
+  }
+
+  // Friends
+  if (Array.isArray(data.friends)) {
+    friends = data.friends.filter(f => f && typeof f === 'object');
+  }
+
+  // Обновляем local
+  saveLocal();
+
+  // Обновляем весь UI
+  renderAll();
+
+  // Тост
+  if (!silent) {
+    if (fromCloud) showToast('☁️ Прогресс синхронизирован', 'info', 2200);
+  }
+  return true;
+}
+
+/* ==== Локальное сохранение (localStorage) ==== */
+function saveLocal(){
+  try {
+    const obj = getFullSaveObject();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
+  } catch(e) { console.warn('saveLocal error', e); }
+}
+
+/* ==== Сохранение всего (local + облако с дебаунсом) ==== */
+let cloudSaveTimer = null;
+function saveAll(triggerCloud = true){
+  saveLocal();
+  if (triggerCloud) scheduleCloudSave();
+}
+
+function scheduleCloudSave(){
+  if (cloudSaveTimer) clearTimeout(cloudSaveTimer);
+  cloudSaveTimer = setTimeout(() => {
+    doCloudSync(false);
+  }, 2500);
+}
+
+/* ==== Ручная/автоматическая синхронизация ==== */
+let isSyncing = false;
+function doCloudSync(showToastOnSuccess = false){
+  if (!TelegramApp.isActive()) {
+    if (showToastOnSuccess) showToast('Синхронизация доступна только в Telegram', 'error', 2200);
+    return;
+  }
+  if (isSyncing) return;
+  isSyncing = true;
+  updateSyncUI(true);
+
+  const obj = getFullSaveObject();
+  TelegramApp.cloudSet(CLOUD_KEY, JSON.stringify(obj), (ok) => {
+    isSyncing = false;
+    if (ok) {
+      state.lastSync = Date.now();
+      saveLocal();
+      updateSyncUI(false);
+      if (showToastOnSuccess) {
+        SFX.sfx.sync();
+        TelegramApp.hapticImpact('light');
+        showToast('☁️ Синхронизировано', 'success', 1800);
+      }
+    } else {
+      updateSyncUI(false, true);
+      if (showToastOnSuccess) showToast('Не удалось синхронизировать', 'error', 2200);
+    }
+  });
+}
+
+/* ==== Загрузка из облака (при старте) ==== */
+function tryLoadFromCloud(){
+  if (!TelegramApp.isActive()) return;
+  TelegramApp.cloudGet(CLOUD_KEY, (value, ok) => {
+    if (!ok || !value) {
+      // В облаке пусто — отправим наши данные
+      scheduleCloudSave();
+      return;
+    }
+    try {
+      const cloudData = JSON.parse(value);
+      const localData = getFullSaveObject();
+      const cloudSavedAt = cloudData.savedAt || 0;
+      const localSavedAt = localData.savedAt || 0;
+
+      if (cloudSavedAt > localSavedAt) {
+        // Облачные свежее
+        applySaveObject(cloudData, { fromCloud: true });
+      } else if (localSavedAt > cloudSavedAt) {
+        // Локальные свежее — отправим
+        scheduleCloudSave();
+      } else {
+        // Равны — ничего не делаем
+      }
+      state.lastSync = cloudSavedAt || Date.now();
+      updateSyncUI(false);
+    } catch(e) {
+      console.warn('Cloud parse error', e);
+      scheduleCloudSave();
+    }
+  });
+}
+
+/* ==== Экспорт JSON ==== */
+function exportSaveToFile(){
+  const obj = getFullSaveObject();
+  const json = JSON.stringify(obj, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const nameStr = profile.username ? `-${profile.username}` : '';
+  a.download = `snake-save${nameStr}-${Date.now()}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  SFX.sfx.equip();
+  TelegramApp.hapticImpact('light');
+  showToast('📄 Файл сохранён', 'success', 2000);
+}
+
+/* ==== Импорт JSON ==== */
+function importSaveFromFile(file, callback){
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data || typeof data !== 'object' || !data.progress) {
+        callback(false, 'Неверный формат файла');
+        return;
+      }
+      applySaveObject(data, { silent: true });
+      saveAll(true);
+      callback(true);
+    } catch(err) {
+      callback(false, 'Ошибка чтения файла');
+    }
+  };
+  reader.readAsText(file);
+}
+
+/* ==== Загрузка при старте (local) ==== */
+function loadLocal(){
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
-      const p = JSON.parse(raw);
-      state.apples      = Number.isFinite(p.apples) ? p.apples : 50;
-      state.owned       = Array.isArray(p.owned) && p.owned.length ? p.owned.filter(id => SKINS.some(s => s.id === id)) : ['gummy'];
-      if (!state.owned.includes('gummy')) state.owned.unshift('gummy');
-      state.active      = state.owned.includes(p.active) ? p.active : 'gummy';
-      state.bestScore   = Number.isFinite(p.bestScore) ? p.bestScore : 0;
-      state.totalApples = Number.isFinite(p.totalApples) ? p.totalApples : 0;
-      state.gamesPlayed = Number.isFinite(p.gamesPlayed) ? p.gamesPlayed : 0;
-      state.casesOpened = Number.isFinite(p.casesOpened) ? p.casesOpened : 0;
-      state.buffsPicked = Number.isFinite(p.buffsPicked) ? p.buffsPicked : 0;
-      if (p.bestByMode && typeof p.bestByMode === 'object') {
-        state.bestByMode = {
-          classic: Number.isFinite(p.bestByMode.classic) ? p.bestByMode.classic : 0,
-          hardcore: Number.isFinite(p.bestByMode.hardcore) ? p.bestByMode.hardcore : 0,
-          endless: Number.isFinite(p.bestByMode.endless) ? p.bestByMode.endless : 0,
-        };
+      const data = JSON.parse(raw);
+      // Профиль
+      if (data.profile) {
+        const p = data.profile;
+        if (typeof p.name === 'string' && p.name.trim()) profile.name = p.name.trim().slice(0, 20);
+        if (typeof p.avatar === 'string') profile.avatar = p.avatar;
+        if (typeof p.photoUrl === 'string' || p.photoUrl === null) profile.photoUrl = p.photoUrl;
+        if (typeof p.username === 'string' || p.username === null) profile.username = p.username;
+        if (typeof p.tgId === 'number' || p.tgId === null) profile.tgId = p.tgId;
+        if (typeof p.customName === 'boolean') profile.customName = p.customName;
       }
+      // Прогресс
+      if (data.progress) {
+        const p = data.progress;
+        state.apples      = Number.isFinite(p.apples) ? Math.floor(p.apples) : 50;
+        state.diamonds    = Number.isFinite(p.diamonds) ? Math.floor(p.diamonds) : 0;
+        state.owned       = Array.isArray(p.owned) && p.owned.length ? p.owned.filter(id => SKINS.some(s => s.id === id)) : ['gummy'];
+        if (!state.owned.includes('gummy')) state.owned.unshift('gummy');
+        state.active      = state.owned.includes(p.active) ? p.active : 'gummy';
+        state.bestScore   = Number.isFinite(p.bestScore) ? p.bestScore : 0;
+        state.totalApples = Number.isFinite(p.totalApples) ? Math.floor(p.totalApples) : 0;
+        state.gamesPlayed = Number.isFinite(p.gamesPlayed) ? p.gamesPlayed : 0;
+        state.casesOpened = Number.isFinite(p.casesOpened) ? p.casesOpened : 0;
+        state.buffsPicked = Number.isFinite(p.buffsPicked) ? p.buffsPicked : 0;
+        if (p.bestByMode && typeof p.bestByMode === 'object') {
+          state.bestByMode = {
+            classic: Number.isFinite(p.bestByMode.classic) ? p.bestByMode.classic : 0,
+            hardcore: Number.isFinite(p.bestByMode.hardcore) ? p.bestByMode.hardcore : 0,
+            endless: Number.isFinite(p.bestByMode.endless) ? p.bestByMode.endless : 0,
+          };
+        }
+      }
+      // Друзья
+      if (Array.isArray(data.friends)) {
+        friends = data.friends.filter(f => f && typeof f === 'object');
+      }
+      state.lastSync = data.savedAt || 0;
+    } else {
+      // Если нет нового формата — пробуем старые ключи (обратная совместимость)
+      tryLegacyMigration();
     }
-  } catch(e){}
-  try {
-    const raw = localStorage.getItem(PROFILE_KEY);
-    if (raw) {
-      const p = JSON.parse(raw);
-      profile.name = (typeof p.name === 'string' && p.name.trim()) ? p.name.trim().slice(0, 20) : 'Игрок';
-      profile.avatar = typeof p.avatar === 'string' ? p.avatar : '🐍';
-      profile.photoUrl = typeof p.photoUrl === 'string' ? p.photoUrl : null;
-      profile.username = typeof p.username === 'string' ? p.username : null;
-      profile.customName = p.customName === true;
-      profile.tgId = p.tgId;
-    }
-  } catch(e){}
-  try {
-    const raw = localStorage.getItem(FRIENDS_KEY);
-    if (raw) {
-      friends = JSON.parse(raw);
-      if (!Array.isArray(friends)) friends = [];
-    }
-  } catch(e){ friends = []; }
+  } catch(e) {
+    console.warn('loadLocal error', e);
+  }
   try {
     const m = localStorage.getItem(MODE_KEY);
     if (m && MODES[m]) selectedMode = m;
   } catch(e){}
 }
-load();
 
-// Загрузка друзей из CloudStorage (приоритет над localStorage)
-function loadFriendsFromCloud(){
-  TelegramApp.cloudGet('snake_friends', (value, ok) => {
-    if (ok && value) {
-      try {
-        const cloudFriends = JSON.parse(value);
-        if (Array.isArray(cloudFriends) && cloudFriends.length >= friends.length) {
-          friends = cloudFriends;
-          saveFriends(); // обновим localStorage тоже
-          renderFriends();
-        }
-      } catch(e) {}
+// Миграция со старых ключей
+function tryLegacyMigration(){
+  try {
+    const oldState = localStorage.getItem('snake_v2_save');
+    const oldProfile = localStorage.getItem('snake_v29_profile');
+    const oldFriends = localStorage.getItem('snake_v29_friends');
+    if (oldState) {
+      const p = JSON.parse(oldState);
+      state.apples = Number.isFinite(p.apples) ? Math.floor(p.apples) : 50;
+      state.owned = Array.isArray(p.owned) && p.owned.length ? p.owned.filter(id => SKINS.some(s => s.id === id)) : ['gummy'];
+      if (!state.owned.includes('gummy')) state.owned.unshift('gummy');
+      state.active = state.owned.includes(p.active) ? p.active : 'gummy';
+      state.bestScore = p.bestScore || 0;
+      state.totalApples = p.totalApples || 0;
+      state.gamesPlayed = p.gamesPlayed || 0;
+      state.casesOpened = p.casesOpened || 0;
+      state.buffsPicked = p.buffsPicked || 0;
+      if (p.bestByMode) state.bestByMode = { classic: p.bestByMode.classic || 0, hardcore: p.bestByMode.hardcore || 0, endless: p.bestByMode.endless || 0 };
     }
-  });
+    if (oldProfile) {
+      const p = JSON.parse(oldProfile);
+      profile.name = p.name || 'Игрок';
+      profile.avatar = p.avatar || '🐍';
+      profile.photoUrl = p.photoUrl || null;
+      profile.username = p.username || null;
+      profile.tgId = p.tgId || null;
+      profile.customName = p.customName === true;
+    }
+    if (oldFriends) {
+      const arr = JSON.parse(oldFriends);
+      if (Array.isArray(arr)) friends = arr;
+    }
+    // Сохраняем в новом формате
+    saveLocal();
+  } catch(e) {}
 }
+
+loadLocal();
 
 let soundMuted = false;
 try { soundMuted = localStorage.getItem(AUDIO_KEY) === '1'; } catch(e){}
@@ -2257,12 +2525,15 @@ const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 
 const hudApples = document.getElementById('hudApples');
+const hudDiamonds = document.getElementById('hudDiamonds');
 const hudTimer = document.getElementById('hudTimer');
 const hudScore = document.getElementById('hudScore');
 const hudCombo = document.getElementById('hudCombo');
 const hudComboVal = document.getElementById('hudComboVal');
 const shopApples = document.getElementById('shopApples');
+const shopDiamonds = document.getElementById('shopDiamonds');
 const mobileApples = document.getElementById('mobileApples');
+const mobileDiamonds = document.getElementById('mobileDiamonds');
 const overlay = document.getElementById('overlay');
 const ovTitle = document.getElementById('ovTitle');
 const ovText = document.getElementById('ovText');
@@ -2319,6 +2590,7 @@ function activateBuff(id){
   const isNew = !isBuffActive(id);
   activeBuffs[id] = { timeLeft: cfg.duration, total: cfg.duration };
   state.buffsPicked++;
+  saveAll();
   if (isNew) {
     SFX.sfx.buffPickup();
     TelegramApp.hapticImpact('medium');
@@ -2423,7 +2695,39 @@ function updateCombo(dt){
 function resetCombo(){ combo.value = 1; combo.count = 0; combo.timer = 0; updateComboUI(); }
 
 /* ============================================================
-   ПРОФИЛЬ — рендер (с аватаркой из TG)
+   ВРЕМЯ СИНХРОНИЗАЦИИ
+============================================================ */
+function formatSyncTime(ts){
+  if (!ts) return 'Никогда';
+  const diff = Date.now() - ts;
+  if (diff < 5000) return 'только что';
+  if (diff < 60000) return `${Math.floor(diff / 1000)} сек назад`;
+  if (diff < 3600000) return `${Math.floor(diff / 60000)} мин назад`;
+  if (diff < 86400000) return `${Math.floor(diff / 3600000)} ч назад`;
+  const d = new Date(ts);
+  return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+}
+
+function updateSyncUI(syncing = false, error = false){
+  const indicator = document.querySelectorAll('.sync-indicator');
+  const timeEls = document.querySelectorAll('.sync-time-value');
+  indicator.forEach(el => {
+    el.classList.remove('syncing', 'error');
+    if (syncing) el.classList.add('syncing');
+    else if (error) el.classList.add('error');
+  });
+  const syncBtn = document.querySelectorAll('.sync-btn');
+  syncBtn.forEach(btn => {
+    if (syncing) btn.classList.add('spinning');
+    else btn.classList.remove('spinning');
+  });
+  timeEls.forEach(el => {
+    el.textContent = formatSyncTime(state.lastSync);
+  });
+}
+
+/* ============================================================
+   ПРОФИЛЬ — рендер
 ============================================================ */
 const AVATAR_OPTIONS = ['🐍','🦎','🐉','🐲','🦖','🐢','🦂','🐊','🦕','🐸','🦄','👾'];
 
@@ -2440,6 +2744,7 @@ function buildProfileHTML(){
   const bestE = state.bestByMode.endless;
   const hasPhoto = !!profile.photoUrl;
   const tgBadge = profile.username ? `<span class="profile-tg-badge">✈️ @${escapeHtml(profile.username)}</span>` : '';
+  const syncActive = TelegramApp.isActive();
   return `
     <div class="profile-avatar-row">
       <div class="profile-avatar ${hasPhoto ? 'has-photo' : ''}" data-action="avatar">${buildAvatarHTML()}</div>
@@ -2448,6 +2753,27 @@ function buildProfileHTML(){
         <div class="profile-name-edit">${hasPhoto ? 'нажми, чтобы сменить аватарку' : 'нажми на имя, чтобы изменить'}</div>
       </div>
     </div>
+
+    <!-- Синхронизация -->
+    ${syncActive ? `
+    <div class="sync-block">
+      <div class="sync-indicator"></div>
+      <div class="sync-info">
+        <div class="sync-label">☁️ Облако Telegram</div>
+        <div class="sync-time">Последний раз: <span class="sync-time-value">${formatSyncTime(state.lastSync)}</span></div>
+      </div>
+      <button class="sync-btn" data-action="sync" title="Синхронизировать сейчас">↻</button>
+    </div>
+    ` : `
+    <div class="sync-block" style="border-color:rgba(115,117,130,.3);background:rgba(115,117,130,.08)">
+      <div class="sync-indicator error"></div>
+      <div class="sync-info">
+        <div class="sync-label" style="color:var(--text-secondary)">☁️ Облако недоступно</div>
+        <div class="sync-time">Открой игру в Telegram для синхронизации</div>
+      </div>
+    </div>
+    `}
+
     <div class="profile-stats">
       <div class="profile-stat"><div class="label">🎯 Классика</div><div class="value gold">${bestC}</div></div>
       <div class="profile-stat"><div class="label">💀 Хардкор</div><div class="value gold">${bestH}</div></div>
@@ -2455,11 +2781,21 @@ function buildProfileHTML(){
       <div class="profile-stat"><div class="label">Общий рекорд</div><div class="value gold">${state.bestScore}</div></div>
       <div class="profile-stat"><div class="label">Игр сыграно</div><div class="value blue">${state.gamesPlayed}</div></div>
       <div class="profile-stat"><div class="label">Всего фруктов</div><div class="value green">${state.totalApples}</div></div>
-      <div class="profile-stat"><div class="label">Кейсов открыто</div><div class="value">${state.casesOpened}</div></div>
+      <div class="profile-stat diamond-stat"><div class="label">💎 Алмазов</div><div class="value diamond">${state.diamonds}</div></div>
       <div class="profile-stat"><div class="label">Друзей</div><div class="value">${friends.length}</div></div>
     </div>
     <div class="profile-section-title">Коллекция по редкости</div>
     <div class="rarity-progress">${buildRarityRows()}</div>
+
+    <div class="profile-section-title">Данные</div>
+    <div class="data-actions">
+      <button data-action="export">📄 Экспорт JSON</button>
+      <button data-action="import" style="position:relative;overflow:hidden">
+        📥 Импорт JSON
+        <input type="file" accept=".json,application/json" id="importFileInput" style="display:none">
+      </button>
+    </div>
+
     <button class="btn-danger" data-action="reset">🗑 Сбросить прогресс</button>
   `;
 }
@@ -2498,18 +2834,17 @@ function attachProfileHandlers(root){
     const action = el.dataset.action;
     if (action === 'avatar') {
       el.addEventListener('click', () => {
-        // Если есть фото из TG — сбрасываем его и переключаем эмодзи
         if (profile.photoUrl) {
           profile.photoUrl = null;
           profile.avatar = AVATAR_OPTIONS[0];
-          saveProfile(); renderProfile();
+          saveAll(); renderProfile();
           showToast('Аватарка сброшена — используется эмодзи', 'info', 1800);
           TelegramApp.hapticImpact('light');
           return;
         }
         const idx = AVATAR_OPTIONS.indexOf(profile.avatar);
         profile.avatar = AVATAR_OPTIONS[(idx + 1) % AVATAR_OPTIONS.length];
-        saveProfile(); renderProfile(); SFX.sfx.equip();
+        saveAll(); renderProfile(); SFX.sfx.equip();
         TelegramApp.hapticImpact('light');
       });
     } else if (action === 'name') {
@@ -2520,18 +2855,58 @@ function attachProfileHandlers(root){
         if (trimmed) {
           profile.name = trimmed;
           profile.customName = true;
-          saveProfile(); renderProfile();
+          saveAll(); renderProfile();
           showToast(`Имя изменено: ${profile.name}`, 'success', 1500);
         }
       });
+    } else if (action === 'sync') {
+      el.addEventListener('click', () => {
+        SFX.sfx.click();
+        doCloudSync(true);
+      });
+    } else if (action === 'export') {
+      el.addEventListener('click', () => {
+        exportSaveToFile();
+      });
+    } else if (action === 'import') {
+      el.addEventListener('click', () => {
+        const inp = el.querySelector('input[type="file"]');
+        if (inp) inp.click();
+      });
+      const fileInput = el.querySelector('input[type="file"]');
+      if (fileInput) {
+        fileInput.addEventListener('change', (e) => {
+          const file = e.target.files?.[0];
+          if (!file) return;
+          importSaveFromFile(file, (ok, err) => {
+            if (ok) {
+              showToast('📥 Прогресс загружен', 'success', 2000);
+              TelegramApp.hapticNotify('success');
+              SFX.sfx.buy();
+            } else {
+              showToast(err || 'Ошибка импорта', 'error', 2200);
+              SFX.sfx.deny();
+            }
+          });
+          e.target.value = '';
+        });
+      }
     } else if (action === 'reset') {
       el.addEventListener('click', () => {
-        const ok = confirm('Ты уверен? Весь прогресс (скины, яблоки, рекорды) будет удалён.');
+        const ok = confirm('Ты уверен? Весь прогресс (скины, яблоки, алмазы, рекорды) будет удалён. Это затронет и облако.');
         if (!ok) return;
-        state = { apples: 50, owned: ['gummy'], active: 'gummy', bestScore: 0, totalApples: 0, gamesPlayed: 0, casesOpened: 0, buffsPicked: 0, bestByMode: { classic: 0, hardcore: 0, endless: 0 }, version: '2.9' };
+        state = {
+          apples: 50, diamonds: 0,
+          owned: ['gummy'], active: 'gummy',
+          bestScore: 0, totalApples: 0, gamesPlayed: 0,
+          casesOpened: 0, buffsPicked: 0,
+          bestByMode: { classic: 0, hardcore: 0, endless: 0 },
+          version: '3.0',
+        };
         profile.customName = false;
-        saveProfile(); save();
-        renderCases(); renderCollection(); renderProfile(); renderModes(); updateHUD();
+        friends = [];
+        saveAll(true);
+        renderAll();
         TelegramApp.pullTelegramProfile();
         showToast('Прогресс сброшен', 'info', 1800);
         SFX.sfx.deny();
@@ -2541,7 +2916,7 @@ function attachProfileHandlers(root){
 }
 
 /* ============================================================
-   ДРУЗЬЯ — рендер + логика
+   ДРУЗЬЯ
 ============================================================ */
 function buildFriendsHTML(){
   const myUsername = profile.username || '';
@@ -2600,7 +2975,6 @@ function renderFriends(){
 }
 
 function attachFriendsHandlers(root){
-  // Кнопка "Добавить"
   const addBtn = root.querySelector('#friendAddBtn');
   const searchInput = root.querySelector('#friendSearchInput');
   if (addBtn && searchInput) {
@@ -2618,7 +2992,6 @@ function attachFriendsHandlers(root){
     });
   }
 
-  // Кнопка "Поделиться"
   const shareBtn = root.querySelector('#friendsShareBtn');
   if (shareBtn) {
     shareBtn.addEventListener('click', () => {
@@ -2626,7 +2999,6 @@ function attachFriendsHandlers(root){
       const text = 'Играю в Змейку! Присоединяйся 🐍';
       const ok = TelegramApp.shareInviteLink(text, link);
       if (!ok) {
-        // Fallback — копируем в буфер
         copyToClipboard(link);
         showToast('Ссылка скопирована в буфер', 'success', 2000);
       }
@@ -2634,7 +3006,6 @@ function attachFriendsHandlers(root){
     });
   }
 
-  // Кнопка "Копировать"
   const copyBtn = root.querySelector('#friendsCopyBtn');
   if (copyBtn) {
     copyBtn.addEventListener('click', () => {
@@ -2645,14 +3016,11 @@ function attachFriendsHandlers(root){
     });
   }
 
-  // Кнопки на карточках друзей
   root.querySelectorAll('[data-action="open"]').forEach(btn => {
     btn.addEventListener('click', () => {
       const username = btn.dataset.username;
       const ok = TelegramApp.openTelegramProfile(username);
-      if (!ok) {
-        showToast('Не удалось открыть профиль', 'error', 1800);
-      }
+      if (!ok) showToast('Не удалось открыть профиль', 'error', 1800);
       TelegramApp.hapticImpact('light');
     });
   });
@@ -2669,33 +3037,20 @@ function addFriendFromInput(value){
     showToast('Введи @username', 'info', 1800);
     return;
   }
-  // Убираем @ и пробелы
   let username = value.replace(/^@+/, '').trim();
-  // Проверка: только латиница, цифры, _
   if (!/^[a-zA-Z0-9_]{3,32}$/.test(username)) {
     showToast('Некорректный username', 'error', 2000);
-    SFX.sfx.deny();
-    return;
+    SFX.sfx.deny(); return;
   }
-  // Нельзя добавить себя
   if (profile.username && username.toLowerCase() === profile.username.toLowerCase()) {
-    showToast('Это ты сам 🙂', 'info', 1800);
-    return;
+    showToast('Это ты сам 🙂', 'info', 1800); return;
   }
-  // Проверка на дубликат
   if (friends.some(f => (f.username || '').toLowerCase() === username.toLowerCase())) {
-    showToast('Уже в списке друзей', 'info', 1800);
-    return;
+    showToast('Уже в списке друзей', 'info', 1800); return;
   }
-  // Добавляем
-  friends.push({
-    username,
-    name: '@' + username,
-    addedAt: Date.now(),
-  });
-  saveFriends();
-  renderFriends();
-  renderProfile();
+  friends.push({ username, name: '@' + username, addedAt: Date.now() });
+  saveAll();
+  renderFriends(); renderProfile();
   SFX.sfx.friend();
   TelegramApp.hapticNotify('success');
   showToast(`✈️ @${username} добавлен!`, 'success', 2200);
@@ -2706,25 +3061,19 @@ function removeFriend(index){
   const removed = friends[index];
   if (!confirm(`Удалить @${removed.username} из друзей?`)) return;
   friends.splice(index, 1);
-  saveFriends();
-  renderFriends();
-  renderProfile();
+  saveAll();
+  renderFriends(); renderProfile();
   SFX.sfx.click();
   showToast(`Удалён из друзей`, 'info', 1500);
 }
 
 function copyToClipboard(text){
   try {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text);
-    } else {
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text);
+    else {
       const ta = document.createElement('textarea');
-      ta.value = text;
-      ta.style.position = 'fixed';
-      ta.style.opacity = '0';
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand('copy');
+      ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy');
       document.body.removeChild(ta);
     }
   } catch(e) { console.warn('Copy failed:', e); }
@@ -2793,7 +3142,8 @@ function createModeCard(mode){
 function selectMode(modeId){
   if (!MODES[modeId]) return;
   selectedMode = modeId;
-  saveMode(); renderModes();
+  try { localStorage.setItem(MODE_KEY, selectedMode); } catch(e){}
+  renderModes();
   SFX.sfx.equip();
   TelegramApp.hapticImpact('light');
   showToast(`Режим: ${MODES[modeId].name}`, 'info', 1400);
@@ -2815,7 +3165,10 @@ function createCaseCard(cs){
   card.className = 'case-card ' + cs.id;
   card.style.setProperty('--case-color-a', cs.colorA);
   card.style.setProperty('--case-color-b', cs.colorB);
-  const canAfford = state.apples >= cs.price;
+  const isDiamond = cs.priceType === 'diamonds';
+  const balance = isDiamond ? state.diamonds : state.apples;
+  const canAfford = balance >= cs.price;
+  const priceLabel = isDiamond ? `💎 ${cs.price}` : `🍎 ${cs.price}`;
   card.innerHTML = `
     <div class="case-header">
       <div class="case-icon">${cs.icon}</div>
@@ -2826,7 +3179,7 @@ function createCaseCard(cs){
     </div>
     <div class="case-price">
       <span class="case-price-label">Открыть за</span>
-      <span class="case-price-val ${canAfford ? '' : 'cant-afford'}">🍎 ${cs.price}</span>
+      <span class="case-price-val ${isDiamond ? 'diamonds' : ''} ${canAfford ? '' : 'cant-afford'}">${priceLabel}</span>
     </div>
   `;
   card.addEventListener('click', () => openCase(cs));
@@ -2859,7 +3212,8 @@ function createSkinTile(skin){
     tile.addEventListener('click', () => {
       if (state.active !== skin.id) {
         state.active = skin.id;
-        save(); renderCollection(); renderCases();
+        saveAll();
+        renderCollection(); renderCases();
         spawnBurst(canvas.width/2, canvas.height/2, skin.colors[0], 22);
         spawnHearts(canvas.width/2, canvas.height/2, 6);
         showToast(`Надет скин «${skin.name}»`, 'success', 1500);
@@ -2881,18 +3235,25 @@ function renderCollection(){
 }
 
 /* ============================================================
-   КЕЙСЫ
+   КЕЙСЫ — ОТКРЫТИЕ
 ============================================================ */
 let currentCase = null;
 function openCase(cs){
   SFX.resume();
-  if (state.apples < cs.price) {
-    showToast(`Не хватает ${cs.price - state.apples} 🍎`, 'error', 1800);
+  const isDiamond = cs.priceType === 'diamonds';
+  const balance = isDiamond ? state.diamonds : state.apples;
+  if (balance < cs.price) {
+    if (isDiamond) {
+      showToast(`Не хватает ${cs.price - state.diamonds} 💎`, 'error', 2000);
+    } else {
+      showToast(`Не хватает ${cs.price - state.apples} 🍎`, 'error', 1800);
+    }
     SFX.sfx.deny(); return;
   }
-  state.apples -= cs.price;
+  if (isDiamond) state.diamonds -= cs.price;
+  else state.apples -= cs.price;
   state.casesOpened++;
-  save(); renderCases();
+  saveAll(); renderCases();
   currentCase = cs;
   const droppedSkin = rollFromCase(cs);
   caseResult.classList.remove('show');
@@ -2942,7 +3303,7 @@ function rollFromCase(cs){
 }
 function revealResult(skin){
   const isNew = !state.owned.includes(skin.id);
-  if (isNew) { state.owned.push(skin.id); save(); }
+  if (isNew) { state.owned.push(skin.id); saveAll(); }
   renderCollection(); renderProfile();
   const bg = skin.gemGradient
     ? `linear-gradient(135deg, ${skin.colors[0]}, ${skin.colors[1]}, ${skin.colors[0]})`
@@ -2960,7 +3321,7 @@ function revealResult(skin){
   else showToast(`Повтор: ${skin.name}`, 'info', 1800);
 }
 function spawnConfetti(count){
-  const colors = ['#ff4a6e','#ffb545','#4a9eff','#b57aff','#7fb87f','#fff'];
+  const colors = ['#ff4a6e','#ffb545','#4a9eff','#b57aff','#7fb87f','#fff','#4ecdf0'];
   for (let i = 0; i < count; i++){
     const el = document.createElement('div');
     el.className = 'confetti';
@@ -3129,13 +3490,17 @@ function checkDemonCollision(){
 }
 function updateHUD(){
   state.apples = Math.floor(state.apples);
+  state.diamonds = Math.floor(state.diamonds);
   hudApples.textContent = state.apples;
+  hudDiamonds.textContent = state.diamonds;
   hudScore.textContent = score ?? 0;
   const mode = MODES[selectedMode];
   if (mode.timeLimit > 0) hudTimer.textContent = Math.max(0, timeRemaining).toFixed(1);
   else hudTimer.textContent = time.toFixed(1);
   shopApples.textContent = state.apples;
+  shopDiamonds.textContent = state.diamonds;
   mobileApples.textContent = state.apples;
+  mobileDiamonds.textContent = state.diamonds;
 }
 
 const FRUITS = [
@@ -3176,7 +3541,7 @@ function step(){
     addApples(mode.appleMultiplier);
     if (score > state.bestScore) state.bestScore = score;
     if (score > (state.bestByMode[selectedMode] || 0)) state.bestByMode[selectedMode] = score;
-    save();
+    saveAll();
     SFX.sfx.eat();
     TelegramApp.hapticImpact('light');
     foodEatenPulse = 1;
@@ -3193,7 +3558,7 @@ function step(){
       addApples(mode.appleMultiplier);
       if (score > state.bestScore) state.bestScore = score;
       if (score > (state.bestByMode[selectedMode] || 0)) state.bestByMode[selectedMode] = score;
-      save();
+      saveAll();
       SFX.sfx.eat();
       TelegramApp.hapticImpact('light');
       foodEatenPulse = 1;
@@ -3256,7 +3621,8 @@ function applyMagnet(){
 function die(){
   const mode = MODES[selectedMode];
   running = false; timerRunning = false; gameOver = true;
-  shake = 12; state.gamesPlayed++; save();
+  shake = 12; state.gamesPlayed++;
+  saveAll();
   SFX.sfx.die();
   TelegramApp.hapticNotify('error');
   const skin = getSkin(state.active);
@@ -3284,7 +3650,8 @@ function die(){
 function winGame(){
   const mode = MODES[selectedMode];
   running = false; timerRunning = false;
-  state.gamesPlayed++; save();
+  state.gamesPlayed++;
+  saveAll();
   SFX.sfx.timeUp();
   TelegramApp.hapticNotify('success');
   const best = state.bestByMode[selectedMode] || 0;
@@ -4016,6 +4383,18 @@ function formatTime(sec){
 function startRadioProgressLoop(){ stopRadioProgressLoop(); radioProgressInterval = setInterval(() => { if (radioOpen) updateProgressUI(); }, 500); }
 function stopRadioProgressLoop(){ if (radioProgressInterval) { clearInterval(radioProgressInterval); radioProgressInterval = null; } }
 
+/* ============================================================
+   RENDER ALL — единая точка обновления UI
+============================================================ */
+function renderAll(){
+  renderModes();
+  renderCases();
+  renderCollection();
+  renderProfile();
+  renderFriends();
+  updateHUD();
+}
+
 function showStartOverlay(){
   const mode = MODES[selectedMode];
   const totalOwned = state.owned.length;
@@ -4023,6 +4402,7 @@ function showStartOverlay(){
   const musicCount = Radio.getPlaylist().length;
   let line = `Режим: <b style="color:${mode.colorA}">${mode.icon} ${mode.name}</b>`;
   line += `<br><span style="color:#9a9ba4;font-size:12px">Привет, ${escapeHtml(profile.name)}! · Скинов: ${totalOwned}/${totalSkins}`;
+  if (state.diamonds > 0) line += ` · 💎 ${state.diamonds}`;
   if (friends.length > 0) line += ` · 👥 ${friends.length}`;
   if (musicCount > 0) line += ` · 🎵 ${musicCount}`;
   line += `</span>`;
@@ -4044,6 +4424,9 @@ function startGame(){
 ovBtn.onclick = startGame;
 playBtn.onclick = () => { if (!running) startGame(); };
 
+/* ============================================================
+   ИНИЦИАЛИЗАЦИЯ
+============================================================ */
 TelegramApp.init();
 
 resetGame();
@@ -4051,14 +4434,27 @@ running = false;
 timerRunning = false;
 showStartOverlay();
 
-renderModes();
-renderCases();
-renderCollection();
-renderProfile();
-renderFriends();
+renderAll();
 renderRadioPlaylist();
 updateRadioUI();
+updateSyncUI(false);
 requestAnimationFrame(loop);
+
+// Через секунду после запуска пробуем синхронизироваться с облаком
+setTimeout(() => {
+  tryLoadFromCloud();
+}, 800);
+
+// Обновляем время синка в UI раз в 30 сек
+setInterval(() => { updateSyncUI(false); }, 30000);
+
+// Пытаемся синхронизироваться при возврате к вкладке
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && TelegramApp.isActive()) {
+    // Через 2 секунды после возврата — легкий ре-синк (только если данные поменялись)
+    setTimeout(() => { doCloudSync(false); }, 2000);
+  }
+});
 
 (async () => {
   const count = await Radio.init();
