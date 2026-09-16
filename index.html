@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Змейка">
-<title>🐍 Змейка — Fun Edition v2.6</title>
+<title>🐍 Змейка — Fun Edition v2.6.1</title>
 <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22%D0%97%D0%BC%D0%B5%D0%B9%D0%BA%D0%B0%22%2C%22short_name%22%3A%22Snake%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%231c1d22%22%2C%22theme_color%22%3A%22%231c1d22%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%253D%2527http%253A%2F%2Fwww.w3.org%2F2000%2Fsvg%2527%2520viewBox%253D%25270%25200%252064%252064%2527%253E%253Crect%2520width%253D%252764%2527%2520height%253D%252764%2527%2520rx%253D%252714%2527%2520fill%253D%2527%25232324244%2527%2F%253E%253Ctext%2520x%253D%252732%2527%2520y%253D%252744%2527%2520font-size%253D%252740%2527%2520text-anchor%253D%2527middle%2527%253E%25F0%259F%2590%258D%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
@@ -161,9 +161,7 @@
   .hud .stat .val.timer.warning { color: var(--danger); animation: timerPulse 0.6s infinite alternate; }
   @keyframes timerPulse { from { opacity: 1; } to { opacity: 0.4; } }
   .hud .stat .val.score { color: var(--accent-2); }
-  .hud .stat .val.mode { color: var(--legendary); font-size: 11.5px; }
 
-  /* HUD Combo */
   .hud .stat.combo {
     background: linear-gradient(90deg, rgba(255,181,69,.2), rgba(255,215,120,.1));
     border-color: rgba(255,181,69,.4);
@@ -261,6 +259,190 @@
   .buff-chip.ghost     { --buff-color-a: #b5a4d4; --buff-color-b: #7a6a9a; }
   .buff-chip.multifruit{ --buff-color-a: #7fb87f; --buff-color-b: #4a8a4a; }
 
+  /* ===== КРЕСТОВИНА GAME BOY ===== */
+  .dpad {
+    display: none;
+    position: relative;
+    width: 200px;
+    height: 200px;
+    margin: 14px auto 0 auto;
+    flex-shrink: 0;
+    touch-action: none;
+    user-select: none;
+  }
+  /* Основание — круглый диск как у геймбоя */
+  .dpad-base {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 35% 30%, rgba(255,255,255,.08), transparent 45%),
+      radial-gradient(circle at 65% 75%, rgba(0,0,0,.35), transparent 50%),
+      linear-gradient(145deg, #3a3b48 0%, #23242e 55%, #1a1b22 100%);
+    box-shadow:
+      inset 0 2px 4px rgba(255,255,255,.08),
+      inset 0 -4px 12px rgba(0,0,0,.55),
+      0 6px 20px rgba(0,0,0,.45),
+      0 2px 6px rgba(0,0,0,.3);
+    border: 1px solid rgba(0,0,0,.35);
+  }
+  /* Внутреннее кольцо */
+  .dpad-base::after {
+    content: '';
+    position: absolute;
+    inset: 22px;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 40% 35%, rgba(255,255,255,.05), transparent 55%),
+      linear-gradient(145deg, #2a2b35, #1e1f26);
+    box-shadow: inset 0 2px 6px rgba(0,0,0,.5), inset 0 -1px 2px rgba(255,255,255,.04);
+  }
+
+  /* Центральный крест — кнопки */
+  .dpad-cross {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .dpad-center {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 35% 30%, rgba(255,255,255,.1), transparent 50%),
+      linear-gradient(145deg, #2e2f3a, #1c1d24);
+    box-shadow:
+      inset 0 1px 2px rgba(255,255,255,.08),
+      inset 0 -2px 4px rgba(0,0,0,.6),
+      0 2px 6px rgba(0,0,0,.5);
+    z-index: 3;
+    pointer-events: none;
+  }
+  .dpad-center::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #555, #111);
+    box-shadow: inset 0 -1px 2px rgba(0,0,0,.7), 0 1px 2px rgba(255,255,255,.06);
+  }
+
+  /* Отдельная кнопка направления */
+  .dpad-btn {
+    position: absolute;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    z-index: 2;
+    transition: transform .08s;
+    -webkit-tap-highlight-color: transparent;
+    pointer-events: auto;
+    touch-action: none;
+  }
+  .dpad-btn::before {
+    /* визуальное тело кнопки */
+    content: '';
+    position: absolute;
+    background:
+      radial-gradient(circle at 35% 30%, rgba(255,255,255,.15), transparent 50%),
+      linear-gradient(145deg, #4a4b58 0%, #2c2d38 60%, #22232b 100%);
+    box-shadow:
+      inset 0 2px 3px rgba(255,255,255,.15),
+      inset 0 -3px 6px rgba(0,0,0,.55),
+      0 3px 8px rgba(0,0,0,.5);
+    transition: box-shadow .1s, background .1s;
+  }
+  .dpad-btn:active::before,
+  .dpad-btn.pressed::before {
+    background:
+      radial-gradient(circle at 35% 30%, rgba(255,255,255,.08), transparent 50%),
+      linear-gradient(145deg, #2a2b35, #1e1f26);
+    box-shadow:
+      inset 0 3px 5px rgba(0,0,0,.55),
+      inset 0 -1px 2px rgba(255,255,255,.08),
+      0 1px 3px rgba(0,0,0,.4);
+  }
+  .dpad-btn:active,
+  .dpad-btn.pressed {
+    transform: scale(.96);
+  }
+
+  /* Верхняя */
+  .dpad-up {
+    top: 4px; left: 50%;
+    transform: translateX(-50%);
+    width: 72px; height: 76px;
+  }
+  .dpad-up::before {
+    inset: 0;
+    border-radius: 34px 34px 12px 12px;
+  }
+  .dpad-up:active, .dpad-up.pressed { transform: translateX(-50%) scale(.96); }
+
+  /* Нижняя */
+  .dpad-down {
+    bottom: 4px; left: 50%;
+    transform: translateX(-50%);
+    width: 72px; height: 76px;
+  }
+  .dpad-down::before {
+    inset: 0;
+    border-radius: 12px 12px 34px 34px;
+  }
+  .dpad-down:active, .dpad-down.pressed { transform: translateX(-50%) scale(.96); }
+
+  /* Левая */
+  .dpad-left {
+    left: 4px; top: 50%;
+    transform: translateY(-50%);
+    width: 76px; height: 72px;
+  }
+  .dpad-left::before {
+    inset: 0;
+    border-radius: 34px 12px 12px 34px;
+  }
+  .dpad-left:active, .dpad-left.pressed { transform: translateY(-50%) scale(.96); }
+
+  /* Правая */
+  .dpad-right {
+    right: 4px; top: 50%;
+    transform: translateY(-50%);
+    width: 76px; height: 72px;
+  }
+  .dpad-right::before {
+    inset: 0;
+    border-radius: 12px 34px 34px 12px;
+  }
+  .dpad-right:active, .dpad-right.pressed { transform: translateY(-50%) scale(.96); }
+
+  /* Стрелки на кнопках */
+  .dpad-btn .dpad-arrow {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 18px;
+    font-weight: 900;
+    color: rgba(255,255,255,.55);
+    text-shadow:
+      0 -1px 0 rgba(0,0,0,.6),
+      0 1px 1px rgba(255,255,255,.1);
+    pointer-events: none;
+    user-select: none;
+    z-index: 1;
+  }
+  .dpad-btn:active .dpad-arrow,
+  .dpad-btn.pressed .dpad-arrow {
+    color: rgba(124,138,255,.85);
+    text-shadow:
+      0 -1px 0 rgba(0,0,0,.7),
+      0 0 8px rgba(124,138,255,.6);
+  }
+
   .pause-indicator {
     position: absolute; inset: 0;
     display: none;
@@ -357,7 +539,6 @@
   .shop-list::-webkit-scrollbar { width: 6px; }
   .shop-list::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 10px; }
 
-  /* ==== Карточки режимов ==== */
   .mode-card {
     position: relative; border-radius: 14px; padding: 14px;
     background: var(--bg-elevated);
@@ -408,7 +589,6 @@
   .mode-stats-label { color: var(--text-muted); }
   .mode-stats-val { color: var(--legendary); font-weight: 700; font-variant-numeric: tabular-nums; }
 
-  /* ==== Кейсы ==== */
   .case-card {
     position: relative; border-radius: 14px; padding: 14px;
     background: var(--bg-elevated);
@@ -458,7 +638,6 @@
   .case-price-val { color: var(--accent-3); font-weight: 700; font-size: 13px; font-variant-numeric: tabular-nums; }
   .case-price-val.cant-afford { color: var(--danger); }
 
-  /* ==== Коллекция ==== */
   .collection-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -514,7 +693,6 @@
   }
   @keyframes legendaryBadge { from { box-shadow: 0 0 0 rgba(255,181,69,0); } to { box-shadow: 0 0 12px rgba(255,181,69,.5); } }
 
-  /* ==== Профиль ==== */
   .profile-in-menu {
     display: flex; flex-direction: column; gap: 12px;
     overflow-y: auto;
@@ -655,7 +833,6 @@
   .btn:hover { background: #8b97ff; }
   .btn:active { transform: scale(.98); }
 
-  /* ===== ОВЕРЛЕЙ КЕЙСА ===== */
   .case-open-overlay {
     display: none; position: fixed; inset: 0;
     background: rgba(10,10,16,.94);
@@ -815,7 +992,6 @@
     100% { opacity: 0; transform: translate(var(--dx, 0px), 100vh) rotate(720deg); }
   }
 
-  /* ===== МОБИЛЬНОЕ МЕНЮ ===== */
   .mobile-shop-screen {
     display: none; position: fixed; inset: 0;
     background: var(--bg-deep); z-index: 200;
@@ -878,7 +1054,6 @@
   .mobile-shop-toggle:active { transform: scale(.94); }
   .mobile-shop-toggle .toggle-icon { font-size: 20px; }
 
-  /* ===== РАДИО ===== */
   .radio-panel {
     display: none; position: fixed;
     bottom: calc(80px + env(safe-area-inset-bottom)); left: 14px;
@@ -1049,7 +1224,6 @@
     background: var(--accent); border: none; cursor: pointer;
   }
 
-  /* ===== TOAST ===== */
   .toast-container {
     position: fixed; top: calc(16px + env(safe-area-inset-top));
     left: 50%; transform: translateX(-50%);
@@ -1083,12 +1257,23 @@
   @keyframes toastOut { to { opacity: 0; transform: translateY(-20px) scale(.9); } }
 
   /* ===== DEVICE LAYOUTS ===== */
+
+  /* ===== ТЕЛЕФОН — ЦЕНТРИРОВАНИЕ И КРЕСТОВИНА ===== */
   .device-phone .game-wrap {
-    flex-direction: column; align-items: center;
-    padding: 10px; gap: 10px;
-    justify-content: flex-start;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;    /* центрирование по вертикали */
+    padding: 10px;
+    gap: 10px;
+    overflow-y: auto;           /* если не влезает — скролл */
+    overflow-x: hidden;
   }
-  .device-phone .board-panel { width: 100%; max-width: min(96vw, 480px); padding: 9px; }
+  .device-phone .board-panel {
+    width: 100%;
+    max-width: min(96vw, 480px);
+    padding: 9px;
+    flex-shrink: 0;
+  }
   .device-phone .hud .stat { font-size: 11.5px; padding: 5px 9px; gap: 4px; }
   .device-phone .hud .stat .val { font-size: 11.5px; }
   .device-phone .shop { display: none; }
@@ -1103,7 +1288,7 @@
     bottom: calc(10px + env(safe-area-inset-bottom));
     left: 10px;
   }
-  /* Звук — рядом с меню (правый нижний угол, над кнопкой меню) */
+  /* Звук — правый верхний угол (на телефоне внизу, над меню) */
   .device-phone .sound-toggle {
     top: auto;
     left: auto;
@@ -1122,12 +1307,30 @@
   .device-phone .buff-chip .buff-name { font-size: 10.5px; }
   .device-phone .buff-chip .buff-time { font-size: 11.5px; }
 
+  /* Крестовина показывается только на телефоне */
+  .device-phone .dpad { display: block; }
+
+  /* Уменьшаем канвас на телефоне чтобы влезла крестовина */
+  .device-phone .canvas-wrap {
+    max-width: min(70vw, 340px);
+    margin: 0 auto;
+  }
+
   @media (orientation: landscape) and (max-height: 500px) {
-    .device-phone .game-wrap { flex-direction: row; align-items: center; justify-content: center; }
+    .device-phone .game-wrap {
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+    }
     .device-phone .board-panel { max-height: 96vh; }
     .device-phone .hud { margin-bottom: 5px; }
     .device-phone .hud .stat { font-size: 11px; padding: 3px 8px; }
     .device-phone .buffs-bar { min-height: 45px; margin-top: 6px; }
+    .device-phone .dpad { width: 160px; height: 160px; margin: 0; }
+    .device-phone .dpad-up, .device-phone .dpad-down { width: 58px; height: 62px; }
+    .device-phone .dpad-left, .device-phone .dpad-right { width: 62px; height: 58px; }
+    .device-phone .dpad-center { width: 46px; height: 46px; }
   }
 
   .device-tablet .game-wrap {
@@ -1197,6 +1400,26 @@
       </div>
     </div>
     <div class="buffs-bar empty" id="buffsBar"></div>
+
+    <!-- КРЕСТОВИНА GAME BOY -->
+    <div class="dpad" id="dpad">
+      <div class="dpad-base"></div>
+      <div class="dpad-cross">
+        <div class="dpad-center"></div>
+      </div>
+      <button class="dpad-btn dpad-up" data-dir="up" aria-label="Вверх">
+        <span class="dpad-arrow">▲</span>
+      </button>
+      <button class="dpad-btn dpad-down" data-dir="down" aria-label="Вниз">
+        <span class="dpad-arrow">▼</span>
+      </button>
+      <button class="dpad-btn dpad-left" data-dir="left" aria-label="Влево">
+        <span class="dpad-arrow">◀</span>
+      </button>
+      <button class="dpad-btn dpad-right" data-dir="right" aria-label="Вправо">
+        <span class="dpad-arrow">▶</span>
+      </button>
+    </div>
   </div>
 
   <div class="shop" id="shop">
@@ -1325,12 +1548,9 @@
 
 <script>
 /* ============================================================
-   v2.6 — 3 режима, свайпы везде, комбо, PWA
+   v2.6.1 — центрирование + крестовина + целые яблоки
 ============================================================ */
 
-/* ============================================================
-   ГЛОБАЛЬНЫЙ MUTE
-============================================================ */
 const GlobalMute = {
   muted: false, listeners: [],
   set(v){ this.muted = v; this.listeners.forEach(fn => { try { fn(v); } catch(e){} }); },
@@ -1511,7 +1731,7 @@ const Radio = (() => {
 })();
 
 /* ============================================================
-   РЕДКОСТИ / СКИНЫ / КЕЙСЫ
+   РЕДКОСТИ / СКИНЫ / КЕЙСЫ / РЕЖИМЫ
 ============================================================ */
 const RARITIES = {
   common:    { name: 'Обычный',      weight: 60, color: '#8a8e96' },
@@ -1555,46 +1775,27 @@ const CASES = [
     pool:['gummy','mint','banana','peach','bubble','candy','lime','orange','panda','strawberry','blueberry','watermelon','lemon','unicorn','dragon','phoenix','amethyst'] },
 ];
 
-/* ==== РЕЖИМЫ ==== */
 const MODES = {
   classic: {
     id: 'classic', name: 'Классика', icon: '🎯',
     desc: 'Собирай фрукты за 60 секунд. Классические стены.',
     colorA: '#7fb87f', colorB: '#4a8a4a',
-    timeLimit: 60,
-    walls: true,
-    grows: true,
-    appleMultiplier: 1,
-    hasDemon: false,
-    hasObstacles: false,
-    endlessFood: false,
-    buffsEnabled: true,
+    timeLimit: 60, walls: true, grows: true, appleMultiplier: 1,
+    hasDemon: false, hasObstacles: false, endlessFood: false, buffsEnabled: true,
   },
   hardcore: {
     id: 'hardcore', name: 'Хардкор', icon: '💀',
     desc: 'Демоническая змея охотится за тобой. Препятствия. Без лимита времени.',
     colorA: '#d07a7a', colorB: '#8a2020',
-    timeLimit: 0,
-    walls: true,
-    grows: true,
-    appleMultiplier: 2,
-    hasDemon: true,
-    hasObstacles: true,
-    endlessFood: false,
-    buffsEnabled: true,
+    timeLimit: 0, walls: true, grows: true, appleMultiplier: 2,
+    hasDemon: true, hasObstacles: true, endlessFood: false, buffsEnabled: true,
   },
   endless: {
     id: 'endless', name: 'Бесконечный', icon: '♾️',
     desc: 'Без стен, много фруктов. Размер не растёт. 3 фрукта = 1 🍎',
     colorA: '#7c8aff', colorB: '#4a4fc4',
-    timeLimit: 0,
-    walls: false,
-    grows: false,
-    appleMultiplier: 1/3,
-    hasDemon: false,
-    hasObstacles: false,
-    endlessFood: true,
-    buffsEnabled: true,
+    timeLimit: 0, walls: false, grows: false, appleMultiplier: 1/3,
+    hasDemon: false, hasObstacles: false, endlessFood: true, buffsEnabled: true,
   },
 };
 
@@ -1602,7 +1803,7 @@ function getCase(id){ return CASES.find(c => c.id === id); }
 function getSkin(id){ return SKINS.find(s => s.id === id) || SKINS[0]; }
 
 /* ============================================================
-   СОСТОЯНИЕ + ПРОФИЛЬ
+   СОСТОЯНИЕ
 ============================================================ */
 const STORAGE_KEY = 'snake_v2_save';
 const AUDIO_KEY = 'snake_v24_audio_muted';
@@ -1614,7 +1815,7 @@ let state = {
   bestScore: 0, totalApples: 0, gamesPlayed: 0,
   casesOpened: 0, buffsPicked: 0,
   bestByMode: { classic: 0, hardcore: 0, endless: 0 },
-  version: '2.6',
+  version: '2.6.1',
 };
 
 let profile = { name: 'Игрок', avatar: '🐍', created: Date.now() };
@@ -1744,6 +1945,7 @@ const ovBtn = document.getElementById('ovBtn');
 const playBtn = document.getElementById('playBtn');
 const pauseIndicator = document.getElementById('pauseIndicator');
 const buffsBar = document.getElementById('buffsBar');
+const dpad = document.getElementById('dpad');
 
 const modesList = document.getElementById('modesList');
 const mobileModesList = document.getElementById('mobileModesList');
@@ -1875,17 +2077,11 @@ function spawnBuffEffect(id){
 /* ============================================================
    КОМБО
 ============================================================ */
-let combo = {
-  value: 1,           // текущий множитель (1..N)
-  timer: 0,           // оставшееся время до сброса
-  maxTime: 3.0,       // время между фруктами для сохранения комбо
-  count: 0,           // сколько подряд съедено
-};
+let combo = { value: 1, timer: 0, maxTime: 3.0, count: 0 };
 
 function onFruitEaten(){
   combo.count++;
   combo.timer = combo.maxTime;
-  // Множитель растёт каждые 3 фрукта, макс ×5
   const newValue = Math.min(5, 1 + Math.floor(combo.count / 3));
   if (newValue > combo.value) {
     combo.value = newValue;
@@ -2010,7 +2206,7 @@ function attachProfileHandlers(root){
       el.addEventListener('click', () => {
         const ok = confirm('Ты уверен? Весь прогресс (скины, яблоки, рекорды) будет удалён.');
         if (!ok) return;
-        state = { apples: 50, owned: ['gummy'], active: 'gummy', bestScore: 0, totalApples: 0, gamesPlayed: 0, casesOpened: 0, buffsPicked: 0, bestByMode: { classic: 0, hardcore: 0, endless: 0 }, version: '2.6' };
+        state = { apples: 50, owned: ['gummy'], active: 'gummy', bestScore: 0, totalApples: 0, gamesPlayed: 0, casesOpened: 0, buffsPicked: 0, bestByMode: { classic: 0, hardcore: 0, endless: 0 }, version: '2.6.1' };
         save(); renderCases(); renderCollection(); renderProfile(); renderModes(); updateHUD();
         showToast('Прогресс сброшен', 'info', 1800);
         SFX.sfx.deny();
@@ -2036,7 +2232,6 @@ function closeMobileShop(){
 mobileShopToggle.addEventListener('click', (e) => { e.stopPropagation(); openMobileShop(); });
 mobileCloseBtn.addEventListener('click', (e) => { e.stopPropagation(); SFX.sfx.click(); closeMobileShop(); });
 
-/* TABS */
 document.querySelectorAll('.shop-tab').forEach(tab => {
   tab.addEventListener('click', () => {
     const target = tab.dataset.tab;
@@ -2289,16 +2484,11 @@ let foodEatenPulse = 0;
 let buffSpawnTimer = 0;
 let buffPickup = null;
 let timeRemaining = 0;
-
-/* ==== Демоническая змея (для hardcore) ==== */
 let demonSnake = null;
 let demonMoveTimer = 0;
-/* ==== Препятствия (для hardcore) ==== */
 let obstacles = [];
+let endlessSpawnTimer = 0;
 
-/* ============================================================
-   ПАУЗА
-============================================================ */
 let paused = false;
 let pausedByRadio = false;
 
@@ -2336,24 +2526,18 @@ function resetGame(){
   sameTypeStreak = 0;
   demonSnake = null;
   obstacles = [];
+  endlessSpawnTimer = 0;
   resetCombo();
 
-  // Установка лимита времени
-  if (mode.timeLimit > 0) {
-    timeRemaining = mode.timeLimit;
-  } else {
-    timeRemaining = 0; // 0 = без лимита
-  }
+  if (mode.timeLimit > 0) timeRemaining = mode.timeLimit;
+  else timeRemaining = 0;
 
-  // Стартовый спавн еды
   if (mode.endlessFood) {
-    // В бесконечном сразу несколько фруктов
     for (let i = 0; i < 5; i++) spawnFood();
   } else {
     spawnFood();
   }
 
-  // Хардкор: демон + препятствия
   if (mode.hasDemon) {
     spawnDemonSnake();
     spawnObstacles();
@@ -2367,9 +2551,6 @@ function resetGame(){
   updateComboUI();
 }
 
-/* ============================================================
-   ЕДА и ПРЕПЯТСТВИЯ
-============================================================ */
 function isCellFreeForBuff(x, y){
   if (snake.some(s => s.x === x && s.y === y)) return false;
   if (food && food.x === x && food.y === y) return false;
@@ -2389,7 +2570,6 @@ function spawnFood(){
   if (free.length === 0) return;
   const pos = free[Math.floor(Math.random()*free.length)];
   const newFood = { x: pos.x, y: pos.y, type: Math.floor(Math.random()*6), spawnT: 0 };
-  // В endless все фрукты в extraFoods кроме первого
   if (mode.endlessFood && food) {
     extraFoods.push(newFood);
   } else {
@@ -2398,8 +2578,7 @@ function spawnFood(){
 }
 
 function spawnExtraFood(){
-  const mode = MODES[selectedMode];
-  const maxFoods = mode.endlessFood ? 5 : 5;
+  const maxFoods = 5;
   const totalFoods = 1 + extraFoods.length;
   if (totalFoods >= maxFoods) return;
   const free = [];
@@ -2432,7 +2611,6 @@ function spawnObstacles(){
     const free = [];
     for (let y = 0; y < ROWS; y++){
       for (let x = 0; x < COLS; x++){
-        // Не спавним рядом со стартовой змейкой (первые 5 клеток слева)
         if (x < 5 && y === 10) continue;
         if (isCellFreeForBuff(x, y)) free.push({ x, y });
       }
@@ -2444,7 +2622,6 @@ function spawnObstacles(){
 }
 
 function spawnDemonSnake(){
-  // Демоническая змея — 4 сегмента в правом верхнем углу
   const startX = 16, startY = 3;
   demonSnake = [
     { x: startX, y: startY },
@@ -2457,11 +2634,9 @@ function spawnDemonSnake(){
   showToast('💀 Демоническая змея появилась!', 'error', 3000);
 }
 
-/* ==== ИИ демонической змеи ==== */
 function updateDemonSnake(dt){
   if (!demonSnake || demonSnake.length === 0) return;
   const mode = MODES[selectedMode];
-  // Демон двигается каждые 0.28 сек
   demonMoveTimer += dt;
   const moveEvery = 0.28;
   if (demonMoveTimer < moveEvery) return;
@@ -2470,39 +2645,28 @@ function updateDemonSnake(dt){
   const head = demonSnake[0];
   const playerHead = snake[0];
 
-  // Собираем возможные направления
   const dirs = [
     { x: 1, y: 0 }, { x: -1, y: 0 },
     { x: 0, y: 1 }, { x: 0, y: -1 },
   ];
 
-  // Оцениваем каждое направление — приоритет на приближение к игроку
-  // но не идти в тупик и не пересекать себя/препятствия/игрока
   const scored = dirs.map(d => {
     const nx = head.x + d.x;
     const ny = head.y + d.y;
-    // Границы
     if (mode.walls) {
       if (nx < 0 || nx >= COLS || ny < 0 || ny >= ROWS) return { d, score: -999 };
-    } else {
-      // бесконечный не для хардкора, но на всякий
     }
-    // Тело демона
     if (demonSnake.some((s, i) => i > 0 && s.x === nx && s.y === ny)) return { d, score: -900 };
-    // Препятствия
     if (obstacles.some(o => o.x === nx && o.y === ny)) return { d, score: -800 };
-    // Тело игрока (демон может догнать)
     if (snake.some(s => s.x === nx && s.y === ny)) return { d, score: -700 };
-    // Оценка: ближе к игроку = лучше
     const dist = Math.abs(nx - playerHead.x) + Math.abs(ny - playerHead.y);
     return { d, score: 100 - dist };
   });
 
   scored.sort((a, b) => b.score - a.score);
   const best = scored[0];
-  if (!best || best.score <= -500) return; // нет хода — стоит на месте
+  if (!best || best.score <= -500) return;
 
-  // Двигаем змею
   const newHead = { x: head.x + best.d.x, y: head.y + best.d.y };
   demonSnake.unshift(newHead);
   demonSnake.pop();
@@ -2514,10 +2678,9 @@ function checkDemonCollision(){
   return demonSnake.some(s => s.x === head.x && s.y === head.y);
 }
 
-/* ============================================================
-   HUD
-============================================================ */
 function updateHUD(){
+  // ==== Яблоки: всегда целые числа ====
+  state.apples = Math.floor(state.apples);
   hudApples.textContent = state.apples;
   hudScore.textContent = score ?? 0;
   const mode = MODES[selectedMode];
@@ -2539,39 +2702,29 @@ const FRUITS = [
   { emoji:'🍒', color:'#e8556b' },
 ];
 
-/* ============================================================
-   STEP — основной ход игры
-============================================================ */
 function step(){
   const mode = MODES[selectedMode];
   dir = nextDir;
   let head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
 
-  // ==== Стены ====
   if (mode.walls) {
     if (head.x < 0 || head.x >= COLS || head.y < 0 || head.y >= ROWS) return die();
   } else {
-    // Бесконечный: телепорт через края
     if (head.x < 0) head.x = COLS - 1;
     if (head.x >= COLS) head.x = 0;
     if (head.y < 0) head.y = ROWS - 1;
     if (head.y >= ROWS) head.y = 0;
   }
 
-  // ==== Препятствия ====
   if (obstacles.some(o => o.x === head.x && o.y === head.y)) return die();
 
-  // ==== Своё тело ====
   const ghostOn = isBuffActive('ghost');
   if (!ghostOn) {
-    // для растущей змейки проверяем всё тело кроме хвоста (он сдвинется)
-    const lastIdx = mode.grows ? snake.length : snake.length - 1;
-    for (let i = 0; i < lastIdx - 1; i++) {
+    for (let i = 0; i < snake.length - 1; i++) {
       if (snake[i].x === head.x && snake[i].y === head.y) return die();
     }
   }
 
-  // ==== Демон ====
   if (demonSnake && demonSnake.some(s => s.x === head.x && s.y === head.y)) return die();
 
   snake.unshift(head);
@@ -2584,13 +2737,23 @@ function step(){
 
   let ate = false;
 
-  // ==== Подбор основного фрукта ====
   if (food && head.x === food.x && head.y === food.y) {
     onFruitEaten();
     score += combo.value;
     const apples = mode.appleMultiplier;
-    state.apples += apples;
-    state.totalApples += apples;
+    // Накопитель дробных яблок
+    if (apples === 1/3) {
+      // Накапливаем и округляем по мере накопления
+      if (!window._fractionalApples) window._fractionalApples = 0;
+      window._fractionalApples += 1/3;
+      const whole = Math.floor(window._fractionalApples);
+      window._fractionalApples -= whole;
+      state.apples += whole;
+      state.totalApples += whole;
+    } else {
+      state.apples += apples;
+      state.totalApples += apples;
+    }
     if (score > state.bestScore) state.bestScore = score;
     if (score > (state.bestByMode[selectedMode] || 0)) state.bestByMode[selectedMode] = score;
     save();
@@ -2600,20 +2763,27 @@ function step(){
     spawnHearts(head.x*CELL + CELL/2, head.y*CELL + CELL/2, 2);
     food = null;
     spawnFood();
-    // endless: сразу подкидываем новый
     if (mode.endlessFood && extraFoods.length < 4) spawnExtraFood();
     ate = true;
   }
 
-  // ==== Подбор дополнительных фруктов ====
   for (let i = extraFoods.length - 1; i >= 0; i--) {
     const ef = extraFoods[i];
     if (head.x === ef.x && head.y === ef.y) {
       onFruitEaten();
       score += combo.value;
       const apples = mode.appleMultiplier;
-      state.apples += apples;
-      state.totalApples += apples;
+      if (apples === 1/3) {
+        if (!window._fractionalApples) window._fractionalApples = 0;
+        window._fractionalApples += 1/3;
+        const whole = Math.floor(window._fractionalApples);
+        window._fractionalApples -= whole;
+        state.apples += whole;
+        state.totalApples += whole;
+      } else {
+        state.apples += apples;
+        state.totalApples += apples;
+      }
       if (score > state.bestScore) state.bestScore = score;
       if (score > (state.bestByMode[selectedMode] || 0)) state.bestByMode[selectedMode] = score;
       save();
@@ -2621,13 +2791,11 @@ function step(){
       foodEatenPulse = 1;
       spawnBurst(ef.x*CELL + CELL/2, ef.y*CELL + CELL/2, FRUITS[ef.type].color, 12);
       extraFoods.splice(i, 1);
-      // endless: подкидываем новый вместо съеденного
       if (mode.endlessFood) spawnExtraFood();
       ate = true;
     }
   }
 
-  // ==== Подбор баффа ====
   if (buffPickup && head.x === buffPickup.x && head.y === buffPickup.y) {
     activateBuff(buffPickup.type);
     buffPickup = null;
@@ -2636,24 +2804,15 @@ function step(){
 
   if (ate) { updateHUD(); renderCases(); }
   else {
-    // Не вырос — убираем хвост
     if (mode.grows) snake.pop();
-    else {
-      // В endless змея постоянного размера
-      snake.pop();
-    }
+    else snake.pop();
   }
 
-  // ==== Магнит ====
   applyMagnet();
 
-  // ==== Проверка касания демона ====
   if (checkDemonCollision()) return die();
 }
 
-/* ============================================================
-   МАГНИТ — тянет к голове
-============================================================ */
 function applyMagnet(){
   if (!isBuffActive('magnet')) return;
   const head = snake[0];
@@ -2676,12 +2835,10 @@ function applyMagnet(){
     moves.push({ fruit: f, nx, ny });
   });
 
-  // Защита от конфликтов — по одному в клетку
   const taken = new Set();
   moves.forEach(m => {
     const key = m.nx + ',' + m.ny;
     if (taken.has(key)) return;
-    // Проверяем, что другой фрукт не стоит на этой клетке (он либо тоже двинулся, либо нет)
     const occupied = allFruits.some(other => other !== m.fruit && other.x === m.nx && other.y === m.ny && !moves.some(mm => mm.fruit === other && mm.nx === other.x && mm.ny === other.y));
     if (occupied) return;
     taken.add(key);
@@ -2690,9 +2847,6 @@ function applyMagnet(){
   });
 }
 
-/* ============================================================
-   DIE / WIN
-============================================================ */
 function die(){
   const mode = MODES[selectedMode];
   running = false; timerRunning = false; gameOver = true;
@@ -2705,6 +2859,7 @@ function die(){
   const best = state.bestByMode[selectedMode] || 0;
   const isRecord = score > 0 && score >= best;
   const timeElapsed = mode.timeLimit > 0 ? (mode.timeLimit - timeRemaining) : time;
+  const gainedApples = Math.round(score * mode.appleMultiplier);
   ovTitle.textContent = isRecord ? '🏆 Новый рекорд!' : 'Игра окончена';
   ovText.innerHTML = `
     Режим: <b style="color:${mode.colorA}">${mode.name}</b><br>
@@ -2712,7 +2867,7 @@ function die(){
     Время: ${timeElapsed.toFixed(1)} сек<br>
     Рекорд режима: ${Math.max(best, score)}<br>
     <span style="color:#e0a47a;font-size:13px;margin-top:8px;display:inline-block">
-      +${Math.floor(state.apples - (state.apples - score * mode.appleMultiplier) + 0.5) >= 0 ? Math.round(score * mode.appleMultiplier) : Math.round(score * mode.appleMultiplier)} 🍎 заработано
+      +${gainedApples} 🍎 заработано
     </span>
   `;
   ovBtn.textContent = 'Ещё раз';
@@ -2726,7 +2881,6 @@ function die(){
 }
 
 function winGame(){
-  // Победа в классике — время вышло
   const mode = MODES[selectedMode];
   running = false; timerRunning = false;
   state.gamesPlayed++;
@@ -2734,13 +2888,14 @@ function winGame(){
   SFX.sfx.timeUp();
   const best = state.bestByMode[selectedMode] || 0;
   const isRecord = score >= best;
+  const gainedApples = Math.round(score * mode.appleMultiplier);
   ovTitle.textContent = isRecord ? '🏆 Новый рекорд!' : '⏱ Время вышло!';
   ovText.innerHTML = `
     Режим: <b style="color:${mode.colorA}">${mode.name}</b><br>
     Счёт: <span class="big-stat">${score}</span><br>
     Рекорд: ${Math.max(best, score)}<br>
     <span style="color:#e0a47a;font-size:13px;margin-top:8px;display:inline-block">
-      +${Math.round(score * mode.appleMultiplier)} 🍎 заработано
+      +${gainedApples} 🍎 заработано
     </span>
   `;
   ovBtn.textContent = 'Ещё раз';
@@ -2831,7 +2986,6 @@ function drawGrid(){
   ctx.lineWidth = 1.5;
   ctx.strokeRect(3.5, 3.5, canvas.width-7, canvas.height-7);
 
-  // Магнит — подсветка
   if (isBuffActive('magnet')) {
     const t = activeBuffs.magnet.timeLeft;
     ctx.fillStyle = `rgba(255,139,167,${0.05 * (t / activeBuffs.magnet.total)})`;
@@ -2899,7 +3053,6 @@ function drawFruitAt(fruit, isExtra){
 function drawFood(){ drawFruitAt(food, false); }
 function drawExtraFoods(){ extraFoods.forEach(f => drawFruitAt(f, true)); }
 
-/* ==== Демон ==== */
 function drawDemonSnake(){
   if (!demonSnake) return;
   demonSnake.forEach((seg, i) => {
@@ -2909,7 +3062,6 @@ function drawDemonSnake(){
     const isHead = i === 0;
     const t = gameTime;
 
-    // Аура
     if (isHead) {
       const aura = ctx.createRadialGradient(cx, cy, 4, cx, cy, CELL * 1.2);
       aura.addColorStop(0, 'rgba(180,20,40,0.5)');
@@ -2918,18 +3070,15 @@ function drawDemonSnake(){
       ctx.beginPath(); ctx.arc(cx, cy, CELL * 1.2, 0, Math.PI*2); ctx.fill();
     }
 
-    // Тело — тёмно-красное с чёрными гранями
     const grad = ctx.createLinearGradient(px, py, px + CELL, py + CELL);
     grad.addColorStop(0, '#5a0a18');
     grad.addColorStop(1, '#2a0208');
     ctx.fillStyle = grad;
 
     if (isHead) {
-      // Голова с рогами
       const radius = 9;
       roundRect(ctx, px + pad, py + pad, size, size, radius);
       ctx.fill();
-      // Рога
       ctx.fillStyle = '#8a1020';
       ctx.beginPath();
       ctx.moveTo(cx - 7, cy - size/2 + 2);
@@ -2943,14 +3092,12 @@ function drawDemonSnake(){
       ctx.lineTo(cx + 4, cy - size/2 - 2);
       ctx.closePath();
       ctx.fill();
-      // Глаза — светящиеся красные
       ctx.fillStyle = '#ff2040';
       ctx.shadowColor = '#ff2040';
       ctx.shadowBlur = 8;
       ctx.beginPath(); ctx.arc(cx - 4, cy - 2, 2, 0, Math.PI*2); ctx.fill();
       ctx.beginPath(); ctx.arc(cx + 4, cy - 2, 2, 0, Math.PI*2); ctx.fill();
       ctx.shadowBlur = 0;
-      // Зрачки
       ctx.fillStyle = '#000';
       ctx.beginPath(); ctx.arc(cx - 4, cy - 2, 0.9, 0, Math.PI*2); ctx.fill();
       ctx.beginPath(); ctx.arc(cx + 4, cy - 2, 0.9, 0, Math.PI*2); ctx.fill();
@@ -2963,7 +3110,6 @@ function drawDemonSnake(){
       ctx.stroke();
     }
 
-    // Пульсирующее свечение
     const pulse = 0.5 + 0.5 * Math.sin(t*4 + i*0.5);
     ctx.fillStyle = `rgba(255,40,60,${0.15 * pulse})`;
     roundRect(ctx, px + pad, py + pad, size, size, isHead ? 9 : 6);
@@ -2971,13 +3117,11 @@ function drawDemonSnake(){
   });
 }
 
-/* ==== Препятствия ==== */
 function drawObstacles(){
   obstacles.forEach(o => {
     const cx = o.x * CELL + CELL/2;
     const cy = o.y * CELL + CELL/2;
     if (o.type === 'rock') {
-      // Камень
       const r = CELL * 0.42;
       const grad = ctx.createRadialGradient(cx - r*0.3, cy - r*0.3, r*0.1, cx, cy, r);
       grad.addColorStop(0, '#6a6a72');
@@ -2991,7 +3135,6 @@ function drawObstacles(){
       ctx.fillStyle = 'rgba(255,255,255,0.15)';
       ctx.beginPath(); ctx.arc(cx - r*0.3, cy - r*0.35, r*0.2, 0, Math.PI*2); ctx.fill();
     } else {
-      // Шипы
       const r = CELL * 0.4;
       ctx.fillStyle = '#8a2030';
       ctx.beginPath();
@@ -3363,7 +3506,6 @@ function loop(now){
   if (!paused) gameTime += dt;
 
   if (running && !paused) {
-    // Таймер
     if (timerRunning) {
       if (mode.timeLimit > 0) {
         timeRemaining -= dt;
@@ -3383,7 +3525,6 @@ function loop(now){
       }
     }
 
-    // Скорость базового шага
     const speedOn = isBuffActive('speed');
     const baseStep = speedOn ? 0.145 / 1.75 : 0.145;
     tickAcc += dt;
@@ -3393,16 +3534,12 @@ function loop(now){
       if (!running) break;
     }
 
-    // Демон
     if (running && mode.hasDemon) updateDemonSnake(dt);
 
-    // Баффы
     updateBuffs(dt);
     tickBuffsBarUI();
-    // Комбо
     updateCombo(dt);
 
-    // Бафф на поле
     if (buffPickup) {
       buffPickup.life -= dt;
       if (buffPickup.life <= 0) buffPickup = null;
@@ -3414,13 +3551,11 @@ function loop(now){
       }
     }
 
-    // В endless — автоспавн фруктов каждые 3 сек
     if (mode.endlessFood) {
-      if (!window._endlessSpawnTimer) window._endlessSpawnTimer = 0;
-      window._endlessSpawnTimer -= dt;
-      if (window._endlessSpawnTimer <= 0) {
+      endlessSpawnTimer -= dt;
+      if (endlessSpawnTimer <= 0) {
         if (1 + extraFoods.length < 5) spawnExtraFood();
-        window._endlessSpawnTimer = 2.5;
+        endlessSpawnTimer = 2.5;
       }
     }
   }
@@ -3488,13 +3623,47 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-/* ==== СВАЙПЫ ПО ВСЕМУ ЭКРАНУ ==== */
+/* ==== КРЕСТОВИНА GAME BOY ==== */
+function bindDpadButton(btn, dx, dy){
+  let pressed = false;
+  const onPress = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (pressed) return;
+    pressed = true;
+    btn.classList.add('pressed');
+    SFX.resume();
+    setDir(dx, dy);
+  };
+  const onRelease = (e) => {
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    pressed = false;
+    btn.classList.remove('pressed');
+  };
+
+  // Touch
+  btn.addEventListener('touchstart', onPress, { passive: false });
+  btn.addEventListener('touchend', onRelease, { passive: false });
+  btn.addEventListener('touchcancel', onRelease, { passive: false });
+  // Mouse (для тестирования на ПК в режиме эмуляции)
+  btn.addEventListener('mousedown', onPress);
+  btn.addEventListener('mouseup', onRelease);
+  btn.addEventListener('mouseleave', onRelease);
+}
+
+if (dpad) {
+  bindDpadButton(dpad.querySelector('.dpad-up'), 0, -1);
+  bindDpadButton(dpad.querySelector('.dpad-down'), 0, 1);
+  bindDpadButton(dpad.querySelector('.dpad-left'), -1, 0);
+  bindDpadButton(dpad.querySelector('.dpad-right'), 1, 0);
+}
+
+/* ==== СВАЙПЫ ПО ВСЕМУ ЭКРАНУ (кроме крестовины и UI) ==== */
 let globalTouchStart = null;
 const SWIPE_MIN_DIST = 24;
 
 function shouldIgnoreSwipe(e){
-  // Игнорируем тапы по кнопкам и панелям
-  if (e.target.closest('.shop, .btn, button, .mobile-shop-screen, .mobile-shop-toggle, .corner-btn, .radio-panel, .case-open-overlay, .profile-in-menu')) return true;
+  if (e.target.closest('.shop, .btn, button, .mobile-shop-screen, .mobile-shop-toggle, .corner-btn, .radio-panel, .case-open-overlay, .profile-in-menu, .dpad')) return true;
   if (mobileShopScreen.classList.contains('open')) return true;
   if (radioOpen) return true;
   if (caseOpenOverlay.classList.contains('show')) return true;
@@ -3518,21 +3687,16 @@ document.addEventListener('touchend', (e) => {
   if (!globalTouchStart) return;
   if (!running || paused) { globalTouchStart = null; return; }
   if (e.changedTouches.length === 0) { globalTouchStart = null; return; }
+  if (shouldIgnoreSwipe(e)) { globalTouchStart = null; return; }
 
   const dx = e.changedTouches[0].clientX - globalTouchStart.x;
   const dy = e.changedTouches[0].clientY - globalTouchStart.y;
   const dist = Math.sqrt(dx*dx + dy*dy);
 
-  if (dist < SWIPE_MIN_DIST) {
-    globalTouchStart = null;
-    return;
-  }
+  if (dist < SWIPE_MIN_DIST) { globalTouchStart = null; return; }
 
-  if (Math.abs(dx) > Math.abs(dy)) {
-    setDir(dx > 0 ? 1 : -1, 0);
-  } else {
-    setDir(0, dy > 0 ? 1 : -1);
-  }
+  if (Math.abs(dx) > Math.abs(dy)) setDir(dx > 0 ? 1 : -1, 0);
+  else setDir(0, dy > 0 ? 1 : -1);
   globalTouchStart = null;
 }, { passive: true });
 
@@ -3707,7 +3871,7 @@ function showStartOverlay(){
   line += `<br><span style="color:#9a9ba4;font-size:12px">Привет, ${escapeHtml(profile.name)}! · Скинов: ${totalOwned}/${totalSkins}`;
   if (musicCount > 0) line += ` · 🎵 ${musicCount}`;
   line += `</span>`;
-  ovTitle.textContent = state.gamesPlayed > 0 ? 'С возвращением!' : 'Змейка v2.6';
+  ovTitle.textContent = state.gamesPlayed > 0 ? 'С возвращением!' : 'Змейка v2.6.1';
   ovText.innerHTML = line;
   ovBtn.textContent = state.gamesPlayed > 0 ? '▶ Продолжить' : '▶ Играть';
   overlay.classList.remove('hidden');
