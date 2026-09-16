@@ -3,7 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>🐍 Змейка — Fun Edition v2.5.1</title>
+<meta name="theme-color" content="#1c1d22">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Змейка">
+<title>🐍 Змейка — Fun Edition v2.6</title>
+<link rel="manifest" href="data:application/json,%7B%22name%22%3A%22%D0%97%D0%BC%D0%B5%D0%B9%D0%BA%D0%B0%22%2C%22short_name%22%3A%22Snake%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%231c1d22%22%2C%22theme_color%22%3A%22%231c1d22%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%253D%2527http%253A%2F%2Fwww.w3.org%2F2000%2Fsvg%2527%2520viewBox%253D%25270%25200%252064%252064%2527%253E%253Crect%2520width%253D%252764%2527%2520height%253D%252764%2527%2520rx%253D%252714%2527%2520fill%253D%2527%25232324244%2527%2F%253E%253Ctext%2520x%253D%252732%2527%2520y%253D%252744%2527%2520font-size%253D%252740%2527%2520text-anchor%253D%2527middle%2527%253E%25F0%259F%2590%258D%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
 
@@ -49,6 +54,7 @@
     align-items: center;
     justify-content: center;
     -webkit-font-smoothing: antialiased;
+    touch-action: manipulation;
   }
 
   body::before {
@@ -137,7 +143,8 @@
 
   .hud {
     display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 10px; padding: 0 2px; gap: 8px;
+    margin-bottom: 10px; padding: 0 2px; gap: 6px;
+    flex-wrap: wrap;
   }
   .hud .stat {
     display: flex; align-items: center; gap: 6px;
@@ -151,7 +158,30 @@
   .hud .stat .val { color: var(--text-primary); font-variant-numeric: tabular-nums; }
   .hud .stat .val.apples { color: var(--accent-3); }
   .hud .stat .val.timer { color: var(--accent); }
+  .hud .stat .val.timer.warning { color: var(--danger); animation: timerPulse 0.6s infinite alternate; }
+  @keyframes timerPulse { from { opacity: 1; } to { opacity: 0.4; } }
   .hud .stat .val.score { color: var(--accent-2); }
+  .hud .stat .val.mode { color: var(--legendary); font-size: 11.5px; }
+
+  /* HUD Combo */
+  .hud .stat.combo {
+    background: linear-gradient(90deg, rgba(255,181,69,.2), rgba(255,215,120,.1));
+    border-color: rgba(255,181,69,.4);
+    opacity: 0;
+    transform: scale(.8);
+    transition: opacity .2s, transform .2s;
+  }
+  .hud .stat.combo.show {
+    opacity: 1;
+    transform: scale(1);
+    animation: comboPulse .3s;
+  }
+  @keyframes comboPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+  }
+  .hud .stat.combo .val { color: var(--legendary); }
 
   .canvas-wrap {
     position: relative; line-height: 0;
@@ -168,7 +198,7 @@
     aspect-ratio: 1 / 1;
   }
 
-  /* ===== Панель усилителей ПОД полем ===== */
+  /* ===== Панель усилителей ===== */
   .buffs-bar {
     display: flex;
     gap: 8px;
@@ -185,7 +215,6 @@
     color: var(--text-muted);
     font-size: 11.5px;
     font-style: italic;
-    letter-spacing: .2px;
   }
 
   .buff-chip {
@@ -202,35 +231,23 @@
     animation: buffIn .35s cubic-bezier(.2,.9,.3,1.3);
     box-shadow: var(--shadow-soft);
   }
-  @keyframes buffIn {
-    from { opacity: 0; transform: scale(.7) translateY(-10px); }
-    to   { opacity: 1; transform: scale(1) translateY(0); }
-  }
+  @keyframes buffIn { from { opacity: 0; transform: scale(.7) translateY(-10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
   .buff-chip.ending { animation: buffEnding .8s infinite; }
   @keyframes buffEnding { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
 
   .buff-chip .buff-icon {
-    width: 36px; height: 36px;
-    border-radius: 9px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 36px; height: 36px; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
     font-size: 20px;
     background: linear-gradient(135deg, var(--buff-color-a), var(--buff-color-b));
     box-shadow: inset 0 -2px 6px rgba(0,0,0,.3), inset 0 2px 4px rgba(255,255,255,.2);
-    flex-shrink: 0;
-    position: relative;
+    flex-shrink: 0; position: relative;
   }
   .buff-chip .buff-icon::after {
-    content: '';
-    position: absolute;
-    top: 4px; left: 6px;
-    width: 12px; height: 5px;
-    border-radius: 50%;
-    background: rgba(255,255,255,.4);
-    filter: blur(1.5px);
+    content: ''; position: absolute; top: 4px; left: 6px;
+    width: 12px; height: 5px; border-radius: 50%;
+    background: rgba(255,255,255,.4); filter: blur(1.5px);
   }
-
   .buff-chip .buff-info { display: flex; flex-direction: column; gap: 1px; flex: 1; min-width: 0; }
   .buff-chip .buff-name { font-size: 11.5px; font-weight: 700; color: var(--text-primary); white-space: nowrap; }
   .buff-chip .buff-time { font-size: 12.5px; font-weight: 700; color: var(--buff-color-a); font-variant-numeric: tabular-nums; }
@@ -239,7 +256,6 @@
     background: linear-gradient(90deg, var(--buff-color-a), var(--buff-color-b));
     transition: width .1s linear; border-radius: 0 3px 3px 0;
   }
-
   .buff-chip.magnet    { --buff-color-a: #ff8ba7; --buff-color-b: #d04a6e; }
   .buff-chip.speed     { --buff-color-a: #ffe066; --buff-color-b: #d4a017; }
   .buff-chip.ghost     { --buff-color-a: #b5a4d4; --buff-color-b: #7a6a9a; }
@@ -259,8 +275,7 @@
   .pause-indicator.show { display: flex; }
   @keyframes pauseFadeIn { from { opacity: 0; } to { opacity: 1; } }
   .pause-icon {
-    width: 96px; height: 96px;
-    border-radius: 50%;
+    width: 96px; height: 96px; border-radius: 50%;
     background: rgba(51,52,61,.85);
     border: 2px solid rgba(124,138,255,.35);
     display: flex; align-items: center; justify-content: center;
@@ -280,7 +295,7 @@
     text-transform: uppercase; color: var(--text-primary); opacity: .8;
   }
 
-  /* ===== МЕНЮ (бывший магазин) ===== */
+  /* ===== МЕНЮ ===== */
   .shop {
     background: var(--panel-bg);
     border-radius: var(--radius);
@@ -314,7 +329,7 @@
     border-radius: 7px;
     background: transparent; border: none;
     color: var(--text-secondary);
-    font-size: 11.5px; font-weight: 600;
+    font-size: 11px; font-weight: 600;
     cursor: pointer;
     transition: background .15s, color .15s;
     font-family: inherit;
@@ -329,10 +344,7 @@
     box-shadow: var(--shadow-soft);
   }
 
-  .shop-pane {
-    display: none; flex: 1; min-height: 0;
-    flex-direction: column;
-  }
+  .shop-pane { display: none; flex: 1; min-height: 0; flex-direction: column; }
   .shop-pane.active { display: flex; }
 
   .shop-list {
@@ -345,6 +357,58 @@
   .shop-list::-webkit-scrollbar { width: 6px; }
   .shop-list::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 10px; }
 
+  /* ==== Карточки режимов ==== */
+  .mode-card {
+    position: relative; border-radius: 14px; padding: 14px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-soft);
+    cursor: pointer;
+    transition: transform .15s, border-color .15s, background .15s;
+    overflow: hidden;
+  }
+  .mode-card:hover { transform: translateY(-2px); border-color: var(--border-mid); background: var(--bg-hover); }
+  .mode-card:active { transform: translateY(0) scale(.99); }
+  .mode-card::before {
+    content: ''; position: absolute; inset: 0; border-radius: 14px; padding: 1px;
+    background: linear-gradient(135deg, var(--mode-color-a), var(--mode-color-b));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    opacity: .5; pointer-events: none;
+  }
+  .mode-card.selected {
+    background: var(--bg-active);
+    box-shadow: inset 0 0 0 2px var(--mode-color-a), 0 0 20px rgba(124,138,255,.2);
+  }
+  .mode-card.classic   { --mode-color-a: #7fb87f; --mode-color-b: #4a8a4a; }
+  .mode-card.hardcore  { --mode-color-a: #d07a7a; --mode-color-b: #8a2020; }
+  .mode-card.endless   { --mode-color-a: #7c8aff; --mode-color-b: #4a4fc4; }
+
+  .mode-header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+  .mode-icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    background: linear-gradient(135deg, var(--mode-color-a), var(--mode-color-b));
+    box-shadow: 0 4px 14px rgba(0,0,0,.35), inset 0 -4px 8px rgba(0,0,0,.3), inset 0 4px 8px rgba(255,255,255,.15);
+    flex-shrink: 0; position: relative; overflow: hidden;
+  }
+  .mode-icon::after {
+    content: ''; position: absolute; top: 6px; left: 8px;
+    width: 18px; height: 7px; border-radius: 50%;
+    background: rgba(255,255,255,.35); filter: blur(2px);
+  }
+  .mode-info { flex: 1; min-width: 0; }
+  .mode-name { font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 2px; }
+  .mode-desc { font-size: 11px; color: var(--text-secondary); line-height: 1.4; }
+  .mode-stats {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: 8px; border-top: 1px solid var(--border-soft);
+    font-size: 11px;
+  }
+  .mode-stats-label { color: var(--text-muted); }
+  .mode-stats-val { color: var(--legendary); font-weight: 700; font-variant-numeric: tabular-nums; }
+
+  /* ==== Кейсы ==== */
   .case-card {
     position: relative; border-radius: 14px; padding: 14px;
     background: var(--bg-elevated);
@@ -394,6 +458,7 @@
   .case-price-val { color: var(--accent-3); font-weight: 700; font-size: 13px; font-variant-numeric: tabular-nums; }
   .case-price-val.cant-afford { color: var(--danger); }
 
+  /* ==== Коллекция ==== */
   .collection-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -449,6 +514,105 @@
   }
   @keyframes legendaryBadge { from { box-shadow: 0 0 0 rgba(255,181,69,0); } to { box-shadow: 0 0 12px rgba(255,181,69,.5); } }
 
+  /* ==== Профиль ==== */
+  .profile-in-menu {
+    display: flex; flex-direction: column; gap: 12px;
+    overflow-y: auto;
+    padding-right: 6px;
+    flex: 1; min-height: 0;
+    scrollbar-width: thin; scrollbar-color: var(--border-mid) transparent;
+  }
+  .profile-in-menu::-webkit-scrollbar { width: 6px; }
+  .profile-in-menu::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 10px; }
+
+  .profile-avatar-row { display: flex; align-items: center; gap: 14px; padding: 4px 0; flex-shrink: 0; }
+  .profile-avatar {
+    width: 64px; height: 64px; border-radius: 16px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px;
+    box-shadow: 0 4px 14px rgba(124,138,255,.35), inset 0 -4px 8px rgba(0,0,0,.25), inset 0 4px 8px rgba(255,255,255,.15);
+    flex-shrink: 0; position: relative; overflow: hidden;
+    cursor: pointer; transition: transform .15s;
+  }
+  .profile-avatar:hover { transform: scale(1.05); }
+  .profile-avatar::after {
+    content: ''; position: absolute; top: 6px; left: 10px;
+    width: 22px; height: 8px; border-radius: 50%;
+    background: rgba(255,255,255,.4); filter: blur(2px);
+  }
+  .profile-name-block { flex: 1; min-width: 0; }
+  .profile-name {
+    font-size: 17px; font-weight: 700;
+    color: var(--text-primary);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    cursor: pointer;
+    padding: 2px 6px; margin-left: -6px;
+    border-radius: 6px;
+    transition: background .15s;
+  }
+  .profile-name:hover { background: var(--bg-elevated); }
+  .profile-name-edit { font-size: 10.5px; color: var(--text-muted); margin-top: 3px; }
+
+  .profile-stats {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .profile-stat {
+    background: rgba(0,0,0,.2);
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    padding: 10px;
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .profile-stat .label {
+    font-size: 10.5px; color: var(--text-muted);
+    letter-spacing: .3px; text-transform: uppercase;
+    font-weight: 600;
+  }
+  .profile-stat .value {
+    font-size: 17px; font-weight: 700;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+  }
+  .profile-stat .value.gold { color: var(--legendary); }
+  .profile-stat .value.blue { color: var(--accent); }
+  .profile-stat .value.green { color: var(--success); }
+
+  .profile-section-title {
+    font-size: 11px; font-weight: 700; letter-spacing: 1.2px;
+    text-transform: uppercase; color: var(--text-muted);
+    padding-top: 6px;
+    flex-shrink: 0;
+  }
+
+  .rarity-progress { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
+  .rarity-row { display: flex; align-items: center; gap: 8px; font-size: 11.5px; }
+  .rarity-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .rarity-row.common    .rarity-dot { background: var(--common); }
+  .rarity-row.uncommon  .rarity-dot { background: var(--uncommon); }
+  .rarity-row.rare      .rarity-dot { background: var(--rare); }
+  .rarity-row.epic      .rarity-dot { background: var(--epic); }
+  .rarity-row.legendary .rarity-dot { background: var(--legendary); box-shadow: 0 0 8px var(--legendary); }
+  .rarity-row .label { color: var(--text-secondary); flex: 1; font-weight: 600; }
+  .rarity-row .count { color: var(--text-primary); font-weight: 700; font-variant-numeric: tabular-nums; }
+  .rarity-row .count.done { color: var(--success); }
+
+  .btn-danger {
+    padding: 10px;
+    font-size: 12px; font-weight: 700;
+    border-radius: 10px; cursor: pointer;
+    background: rgba(208,122,122,.15);
+    border: 1px solid rgba(208,122,122,.4);
+    color: var(--danger);
+    font-family: inherit;
+    transition: background .15s;
+    margin-top: 4px;
+    flex-shrink: 0;
+  }
+  .btn-danger:hover { background: rgba(208,122,122,.25); }
+
   .btn-play {
     margin-top: 12px; padding: 13px;
     font-size: 14px; font-weight: 700; letter-spacing: .8px;
@@ -491,121 +655,7 @@
   .btn:hover { background: #8b97ff; }
   .btn:active { transform: scale(.98); }
 
-  /* ===== ПРОФИЛЬ ВНУТРИ МЕНЮ ===== */
-  .profile-in-menu {
-    display: flex; flex-direction: column; gap: 12px;
-    overflow-y: auto;
-    padding-right: 6px;
-    flex: 1; min-height: 0;
-    scrollbar-width: thin; scrollbar-color: var(--border-mid) transparent;
-  }
-  .profile-in-menu::-webkit-scrollbar { width: 6px; }
-  .profile-in-menu::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 10px; }
-
-  .profile-avatar-row {
-    display: flex; align-items: center; gap: 14px;
-    padding: 4px 0;
-    flex-shrink: 0;
-  }
-  .profile-avatar {
-    width: 64px; height: 64px; border-radius: 16px;
-    background: linear-gradient(135deg, var(--accent), var(--accent-2));
-    display: flex; align-items: center; justify-content: center;
-    font-size: 32px;
-    box-shadow: 0 4px 14px rgba(124,138,255,.35), inset 0 -4px 8px rgba(0,0,0,.25), inset 0 4px 8px rgba(255,255,255,.15);
-    flex-shrink: 0;
-    position: relative;
-    overflow: hidden;
-    cursor: pointer;
-    transition: transform .15s;
-  }
-  .profile-avatar:hover { transform: scale(1.05); }
-  .profile-avatar:active { transform: scale(.98); }
-  .profile-avatar::after {
-    content: ''; position: absolute; top: 6px; left: 10px;
-    width: 22px; height: 8px; border-radius: 50%;
-    background: rgba(255,255,255,.4);
-    filter: blur(2px);
-  }
-  .profile-name-block { flex: 1; min-width: 0; }
-  .profile-name {
-    font-size: 17px; font-weight: 700;
-    color: var(--text-primary);
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    cursor: pointer;
-    padding: 2px 6px; margin-left: -6px;
-    border-radius: 6px;
-    transition: background .15s;
-  }
-  .profile-name:hover { background: var(--bg-elevated); }
-  .profile-name-edit { font-size: 10.5px; color: var(--text-muted); margin-top: 3px; letter-spacing: .2px; }
-
-  .profile-stats {
-    display: grid; grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-    flex-shrink: 0;
-  }
-  .profile-stat {
-    background: rgba(0,0,0,.2);
-    border: 1px solid var(--border-soft);
-    border-radius: 10px;
-    padding: 10px;
-    display: flex; flex-direction: column; gap: 2px;
-  }
-  .profile-stat .label {
-    font-size: 10.5px; color: var(--text-muted);
-    letter-spacing: .3px; text-transform: uppercase;
-    font-weight: 600;
-  }
-  .profile-stat .value {
-    font-size: 17px; font-weight: 700;
-    color: var(--text-primary);
-    font-variant-numeric: tabular-nums;
-  }
-  .profile-stat .value.gold { color: var(--legendary); }
-  .profile-stat .value.blue { color: var(--accent); }
-  .profile-stat .value.green { color: var(--success); }
-
-  .profile-section-title {
-    font-size: 11px; font-weight: 700; letter-spacing: 1.2px;
-    text-transform: uppercase; color: var(--text-muted);
-    padding-top: 6px;
-    flex-shrink: 0;
-  }
-
-  .rarity-progress {
-    display: flex; flex-direction: column; gap: 6px;
-    flex-shrink: 0;
-  }
-  .rarity-row {
-    display: flex; align-items: center; gap: 8px;
-    font-size: 11.5px;
-  }
-  .rarity-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-  .rarity-row.common    .rarity-dot { background: var(--common); }
-  .rarity-row.uncommon  .rarity-dot { background: var(--uncommon); }
-  .rarity-row.rare      .rarity-dot { background: var(--rare); }
-  .rarity-row.epic      .rarity-dot { background: var(--epic); }
-  .rarity-row.legendary .rarity-dot { background: var(--legendary); box-shadow: 0 0 8px var(--legendary); }
-  .rarity-row .label { color: var(--text-secondary); flex: 1; font-weight: 600; }
-  .rarity-row .count { color: var(--text-primary); font-weight: 700; font-variant-numeric: tabular-nums; }
-  .rarity-row .count.done { color: var(--success); }
-
-  .btn-danger {
-    padding: 10px;
-    font-size: 12px; font-weight: 700;
-    border-radius: 10px; cursor: pointer;
-    background: rgba(208,122,122,.15);
-    border: 1px solid rgba(208,122,122,.4);
-    color: var(--danger);
-    font-family: inherit;
-    transition: background .15s;
-    margin-top: 4px;
-    flex-shrink: 0;
-  }
-  .btn-danger:hover { background: rgba(208,122,122,.25); }
-
-  /* ===== ОВЕРЛЕЙ ОТКРЫТИЯ КЕЙСА ===== */
+  /* ===== ОВЕРЛЕЙ КЕЙСА ===== */
   .case-open-overlay {
     display: none; position: fixed; inset: 0;
     background: rgba(10,10,16,.94);
@@ -616,7 +666,6 @@
     animation: fadeIn .3s ease;
   }
   .case-open-overlay.show { display: flex; }
-
   .case-open-header { text-align: center; margin-bottom: 30px; flex-shrink: 0; }
   .case-open-title { font-size: 20px; font-weight: 700; color: var(--text-primary); letter-spacing: .5px; }
   .case-open-sub { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
@@ -853,10 +902,7 @@
     padding-bottom: 12px; border-bottom: 1px solid var(--border-soft);
     flex-shrink: 0;
   }
-  .radio-title {
-    display: flex; align-items: center; gap: 10px;
-    font-size: 15px; font-weight: 700; letter-spacing: .3px;
-  }
+  .radio-title { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 700; letter-spacing: .3px; }
   .radio-title-icon {
     width: 32px; height: 32px; border-radius: 9px;
     background: linear-gradient(145deg, var(--accent), #5c6eff);
@@ -880,8 +926,7 @@
   }
   .radio-now-art {
     width: 52px; height: 52px; border-radius: 10px;
-    flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; display: flex; align-items: center; justify-content: center;
     font-size: 24px;
     background: linear-gradient(135deg, var(--accent), var(--accent-2));
     position: relative; overflow: hidden;
@@ -893,41 +938,21 @@
   }
   @keyframes radioArt { from { transform: scale(.8); opacity: .3; } to { transform: scale(1.2); opacity: .7; } }
   .radio-now-info { flex: 1; min-width: 0; }
-  .radio-now-title {
-    font-size: 14px; font-weight: 700; color: var(--text-primary);
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-  .radio-now-artist {
-    font-size: 11.5px; color: var(--text-secondary); margin-top: 3px;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-  .radio-progress {
-    display: flex; align-items: center; gap: 10px;
-    font-size: 10.5px; color: var(--text-muted);
-    font-variant-numeric: tabular-nums;
-    flex-shrink: 0;
-  }
+  .radio-now-title { font-size: 14px; font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .radio-now-artist { font-size: 11.5px; color: var(--text-secondary); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .radio-progress { display: flex; align-items: center; gap: 10px; font-size: 10.5px; color: var(--text-muted); font-variant-numeric: tabular-nums; flex-shrink: 0; }
   .radio-progress-track {
     flex: 1; height: 4px; background: rgba(255,255,255,.06);
     border-radius: 3px; overflow: hidden;
     position: relative; cursor: pointer;
   }
-  .radio-progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--accent), var(--accent-2));
-    border-radius: 3px; width: 0%;
-    transition: width .2s linear;
-  }
-  .radio-controls {
-    display: flex; align-items: center; justify-content: center;
-    gap: 12px; flex-shrink: 0;
-  }
+  .radio-progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); border-radius: 3px; width: 0%; transition: width .2s linear; }
+  .radio-controls { display: flex; align-items: center; justify-content: center; gap: 12px; flex-shrink: 0; }
   .radio-btn {
     width: 42px; height: 42px; border-radius: 12px;
     background: var(--bg-elevated); border: 1px solid var(--border-soft);
     color: var(--text-primary); font-size: 16px;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
     transition: background .15s, transform .1s;
     font-family: inherit;
   }
@@ -941,23 +966,14 @@
   }
   .radio-btn.play-btn-main:hover { background: #8b97ff; }
   .radio-btn.play-btn-main:active { transform: scale(.94); }
-  .radio-playlist-header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding-top: 8px; flex-shrink: 0;
-  }
-  .radio-playlist-header h3 {
-    font-size: 12px; font-weight: 700; letter-spacing: 1.2px;
-    text-transform: uppercase; color: var(--text-muted);
-  }
+  .radio-playlist-header { display: flex; align-items: center; justify-content: space-between; padding-top: 8px; flex-shrink: 0; }
+  .radio-playlist-header h3 { font-size: 12px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-muted); }
   .radio-add-btn {
     font-size: 11px; padding: 5px 10px;
     border-radius: 8px;
-    background: var(--bg-elevated);
-    border: 1px solid var(--border-mid);
-    color: var(--text-primary);
-    cursor: pointer; font-weight: 600;
-    font-family: inherit;
-    transition: background .15s;
+    background: var(--bg-elevated); border: 1px solid var(--border-mid);
+    color: var(--text-primary); cursor: pointer; font-weight: 600;
+    font-family: inherit; transition: background .15s;
     display: flex; align-items: center; gap: 4px;
   }
   .radio-add-btn:hover { background: var(--bg-hover); }
@@ -991,25 +1007,17 @@
     width: 32px; height: 32px; border-radius: 8px;
     background: var(--bg-active);
     display: flex; align-items: center; justify-content: center;
-    font-size: 15px;
-    flex-shrink: 0; overflow: hidden;
+    font-size: 15px; flex-shrink: 0; overflow: hidden;
   }
   .radio-track-info { flex: 1; min-width: 0; }
-  .radio-track-name {
-    font-size: 12.5px; font-weight: 600; color: var(--text-primary);
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-  .radio-track-meta {
-    font-size: 10.5px; color: var(--text-muted); margin-top: 2px;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
+  .radio-track-name { font-size: 12.5px; font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .radio-track-meta { font-size: 10.5px; color: var(--text-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .radio-track-remove {
     width: 24px; height: 24px; border-radius: 6px;
     background: transparent; border: none;
     color: var(--text-muted); cursor: pointer;
     display: flex; align-items: center; justify-content: center;
-    font-size: 14px;
-    opacity: 0;
+    font-size: 14px; opacity: 0;
     transition: opacity .15s, background .15s, color .15s;
     font-family: inherit; flex-shrink: 0;
   }
@@ -1066,6 +1074,7 @@
   .toast.error   { border-color: var(--danger); color: var(--danger); }
   .toast.info    { border-color: var(--accent); color: var(--accent); }
   .toast.buff    { border-color: var(--legendary); color: var(--legendary); font-size: 14px; padding: 14px 22px; }
+  .toast.combo   { border-color: var(--legendary); color: var(--legendary); font-size: 16px; padding: 12px 24px; }
   .toast.fade-out { animation: toastOut .3s forwards; }
   @keyframes toastIn {
     from { opacity: 0; transform: translateY(-20px) scale(.9); }
@@ -1080,19 +1089,27 @@
     justify-content: flex-start;
   }
   .device-phone .board-panel { width: 100%; max-width: min(96vw, 480px); padding: 9px; }
-  .device-phone .hud .stat { font-size: 12px; padding: 5px 9px; gap: 4px; }
-  .device-phone .hud .stat .val { font-size: 12px; }
+  .device-phone .hud .stat { font-size: 11.5px; padding: 5px 9px; gap: 4px; }
+  .device-phone .hud .stat .val { font-size: 11.5px; }
   .device-phone .shop { display: none; }
   .device-phone .mobile-shop-toggle { display: flex; }
   .device-phone .mobile-shop-screen { display: flex; }
   .device-phone .corner-btn { width: 42px; height: 42px; font-size: 18px; }
+
+  /* Радио — левый нижний угол */
+  .device-phone .radio-toggle {
+    top: auto;
+    right: auto;
+    bottom: calc(10px + env(safe-area-inset-bottom));
+    left: 10px;
+  }
+  /* Звук — рядом с меню (правый нижний угол, над кнопкой меню) */
   .device-phone .sound-toggle {
-  top: auto;
-  right: auto;
-  bottom: calc(10px + env(safe-area-inset-bottom));
-  left: calc(10px + 42px + 8px);   /* 10px (радио) + 42px (ширина радио) + 8px зазор */
-}
-  .device-phone .radio-toggle { bottom: calc(10px + env(safe-area-inset-bottom)); left: 10px; }
+    top: auto;
+    left: auto;
+    right: 20px;
+    bottom: calc(20px + env(safe-area-inset-bottom) + 56px + 8px);
+  }
   .device-phone .radio-panel {
     bottom: calc(70px + env(safe-area-inset-bottom));
     left: 10px; right: 10px; width: auto; max-width: none;
@@ -1124,7 +1141,7 @@
   @media (orientation: landscape) {
     .device-tablet .game-wrap { flex-direction: row; align-items: stretch; }
     .device-tablet .board-panel { max-height: calc(100vh - 28px); flex-shrink: 0; }
-    .device-tablet .shop { width: 320px; max-width: none; max-height: calc(100vh - 28px); }
+    .device-tablet .shop { width: 340px; max-width: none; max-height: calc(100vh - 28px); }
     .device-tablet .collection-grid { grid-template-columns: repeat(2, 1fr); }
   }
 
@@ -1162,6 +1179,7 @@
       <div class="stat">🍎 <span class="val apples" id="hudApples">0</span></div>
       <div class="stat">⏱ <span class="val timer" id="hudTimer">0.0</span></div>
       <div class="stat">🏆 <span class="val score" id="hudScore">0</span></div>
+      <div class="stat combo" id="hudCombo">×<span class="val" id="hudComboVal">1</span></div>
     </div>
     <div class="canvas-wrap">
       <canvas id="game" width="480" height="480"></canvas>
@@ -1181,18 +1199,21 @@
     <div class="buffs-bar empty" id="buffsBar"></div>
   </div>
 
-  <!-- МЕНЮ -->
   <div class="shop" id="shop">
     <div class="shop-header">
       <h2>Меню</h2>
       <div class="shop-wallet">🍎 <span id="shopApples">0</span></div>
     </div>
     <div class="shop-tabs">
-      <button class="shop-tab active" data-tab="cases">📦 Кейсы</button>
+      <button class="shop-tab active" data-tab="modes">🎮 Режимы</button>
+      <button class="shop-tab" data-tab="cases">📦 Кейсы</button>
       <button class="shop-tab" data-tab="collection">👕 Скины</button>
       <button class="shop-tab" data-tab="profile">👤 Профиль</button>
     </div>
-    <div class="shop-pane active" id="paneCases">
+    <div class="shop-pane active" id="paneModes">
+      <div class="shop-list" id="modesList"></div>
+    </div>
+    <div class="shop-pane" id="paneCases">
       <div class="shop-list" id="casesList"></div>
     </div>
     <div class="shop-pane" id="paneCollection">
@@ -1219,11 +1240,15 @@
     <button class="mobile-close-btn" id="mobileCloseBtn">✕</button>
   </div>
   <div class="shop-tabs">
-    <button class="shop-tab active" data-tab="cases">📦 Кейсы</button>
+    <button class="shop-tab active" data-tab="modes">🎮 Режимы</button>
+    <button class="shop-tab" data-tab="cases">📦 Кейсы</button>
     <button class="shop-tab" data-tab="collection">👕 Скины</button>
-    <button class="shop-tab" data-tab="profile">👤 Профиль</button>
+    <button class="shop-tab" data-tab="profile">👤</button>
   </div>
-  <div class="shop-pane active" id="mobilePaneCases" style="flex:1;min-height:0">
+  <div class="shop-pane active" id="mobilePaneModes" style="flex:1;min-height:0">
+    <div class="mobile-shop-list" id="mobileModesList"></div>
+  </div>
+  <div class="shop-pane" id="mobilePaneCases" style="flex:1;min-height:0">
     <div class="mobile-shop-list" id="mobileCasesList"></div>
   </div>
   <div class="shop-pane" id="mobilePaneCollection" style="flex:1;min-height:0">
@@ -1300,15 +1325,14 @@
 
 <script>
 /* ============================================================
-   v2.5.1 — Меню с профилем + фикс магнита + фикс баффов
+   v2.6 — 3 режима, свайпы везде, комбо, PWA
 ============================================================ */
 
 /* ============================================================
    ГЛОБАЛЬНЫЙ MUTE
 ============================================================ */
 const GlobalMute = {
-  muted: false,
-  listeners: [],
+  muted: false, listeners: [],
   set(v){ this.muted = v; this.listeners.forEach(fn => { try { fn(v); } catch(e){} }); },
   get(){ return this.muted; },
   onChange(fn){ this.listeners.push(fn); }
@@ -1353,6 +1377,7 @@ const SFX = (() => {
     turn(){ play(880, 0.03, 'sine', 0.05); },
     die(){ play(420, 0.18, 'sawtooth', 0.12); setTimeout(() => play(320, 0.20, 'sawtooth', 0.12), 130); setTimeout(() => play(220, 0.35, 'sawtooth', 0.12), 280); setTimeout(() => play(140, 0.6, 'sine', 0.10), 460); },
     win(){ arp([523, 659, 784, 1046, 1318], 70, 'triangle', 0.13); },
+    timeUp(){ arp([784, 659, 523, 440], 100, 'triangle', 0.12); },
     buy(){ arp([659, 784, 988, 1318], 55, 'triangle', 0.14); play(1568, 0.3, 'sine', 0.08, 0); },
     equip(){ play(660, 0.08, 'triangle', 0.10); setTimeout(() => play(990, 0.12, 'triangle', 0.10), 50); },
     deny(){ play(200, 0.1, 'square', 0.08); setTimeout(() => play(150, 0.15, 'square', 0.08), 90); },
@@ -1368,14 +1393,12 @@ const SFX = (() => {
       else if (rarity === 'rare') { arp([392, 523, 659], 80, 'triangle', 0.11); }
       else { play(440, 0.15, 'triangle', 0.1); setTimeout(() => play(523, 0.15, 'triangle', 0.1), 100); }
     },
-    buffPickup(){
-      play(880, 0.1, 'triangle', 0.13);
-      setTimeout(() => play(1174, 0.1, 'triangle', 0.13), 60);
-      setTimeout(() => play(1568, 0.15, 'triangle', 0.12), 120);
-      setTimeout(() => play(2093, 0.2, 'sine', 0.08), 200);
-    },
+    buffPickup(){ play(880, 0.1, 'triangle', 0.13); setTimeout(() => play(1174, 0.1, 'triangle', 0.13), 60); setTimeout(() => play(1568, 0.15, 'triangle', 0.12), 120); setTimeout(() => play(2093, 0.2, 'sine', 0.08), 200); },
     buffExpire(){ play(660, 0.1, 'sine', 0.08); setTimeout(() => play(440, 0.15, 'sine', 0.06), 80); setTimeout(() => play(330, 0.2, 'sine', 0.05), 160); },
     buffWarning(){ play(880, 0.05, 'square', 0.05); },
+    comboUp(level){ const base = 600 + level * 80; play(base, 0.06, 'triangle', 0.10); setTimeout(() => play(base * 1.25, 0.08, 'triangle', 0.10), 50); },
+    comboBreak(){ play(300, 0.1, 'sawtooth', 0.06); setTimeout(() => play(200, 0.12, 'sawtooth', 0.06), 70); },
+    demonRoar(){ play(120, 0.4, 'sawtooth', 0.1); setTimeout(() => play(90, 0.5, 'sawtooth', 0.1), 200); setTimeout(() => play(60, 0.7, 'sine', 0.08), 450); },
   };
   return { play, arp, sfx, resume };
 })();
@@ -1442,10 +1465,7 @@ const Radio = (() => {
   function getCurrentTrack(){ return currentIndex >= 0 ? playlist[currentIndex] : null; }
   function isPlaying(){ return playing; }
   function getVolume(){ return volume; }
-
-  function stopAudioElement(){
-    if (audioEl) { try { audioEl.pause(); } catch(e){} audioEl.removeAttribute('src'); audioEl.load(); audioEl = null; }
-  }
+  function stopAudioElement(){ if (audioEl) { try { audioEl.pause(); } catch(e){} audioEl.removeAttribute('src'); audioEl.load(); audioEl = null; } }
   function startAudioElement(track){
     stopAudioElement();
     audioEl = new Audio(track.url);
@@ -1462,11 +1482,7 @@ const Radio = (() => {
     if (currentIndex < 0 && playlist.length > 0) currentIndex = 0;
     const track = getCurrentTrack();
     if (!track) return;
-    stopAudioElement();
-    playing = true;
-    SFX.resume();
-    startAudioElement(track);
-    saveIndex();
+    stopAudioElement(); playing = true; SFX.resume(); startAudioElement(track); saveIndex();
   }
   function pause(){ if (!playing) return; playing = false; if (audioEl) { try { audioEl.pause(); } catch(e){} } }
   function stop(){ playing = false; stopAudioElement(); }
@@ -1539,6 +1555,49 @@ const CASES = [
     pool:['gummy','mint','banana','peach','bubble','candy','lime','orange','panda','strawberry','blueberry','watermelon','lemon','unicorn','dragon','phoenix','amethyst'] },
 ];
 
+/* ==== РЕЖИМЫ ==== */
+const MODES = {
+  classic: {
+    id: 'classic', name: 'Классика', icon: '🎯',
+    desc: 'Собирай фрукты за 60 секунд. Классические стены.',
+    colorA: '#7fb87f', colorB: '#4a8a4a',
+    timeLimit: 60,
+    walls: true,
+    grows: true,
+    appleMultiplier: 1,
+    hasDemon: false,
+    hasObstacles: false,
+    endlessFood: false,
+    buffsEnabled: true,
+  },
+  hardcore: {
+    id: 'hardcore', name: 'Хардкор', icon: '💀',
+    desc: 'Демоническая змея охотится за тобой. Препятствия. Без лимита времени.',
+    colorA: '#d07a7a', colorB: '#8a2020',
+    timeLimit: 0,
+    walls: true,
+    grows: true,
+    appleMultiplier: 2,
+    hasDemon: true,
+    hasObstacles: true,
+    endlessFood: false,
+    buffsEnabled: true,
+  },
+  endless: {
+    id: 'endless', name: 'Бесконечный', icon: '♾️',
+    desc: 'Без стен, много фруктов. Размер не растёт. 3 фрукта = 1 🍎',
+    colorA: '#7c8aff', colorB: '#4a4fc4',
+    timeLimit: 0,
+    walls: false,
+    grows: false,
+    appleMultiplier: 1/3,
+    hasDemon: false,
+    hasObstacles: false,
+    endlessFood: true,
+    buffsEnabled: true,
+  },
+};
+
 function getCase(id){ return CASES.find(c => c.id === id); }
 function getSkin(id){ return SKINS.find(s => s.id === id) || SKINS[0]; }
 
@@ -1548,17 +1607,22 @@ function getSkin(id){ return SKINS.find(s => s.id === id) || SKINS[0]; }
 const STORAGE_KEY = 'snake_v2_save';
 const AUDIO_KEY = 'snake_v24_audio_muted';
 const PROFILE_KEY = 'snake_v25_profile';
+const MODE_KEY = 'snake_v26_mode';
 
 let state = {
   apples: 50, owned: ['gummy'], active: 'gummy',
   bestScore: 0, totalApples: 0, gamesPlayed: 0,
-  casesOpened: 0, buffsPicked: 0, version: '2.5.1',
+  casesOpened: 0, buffsPicked: 0,
+  bestByMode: { classic: 0, hardcore: 0, endless: 0 },
+  version: '2.6',
 };
 
 let profile = { name: 'Игрок', avatar: '🐍', created: Date.now() };
+let selectedMode = 'classic';
 
 function save() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e){} }
 function saveProfile() { try { localStorage.setItem(PROFILE_KEY, JSON.stringify(profile)); } catch(e){} }
+function saveMode() { try { localStorage.setItem(MODE_KEY, selectedMode); } catch(e){} }
 
 function load() {
   try {
@@ -1574,6 +1638,13 @@ function load() {
       state.gamesPlayed = Number.isFinite(p.gamesPlayed) ? p.gamesPlayed : 0;
       state.casesOpened = Number.isFinite(p.casesOpened) ? p.casesOpened : 0;
       state.buffsPicked = Number.isFinite(p.buffsPicked) ? p.buffsPicked : 0;
+      if (p.bestByMode && typeof p.bestByMode === 'object') {
+        state.bestByMode = {
+          classic: Number.isFinite(p.bestByMode.classic) ? p.bestByMode.classic : 0,
+          hardcore: Number.isFinite(p.bestByMode.hardcore) ? p.bestByMode.hardcore : 0,
+          endless: Number.isFinite(p.bestByMode.endless) ? p.bestByMode.endless : 0,
+        };
+      }
     }
   } catch(e){}
   try {
@@ -1582,8 +1653,11 @@ function load() {
       const p = JSON.parse(raw);
       profile.name = (typeof p.name === 'string' && p.name.trim()) ? p.name.trim().slice(0, 20) : 'Игрок';
       profile.avatar = typeof p.avatar === 'string' ? p.avatar : '🐍';
-      profile.created = p.created || Date.now();
     }
+  } catch(e){}
+  try {
+    const m = localStorage.getItem(MODE_KEY);
+    if (m && MODES[m]) selectedMode = m;
   } catch(e){}
 }
 load();
@@ -1659,6 +1733,8 @@ const ctx = canvas.getContext('2d');
 const hudApples = document.getElementById('hudApples');
 const hudTimer = document.getElementById('hudTimer');
 const hudScore = document.getElementById('hudScore');
+const hudCombo = document.getElementById('hudCombo');
+const hudComboVal = document.getElementById('hudComboVal');
 const shopApples = document.getElementById('shopApples');
 const mobileApples = document.getElementById('mobileApples');
 const overlay = document.getElementById('overlay');
@@ -1669,6 +1745,8 @@ const playBtn = document.getElementById('playBtn');
 const pauseIndicator = document.getElementById('pauseIndicator');
 const buffsBar = document.getElementById('buffsBar');
 
+const modesList = document.getElementById('modesList');
+const mobileModesList = document.getElementById('mobileModesList');
 const casesList = document.getElementById('casesList');
 const mobileCasesList = document.getElementById('mobileCasesList');
 const collectionGrid = document.getElementById('collectionGrid');
@@ -1680,7 +1758,7 @@ const mobileShopToggle = document.getElementById('mobileShopToggle');
 const mobileCloseBtn = document.getElementById('mobileCloseBtn');
 
 /* ============================================================
-   УСИЛИТЕЛИ — массив с гарантированной ротацией
+   УСИЛИТЕЛИ
 ============================================================ */
 const BUFFS_LIST = [
   { id: 'magnet',     name: 'Магнит',      icon: '🧲', duration: 5,  colorA: '#ff8ba7', colorB: '#d04a6e', desc: 'Притягивает все фрукты' },
@@ -1692,7 +1770,6 @@ const BUFFS_LIST = [
 const BUFFS = {};
 BUFFS_LIST.forEach(b => { BUFFS[b.id] = b; });
 
-// Защита от повторения одного и того же баффа
 let lastBuffType = null;
 let sameTypeStreak = 0;
 
@@ -1793,48 +1870,89 @@ function spawnBuffEffect(id){
     const sp = 1 + Math.random() * 5;
     particles.push({ type: 'dot', x: cx, y: cy, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: 1, maxLife: 0.9 + Math.random() * 0.6, size: 3 + Math.random() * 4, color: cfg.colorA });
   }
-  for (let i = 0; i < 16; i++){
-    const a = (i / 16) * Math.PI * 2;
-    particles.push({ type: 'dot', x: cx + Math.cos(a) * 10, y: cy + Math.sin(a) * 10, vx: Math.cos(a) * 2, vy: Math.sin(a) * 2, life: 1, maxLife: 1, size: 5, color: cfg.colorB });
-  }
 }
 
 /* ============================================================
-   ПРОФИЛЬ — рендер внутри меню
+   КОМБО
+============================================================ */
+let combo = {
+  value: 1,           // текущий множитель (1..N)
+  timer: 0,           // оставшееся время до сброса
+  maxTime: 3.0,       // время между фруктами для сохранения комбо
+  count: 0,           // сколько подряд съедено
+};
+
+function onFruitEaten(){
+  combo.count++;
+  combo.timer = combo.maxTime;
+  // Множитель растёт каждые 3 фрукта, макс ×5
+  const newValue = Math.min(5, 1 + Math.floor(combo.count / 3));
+  if (newValue > combo.value) {
+    combo.value = newValue;
+    SFX.sfx.comboUp(combo.value);
+    showToast(`🔥 КОМБО ×${combo.value}!`, 'combo', 1400);
+  }
+  updateComboUI();
+}
+
+function updateComboUI(){
+  if (combo.value > 1) {
+    hudCombo.classList.add('show');
+    hudComboVal.textContent = combo.value;
+  } else {
+    hudCombo.classList.remove('show');
+  }
+}
+
+function updateCombo(dt){
+  if (combo.timer > 0) {
+    combo.timer -= dt;
+    if (combo.timer <= 0) {
+      if (combo.value > 1) SFX.sfx.comboBreak();
+      combo.value = 1;
+      combo.count = 0;
+      combo.timer = 0;
+      updateComboUI();
+    }
+  }
+}
+
+function resetCombo(){
+  combo.value = 1;
+  combo.count = 0;
+  combo.timer = 0;
+  updateComboUI();
+}
+
+/* ============================================================
+   ПРОФИЛЬ
 ============================================================ */
 const AVATAR_OPTIONS = ['🐍','🦎','🐉','🐲','🦖','🐢','🦂','🐊','🦕','🐸','🦄','👾'];
 
 function buildProfileHTML(){
+  const bestC = state.bestByMode.classic;
+  const bestH = state.bestByMode.hardcore;
+  const bestE = state.bestByMode.endless;
   return `
     <div class="profile-avatar-row">
       <div class="profile-avatar" data-action="avatar">${profile.avatar}</div>
       <div class="profile-name-block">
-        <div class="profile-name" data-action="name" title="Нажми, чтобы изменить">${escapeHtml(profile.name)}</div>
+        <div class="profile-name" data-action="name">${escapeHtml(profile.name)}</div>
         <div class="profile-name-edit">нажми на имя, чтобы изменить</div>
       </div>
     </div>
     <div class="profile-stats">
-      <div class="profile-stat">
-        <div class="label">Рекорд</div>
-        <div class="value gold">${state.bestScore}</div>
-      </div>
-      <div class="profile-stat">
-        <div class="label">Игр сыграно</div>
-        <div class="value blue">${state.gamesPlayed}</div>
-      </div>
-      <div class="profile-stat">
-        <div class="label">Всего фруктов</div>
-        <div class="value green">${state.totalApples}</div>
-      </div>
-      <div class="profile-stat">
-        <div class="label">Кейсов открыто</div>
-        <div class="value">${state.casesOpened}</div>
-      </div>
+      <div class="profile-stat"><div class="label">🎯 Классика</div><div class="value gold">${bestC}</div></div>
+      <div class="profile-stat"><div class="label">💀 Хардкор</div><div class="value gold">${bestH}</div></div>
+      <div class="profile-stat"><div class="label">♾️ Бесконечный</div><div class="value gold">${bestE}</div></div>
+      <div class="profile-stat"><div class="label">Общий рекорд</div><div class="value gold">${state.bestScore}</div></div>
+      <div class="profile-stat"><div class="label">Игр сыграно</div><div class="value blue">${state.gamesPlayed}</div></div>
+      <div class="profile-stat"><div class="label">Всего фруктов</div><div class="value green">${state.totalApples}</div></div>
+      <div class="profile-stat"><div class="label">Кейсов открыто</div><div class="value">${state.casesOpened}</div></div>
+      <div class="profile-stat"><div class="label">Баффов собрано</div><div class="value">${state.buffsPicked}</div></div>
     </div>
     <div class="profile-section-title">Коллекция по редкости</div>
-    <div class="rarity-progress">
-      ${buildRarityRows()}
-    </div>
+    <div class="rarity-progress">${buildRarityRows()}</div>
     <button class="btn-danger" data-action="reset">🗑 Сбросить прогресс</button>
   `;
 }
@@ -1875,9 +1993,7 @@ function attachProfileHandlers(root){
       el.addEventListener('click', () => {
         const idx = AVATAR_OPTIONS.indexOf(profile.avatar);
         profile.avatar = AVATAR_OPTIONS[(idx + 1) % AVATAR_OPTIONS.length];
-        saveProfile();
-        renderProfile();
-        SFX.sfx.equip();
+        saveProfile(); renderProfile(); SFX.sfx.equip();
       });
     } else if (action === 'name') {
       el.addEventListener('click', () => {
@@ -1886,8 +2002,7 @@ function attachProfileHandlers(root){
         const trimmed = newName.trim().slice(0, 20);
         if (trimmed) {
           profile.name = trimmed;
-          saveProfile();
-          renderProfile();
+          saveProfile(); renderProfile();
           showToast(`Имя изменено: ${profile.name}`, 'success', 1500);
         }
       });
@@ -1895,12 +2010,8 @@ function attachProfileHandlers(root){
       el.addEventListener('click', () => {
         const ok = confirm('Ты уверен? Весь прогресс (скины, яблоки, рекорды) будет удалён.');
         if (!ok) return;
-        state = { apples: 50, owned: ['gummy'], active: 'gummy', bestScore: 0, totalApples: 0, gamesPlayed: 0, casesOpened: 0, buffsPicked: 0, version: '2.5.1' };
-        save();
-        renderCases();
-        renderCollection();
-        renderProfile();
-        updateHUD();
+        state = { apples: 50, owned: ['gummy'], active: 'gummy', bestScore: 0, totalApples: 0, gamesPlayed: 0, casesOpened: 0, buffsPicked: 0, bestByMode: { classic: 0, hardcore: 0, endless: 0 }, version: '2.6' };
+        save(); renderCases(); renderCollection(); renderProfile(); renderModes(); updateHUD();
         showToast('Прогресс сброшен', 'info', 1800);
         SFX.sfx.deny();
       });
@@ -1912,8 +2023,7 @@ function attachProfileHandlers(root){
    МОБИЛЬНОЕ МЕНЮ
 ============================================================ */
 function openMobileShop(){
-  SFX.resume();
-  SFX.sfx.click();
+  SFX.resume(); SFX.sfx.click();
   mobileShopScreen.classList.add('open');
   document.body.classList.add('shop-open');
   document.body.style.overflow = 'hidden';
@@ -1926,9 +2036,7 @@ function closeMobileShop(){
 mobileShopToggle.addEventListener('click', (e) => { e.stopPropagation(); openMobileShop(); });
 mobileCloseBtn.addEventListener('click', (e) => { e.stopPropagation(); SFX.sfx.click(); closeMobileShop(); });
 
-/* ============================================================
-   TABS
-============================================================ */
+/* TABS */
 document.querySelectorAll('.shop-tab').forEach(tab => {
   tab.addEventListener('click', () => {
     const target = tab.dataset.tab;
@@ -1942,6 +2050,53 @@ document.querySelectorAll('.shop-tab').forEach(tab => {
     SFX.sfx.click();
   });
 });
+
+/* ============================================================
+   РЕНДЕР РЕЖИМОВ
+============================================================ */
+function createModeCard(mode){
+  const card = document.createElement('div');
+  card.className = 'mode-card ' + mode.id + (selectedMode === mode.id ? ' selected' : '');
+  card.style.setProperty('--mode-color-a', mode.colorA);
+  card.style.setProperty('--mode-color-b', mode.colorB);
+  const best = state.bestByMode[mode.id] || 0;
+  const timeLabel = mode.timeLimit > 0 ? `${mode.timeLimit} сек` : 'Без лимита';
+  const appleLabel = mode.appleMultiplier === 1 ? '×1' : `×${mode.appleMultiplier.toFixed(2).replace(/\.?0+$/, '')}`;
+  card.innerHTML = `
+    <div class="mode-header">
+      <div class="mode-icon">${mode.icon}</div>
+      <div class="mode-info">
+        <div class="mode-name">${mode.name}</div>
+        <div class="mode-desc">${mode.desc}</div>
+      </div>
+    </div>
+    <div class="mode-stats">
+      <span class="mode-stats-label">⏱ ${timeLabel} · 🍎 ${appleLabel}</span>
+      <span class="mode-stats-val">🏆 ${best}</span>
+    </div>
+  `;
+  card.addEventListener('click', () => selectMode(mode.id));
+  card.addEventListener('mouseenter', () => SFX.sfx.hover());
+  return card;
+}
+
+function selectMode(modeId){
+  if (!MODES[modeId]) return;
+  selectedMode = modeId;
+  saveMode();
+  renderModes();
+  SFX.sfx.equip();
+  showToast(`Режим: ${MODES[modeId].name}`, 'info', 1400);
+}
+
+function renderModes(){
+  modesList.innerHTML = '';
+  mobileModesList.innerHTML = '';
+  Object.values(MODES).forEach(mode => {
+    modesList.appendChild(createModeCard(mode));
+    mobileModesList.appendChild(createModeCard(mode));
+  });
+}
 
 /* ============================================================
    РЕНДЕР КЕЙСОВ
@@ -1985,14 +2140,11 @@ function createSkinTile(skin){
   const active = state.active === skin.id;
   const tile = document.createElement('div');
   tile.className = 'skin-tile' + (active ? ' active' : '') + (!owned ? ' locked' : '');
-  tile.dataset.skinId = skin.id;
   const previewBg = skin.gemGradient
     ? `linear-gradient(135deg, ${skin.colors[0]}, ${skin.colors[1]}, ${skin.colors[0]})`
     : `linear-gradient(135deg, ${skin.colors[0]}, ${skin.colors[1]})`;
   tile.innerHTML = `
-    <div class="skin-tile-preview" style="background:${previewBg}">
-      <span>${owned ? skin.icon : '❔'}</span>
-    </div>
+    <div class="skin-tile-preview" style="background:${previewBg}"><span>${owned ? skin.icon : '❔'}</span></div>
     <div class="skin-tile-name">${owned ? skin.name : '???'}</div>
     <div class="rarity-badge ${skin.rarity}">${RARITIES[skin.rarity].name}</div>
   `;
@@ -2022,7 +2174,7 @@ function renderCollection(){
 }
 
 /* ============================================================
-   КЕЙСЫ — открытие
+   КЕЙСЫ
 ============================================================ */
 let currentCase = null;
 
@@ -2030,13 +2182,11 @@ function openCase(cs){
   SFX.resume();
   if (state.apples < cs.price) {
     showToast(`Не хватает ${cs.price - state.apples} 🍎`, 'error', 1800);
-    SFX.sfx.deny();
-    return;
+    SFX.sfx.deny(); return;
   }
   state.apples -= cs.price;
   state.casesOpened++;
-  save();
-  renderCases();
+  save(); renderCases();
   currentCase = cs;
   const droppedSkin = rollFromCase(cs);
   caseResult.classList.remove('show');
@@ -2046,8 +2196,7 @@ function openCase(cs){
   caseOpenTitle.textContent = cs.name;
   caseOpenSub.textContent = cs.sub;
   const rouletteItems = [];
-  const TOTAL_ITEMS = 60;
-  const WINNER_INDEX = 52;
+  const TOTAL_ITEMS = 60, WINNER_INDEX = 52;
   for (let i = 0; i < TOTAL_ITEMS; i++){
     let skin;
     if (i === WINNER_INDEX) skin = droppedSkin;
@@ -2061,10 +2210,7 @@ function openCase(cs){
     const bg = skin.gemGradient
       ? `linear-gradient(135deg, ${skin.colors[0]}, ${skin.colors[1]}, ${skin.colors[0]})`
       : `linear-gradient(135deg, ${skin.colors[0]}, ${skin.colors[1]})`;
-    item.innerHTML = `
-      <div class="roulette-item-icon" style="background:${bg}">${skin.icon}</div>
-      <div class="roulette-item-name">${skin.name}</div>
-    `;
+    item.innerHTML = `<div class="roulette-item-icon" style="background:${bg}">${skin.icon}</div><div class="roulette-item-name">${skin.name}</div>`;
     rouletteTrack.appendChild(item);
   });
   SFX.sfx.caseSpin();
@@ -2093,8 +2239,7 @@ function rollFromCase(cs){
 function revealResult(skin){
   const isNew = !state.owned.includes(skin.id);
   if (isNew) { state.owned.push(skin.id); save(); }
-  renderCollection();
-  renderProfile();
+  renderCollection(); renderProfile();
   const bg = skin.gemGradient
     ? `linear-gradient(135deg, ${skin.colors[0]}, ${skin.colors[1]}, ${skin.colors[0]})`
     : `linear-gradient(135deg, ${skin.colors[0]}, ${skin.colors[1]})`;
@@ -2143,6 +2288,13 @@ let trailSpots = [];
 let foodEatenPulse = 0;
 let buffSpawnTimer = 0;
 let buffPickup = null;
+let timeRemaining = 0;
+
+/* ==== Демоническая змея (для hardcore) ==== */
+let demonSnake = null;
+let demonMoveTimer = 0;
+/* ==== Препятствия (для hardcore) ==== */
+let obstacles = [];
 
 /* ============================================================
    ПАУЗА
@@ -2167,9 +2319,11 @@ function resumeGame(){
 function togglePause(){ if (!running) return; if (paused) resumeGame(); else pauseGame('user'); }
 
 /* ============================================================
-   ИГРА
+   ИГРА — RESET
 ============================================================ */
 function resetGame(){
+  const mode = MODES[selectedMode];
+
   snake = [{x:10,y:10},{x:9,y:10},{x:8,y:10}];
   dir = {x:1,y:0}; nextDir = {x:1,y:0};
   score = 0; time = 0; tickAcc = 0;
@@ -2180,35 +2334,74 @@ function resetGame(){
   buffSpawnTimer = 5 + Math.random() * 3;
   lastBuffType = null;
   sameTypeStreak = 0;
+  demonSnake = null;
+  obstacles = [];
+  resetCombo();
+
+  // Установка лимита времени
+  if (mode.timeLimit > 0) {
+    timeRemaining = mode.timeLimit;
+  } else {
+    timeRemaining = 0; // 0 = без лимита
+  }
+
+  // Стартовый спавн еды
+  if (mode.endlessFood) {
+    // В бесконечном сразу несколько фруктов
+    for (let i = 0; i < 5; i++) spawnFood();
+  } else {
+    spawnFood();
+  }
+
+  // Хардкор: демон + препятствия
+  if (mode.hasDemon) {
+    spawnDemonSnake();
+    spawnObstacles();
+  }
+
   gameOver = false; running = true; timerRunning = true;
   paused = false;
   pauseIndicator.classList.remove('show');
-  spawnFood();
   updateBuffsBar();
   updateHUD();
+  updateComboUI();
 }
 
+/* ============================================================
+   ЕДА и ПРЕПЯТСТВИЯ
+============================================================ */
 function isCellFreeForBuff(x, y){
   if (snake.some(s => s.x === x && s.y === y)) return false;
   if (food && food.x === x && food.y === y) return false;
   if (extraFoods.some(f => f.x === x && f.y === y)) return false;
   if (buffPickup && buffPickup.x === x && buffPickup.y === y) return false;
+  if (demonSnake && demonSnake.some(s => s.x === x && s.y === y)) return false;
+  if (obstacles.some(o => o.x === x && o.y === y)) return false;
   return true;
 }
 
 function spawnFood(){
+  const mode = MODES[selectedMode];
   const free = [];
   for (let y=0; y<ROWS; y++)
     for (let x=0; x<COLS; x++)
       if (isCellFreeForBuff(x, y)) free.push({x,y});
-  if (free.length === 0) { winGame(); return; }
-  food = free[Math.floor(Math.random()*free.length)];
-  food.type = Math.floor(Math.random()*6);
-  food.spawnT = 0;
+  if (free.length === 0) return;
+  const pos = free[Math.floor(Math.random()*free.length)];
+  const newFood = { x: pos.x, y: pos.y, type: Math.floor(Math.random()*6), spawnT: 0 };
+  // В endless все фрукты в extraFoods кроме первого
+  if (mode.endlessFood && food) {
+    extraFoods.push(newFood);
+  } else {
+    food = newFood;
+  }
 }
 
 function spawnExtraFood(){
-  if (extraFoods.length >= 5) return;
+  const mode = MODES[selectedMode];
+  const maxFoods = mode.endlessFood ? 5 : 5;
+  const totalFoods = 1 + extraFoods.length;
+  if (totalFoods >= maxFoods) return;
   const free = [];
   for (let y=0; y<ROWS; y++)
     for (let x=0; x<COLS; x++)
@@ -2219,6 +2412,8 @@ function spawnExtraFood(){
 }
 
 function spawnBuff(){
+  const mode = MODES[selectedMode];
+  if (!mode.buffsEnabled) return;
   const free = [];
   for (let y = 0; y < ROWS; y++){
     for (let x = 0; x < COLS; x++){
@@ -2229,13 +2424,108 @@ function spawnBuff(){
   const pos = free[Math.floor(Math.random() * free.length)];
   const type = pickRandomBuffType();
   buffPickup = { x: pos.x, y: pos.y, type, spawnT: 0, life: 12 };
-  console.log('[BUFF SPAWN]', type, 'at', pos.x, pos.y);
 }
 
+function spawnObstacles(){
+  const count = 6 + Math.floor(Math.random() * 4);
+  for (let i = 0; i < count; i++){
+    const free = [];
+    for (let y = 0; y < ROWS; y++){
+      for (let x = 0; x < COLS; x++){
+        // Не спавним рядом со стартовой змейкой (первые 5 клеток слева)
+        if (x < 5 && y === 10) continue;
+        if (isCellFreeForBuff(x, y)) free.push({ x, y });
+      }
+    }
+    if (free.length === 0) break;
+    const pos = free[Math.floor(Math.random() * free.length)];
+    obstacles.push({ x: pos.x, y: pos.y, type: Math.random() < 0.5 ? 'rock' : 'spike' });
+  }
+}
+
+function spawnDemonSnake(){
+  // Демоническая змея — 4 сегмента в правом верхнем углу
+  const startX = 16, startY = 3;
+  demonSnake = [
+    { x: startX, y: startY },
+    { x: startX + 1, y: startY },
+    { x: startX + 2, y: startY },
+    { x: startX + 3, y: startY },
+  ];
+  demonMoveTimer = 0;
+  SFX.sfx.demonRoar();
+  showToast('💀 Демоническая змея появилась!', 'error', 3000);
+}
+
+/* ==== ИИ демонической змеи ==== */
+function updateDemonSnake(dt){
+  if (!demonSnake || demonSnake.length === 0) return;
+  const mode = MODES[selectedMode];
+  // Демон двигается каждые 0.28 сек
+  demonMoveTimer += dt;
+  const moveEvery = 0.28;
+  if (demonMoveTimer < moveEvery) return;
+  demonMoveTimer -= moveEvery;
+
+  const head = demonSnake[0];
+  const playerHead = snake[0];
+
+  // Собираем возможные направления
+  const dirs = [
+    { x: 1, y: 0 }, { x: -1, y: 0 },
+    { x: 0, y: 1 }, { x: 0, y: -1 },
+  ];
+
+  // Оцениваем каждое направление — приоритет на приближение к игроку
+  // но не идти в тупик и не пересекать себя/препятствия/игрока
+  const scored = dirs.map(d => {
+    const nx = head.x + d.x;
+    const ny = head.y + d.y;
+    // Границы
+    if (mode.walls) {
+      if (nx < 0 || nx >= COLS || ny < 0 || ny >= ROWS) return { d, score: -999 };
+    } else {
+      // бесконечный не для хардкора, но на всякий
+    }
+    // Тело демона
+    if (demonSnake.some((s, i) => i > 0 && s.x === nx && s.y === ny)) return { d, score: -900 };
+    // Препятствия
+    if (obstacles.some(o => o.x === nx && o.y === ny)) return { d, score: -800 };
+    // Тело игрока (демон может догнать)
+    if (snake.some(s => s.x === nx && s.y === ny)) return { d, score: -700 };
+    // Оценка: ближе к игроку = лучше
+    const dist = Math.abs(nx - playerHead.x) + Math.abs(ny - playerHead.y);
+    return { d, score: 100 - dist };
+  });
+
+  scored.sort((a, b) => b.score - a.score);
+  const best = scored[0];
+  if (!best || best.score <= -500) return; // нет хода — стоит на месте
+
+  // Двигаем змею
+  const newHead = { x: head.x + best.d.x, y: head.y + best.d.y };
+  demonSnake.unshift(newHead);
+  demonSnake.pop();
+}
+
+function checkDemonCollision(){
+  if (!demonSnake) return false;
+  const head = snake[0];
+  return demonSnake.some(s => s.x === head.x && s.y === head.y);
+}
+
+/* ============================================================
+   HUD
+============================================================ */
 function updateHUD(){
   hudApples.textContent = state.apples;
   hudScore.textContent = score ?? 0;
-  hudTimer.textContent = time.toFixed(1);
+  const mode = MODES[selectedMode];
+  if (mode.timeLimit > 0) {
+    hudTimer.textContent = Math.max(0, timeRemaining).toFixed(1);
+  } else {
+    hudTimer.textContent = time.toFixed(1);
+  }
   shopApples.textContent = state.apples;
   mobileApples.textContent = state.apples;
 }
@@ -2249,102 +2539,40 @@ const FRUITS = [
   { emoji:'🍒', color:'#e8556b' },
 ];
 
-/**
- * ===== ИСПРАВЛЕННЫЙ МАГНИТ =====
- * Логика:
- *  - Все фрукты (основной + дополнительные) двигаются на 1 клетку в сторону головы змейки.
- *  - Если фрукт уже на позиции головы или в 1 клетке — он "долетает" (подбирается).
- *  - Не пересекаются между собой и не попадают в тело змейки (кроме головы).
- */
-function applyMagnet(){
-  if (!isBuffActive('magnet')) return;
-  const head = snake[0];
-
-  // Собираем все "магнитные" фрукты: основной + дополнительные
-  const allFruits = [];
-  if (food) allFruits.push({ ref: food, isExtra: false, idx: -1 });
-  extraFoods.forEach((f, i) => allFruits.push({ ref: f, isExtra: true, idx: i }));
-
-  // Устанавливаем множество занятых клеток (кроме головы и самого фрукта)
-  // чтобы фрукты не накладывались друг на друга
-  const eatenExtras = [];
-
-  // Сначала собираем все "целевые" позиции, чтобы разом двигать
-  const moves = [];
-
-  allFruits.forEach(entry => {
-    const f = entry.ref;
-    const dx = head.x - f.x;
-    const dy = head.y - f.y;
-    if (dx === 0 && dy === 0) return; // уже под головой — подберётся в step()
-
-    // Смещаем только по доминирующей оси, максимум на 1
-    let nx = f.x, ny = f.y;
-    if (Math.abs(dx) >= Math.abs(dy)) {
-      nx = f.x + Math.sign(dx);
-    } else {
-      ny = f.y + Math.sign(dy);
-    }
-
-    // Проверка границ
-    if (nx < 0 || nx >= COLS || ny < 0 || ny >= ROWS) return;
-
-    // Не двигаться в тело змейки (кроме головы)
-    const inBody = snake.slice(1).some(s => s.x === nx && s.y === ny);
-    if (inBody) return;
-
-    // Не двигаться в другой фрукт (проверим после сбора всех moves)
-    moves.push({ entry, nx, ny });
-  });
-
-  // Проверяем, что целевые позиции не совпадают между собой
-  // и не заняты другими фруктами
-  const targets = {};
-  moves.forEach(m => {
-    const key = m.nx + ',' + m.ny;
-    if (!targets[key]) targets[key] = [];
-    targets[key].push(m);
-  });
-
-  // Отсеиваем конфликты: если двое хотят в одну клетку, оставляем ближайшего
-  const finalMoves = [];
-  const takenKeys = new Set();
-
-  moves.forEach(m => {
-    const key = m.nx + ',' + m.ny;
-    // Проверка, что клетка не занята другим "неподвижным" фруктом
-    const occupiedByOtherFruit = allFruits.some(other => {
-      if (other.ref === m.entry.ref) return false;
-      // если другой фрукт двигается в эту же клетку — пропускаем
-      return other.ref.x === m.nx && other.ref.y === m.ny;
-    });
-    if (occupiedByOtherFruit) return;
-    if (targets[key].length > 1) {
-      // конфликт — берём только первый
-      if (takenKeys.has(key)) return;
-      takenKeys.add(key);
-    }
-    finalMoves.push(m);
-  });
-
-  // Применяем движения
-  finalMoves.forEach(m => {
-    m.entry.ref.x = m.nx;
-    m.entry.ref.y = m.ny;
-  });
-}
-
+/* ============================================================
+   STEP — основной ход игры
+============================================================ */
 function step(){
+  const mode = MODES[selectedMode];
   dir = nextDir;
-  const head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
-  if (head.x < 0 || head.x >= COLS || head.y < 0 || head.y >= ROWS) return die();
+  let head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
 
+  // ==== Стены ====
+  if (mode.walls) {
+    if (head.x < 0 || head.x >= COLS || head.y < 0 || head.y >= ROWS) return die();
+  } else {
+    // Бесконечный: телепорт через края
+    if (head.x < 0) head.x = COLS - 1;
+    if (head.x >= COLS) head.x = 0;
+    if (head.y < 0) head.y = ROWS - 1;
+    if (head.y >= ROWS) head.y = 0;
+  }
+
+  // ==== Препятствия ====
+  if (obstacles.some(o => o.x === head.x && o.y === head.y)) return die();
+
+  // ==== Своё тело ====
   const ghostOn = isBuffActive('ghost');
   if (!ghostOn) {
-    for (let i = 0; i < snake.length - 1; i++) {
+    // для растущей змейки проверяем всё тело кроме хвоста (он сдвинется)
+    const lastIdx = mode.grows ? snake.length : snake.length - 1;
+    for (let i = 0; i < lastIdx - 1; i++) {
       if (snake[i].x === head.x && snake[i].y === head.y) return die();
     }
   }
+
+  // ==== Демон ====
+  if (demonSnake && demonSnake.some(s => s.x === head.x && s.y === head.y)) return die();
 
   snake.unshift(head);
 
@@ -2358,14 +2586,22 @@ function step(){
 
   // ==== Подбор основного фрукта ====
   if (food && head.x === food.x && head.y === food.y) {
-    score++; state.apples++; state.totalApples++;
+    onFruitEaten();
+    score += combo.value;
+    const apples = mode.appleMultiplier;
+    state.apples += apples;
+    state.totalApples += apples;
     if (score > state.bestScore) state.bestScore = score;
+    if (score > (state.bestByMode[selectedMode] || 0)) state.bestByMode[selectedMode] = score;
     save();
     SFX.sfx.eat();
     foodEatenPulse = 1;
     spawnBurst(head.x*CELL + CELL/2, head.y*CELL + CELL/2, FRUITS[food.type].color, 16);
     spawnHearts(head.x*CELL + CELL/2, head.y*CELL + CELL/2, 2);
+    food = null;
     spawnFood();
+    // endless: сразу подкидываем новый
+    if (mode.endlessFood && extraFoods.length < 4) spawnExtraFood();
     ate = true;
   }
 
@@ -2373,34 +2609,92 @@ function step(){
   for (let i = extraFoods.length - 1; i >= 0; i--) {
     const ef = extraFoods[i];
     if (head.x === ef.x && head.y === ef.y) {
-      score++; state.apples++; state.totalApples++;
+      onFruitEaten();
+      score += combo.value;
+      const apples = mode.appleMultiplier;
+      state.apples += apples;
+      state.totalApples += apples;
       if (score > state.bestScore) state.bestScore = score;
+      if (score > (state.bestByMode[selectedMode] || 0)) state.bestByMode[selectedMode] = score;
       save();
       SFX.sfx.eat();
+      foodEatenPulse = 1;
       spawnBurst(ef.x*CELL + CELL/2, ef.y*CELL + CELL/2, FRUITS[ef.type].color, 12);
       extraFoods.splice(i, 1);
+      // endless: подкидываем новый вместо съеденного
+      if (mode.endlessFood) spawnExtraFood();
       ate = true;
     }
   }
 
   // ==== Подбор баффа ====
   if (buffPickup && head.x === buffPickup.x && head.y === buffPickup.y) {
-    console.log('[BUFF PICKED]', buffPickup.type);
     activateBuff(buffPickup.type);
     buffPickup = null;
     ate = true;
   }
 
   if (ate) { updateHUD(); renderCases(); }
-  else { snake.pop(); }
+  else {
+    // Не вырос — убираем хвост
+    if (mode.grows) snake.pop();
+    else {
+      // В endless змея постоянного размера
+      snake.pop();
+    }
+  }
 
-  // ==== Магнит: тянем фрукты к голове ====
+  // ==== Магнит ====
   applyMagnet();
 
-  if (snake.length === COLS * ROWS) winGame();
+  // ==== Проверка касания демона ====
+  if (checkDemonCollision()) return die();
 }
 
+/* ============================================================
+   МАГНИТ — тянет к голове
+============================================================ */
+function applyMagnet(){
+  if (!isBuffActive('magnet')) return;
+  const head = snake[0];
+  const allFruits = [];
+  if (food) allFruits.push(food);
+  extraFoods.forEach(f => allFruits.push(f));
+
+  const moves = [];
+  allFruits.forEach(f => {
+    const dx = head.x - f.x;
+    const dy = head.y - f.y;
+    if (dx === 0 && dy === 0) return;
+    let nx = f.x, ny = f.y;
+    if (Math.abs(dx) >= Math.abs(dy)) nx = f.x + Math.sign(dx);
+    else ny = f.y + Math.sign(dy);
+    if (nx < 0 || nx >= COLS || ny < 0 || ny >= ROWS) return;
+    const inBody = snake.slice(1).some(s => s.x === nx && s.y === ny);
+    if (inBody) return;
+    if (obstacles.some(o => o.x === nx && o.y === ny)) return;
+    moves.push({ fruit: f, nx, ny });
+  });
+
+  // Защита от конфликтов — по одному в клетку
+  const taken = new Set();
+  moves.forEach(m => {
+    const key = m.nx + ',' + m.ny;
+    if (taken.has(key)) return;
+    // Проверяем, что другой фрукт не стоит на этой клетке (он либо тоже двинулся, либо нет)
+    const occupied = allFruits.some(other => other !== m.fruit && other.x === m.nx && other.y === m.ny && !moves.some(mm => mm.fruit === other && mm.nx === other.x && mm.ny === other.y));
+    if (occupied) return;
+    taken.add(key);
+    m.fruit.x = m.nx;
+    m.fruit.y = m.ny;
+  });
+}
+
+/* ============================================================
+   DIE / WIN
+============================================================ */
 function die(){
+  const mode = MODES[selectedMode];
   running = false; timerRunning = false; gameOver = true;
   shake = 12;
   state.gamesPlayed++;
@@ -2408,14 +2702,17 @@ function die(){
   SFX.sfx.die();
   const skin = getSkin(state.active);
   spawnBurst(snake[0].x*CELL + CELL/2, snake[0].y*CELL + CELL/2, skin.colors[0], 34);
-  const isRecord = score > 0 && score === state.bestScore;
-  ovTitle.textContent = isRecord ? '🏆 Новый рекорд!' : 'Ой-ой 🙈';
+  const best = state.bestByMode[selectedMode] || 0;
+  const isRecord = score > 0 && score >= best;
+  const timeElapsed = mode.timeLimit > 0 ? (mode.timeLimit - timeRemaining) : time;
+  ovTitle.textContent = isRecord ? '🏆 Новый рекорд!' : 'Игра окончена';
   ovText.innerHTML = `
+    Режим: <b style="color:${mode.colorA}">${mode.name}</b><br>
     Счёт: <span class="big-stat">${score}</span><br>
-    Время: ${time.toFixed(1)} сек<br>
-    Рекорд: ${state.bestScore}<br>
+    Время: ${timeElapsed.toFixed(1)} сек<br>
+    Рекорд режима: ${Math.max(best, score)}<br>
     <span style="color:#e0a47a;font-size:13px;margin-top:8px;display:inline-block">
-      +${score} 🍎 заработано
+      +${Math.floor(state.apples - (state.apples - score * mode.appleMultiplier) + 0.5) >= 0 ? Math.round(score * mode.appleMultiplier) : Math.round(score * mode.appleMultiplier)} 🍎 заработано
     </span>
   `;
   ovBtn.textContent = 'Ещё раз';
@@ -2424,19 +2721,35 @@ function die(){
   updateHUD();
   updateBuffsBar();
   renderProfile();
+  renderModes();
+  resetCombo();
 }
 
 function winGame(){
+  // Победа в классике — время вышло
+  const mode = MODES[selectedMode];
   running = false; timerRunning = false;
   state.gamesPlayed++;
   save();
-  SFX.sfx.win();
-  ovTitle.textContent = 'Вау, победа! 🎉';
-  ovText.innerHTML = `Всё поле твоё!<br>Время: ${time.toFixed(1)} сек<br>Счёт: ${score}`;
+  SFX.sfx.timeUp();
+  const best = state.bestByMode[selectedMode] || 0;
+  const isRecord = score >= best;
+  ovTitle.textContent = isRecord ? '🏆 Новый рекорд!' : '⏱ Время вышло!';
+  ovText.innerHTML = `
+    Режим: <b style="color:${mode.colorA}">${mode.name}</b><br>
+    Счёт: <span class="big-stat">${score}</span><br>
+    Рекорд: ${Math.max(best, score)}<br>
+    <span style="color:#e0a47a;font-size:13px;margin-top:8px;display:inline-block">
+      +${Math.round(score * mode.appleMultiplier)} 🍎 заработано
+    </span>
+  `;
   ovBtn.textContent = 'Ещё раз';
   overlay.classList.remove('hidden');
   pauseIndicator.classList.remove('show');
   updateBuffsBar();
+  renderProfile();
+  renderModes();
+  resetCombo();
 }
 
 /* ============================================================
@@ -2470,7 +2783,7 @@ function updateParticles(dt){
 }
 
 /* ============================================================
-   ЦВЕТОВЫЕ ХЕЛПЕРЫ
+   ЦВЕТ
 ============================================================ */
 function hexToRgb(hex){ const n = parseInt(hex.replace('#',''), 16); return { r: (n>>16)&255, g: (n>>8)&255, b: n&255 }; }
 function rgbToHex(r, g, b){ return '#' + [r,g,b].map(v => Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')).join(''); }
@@ -2481,13 +2794,30 @@ function rgba(hex, a){ const { r, g, b } = hexToRgb(hex); return `rgba(${r},${g}
    ОТРИСОВКА
 ============================================================ */
 function drawGrid(){
+  const mode = MODES[selectedMode];
   const bgGrad = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 40, canvas.width/2, canvas.height/2, canvas.width * 0.75);
-  bgGrad.addColorStop(0, '#262732'); bgGrad.addColorStop(0.7, '#1e1f28'); bgGrad.addColorStop(1, '#17181f');
+  if (mode.id === 'hardcore') {
+    bgGrad.addColorStop(0, '#2a1a1e');
+    bgGrad.addColorStop(0.7, '#1f1418');
+    bgGrad.addColorStop(1, '#150b0e');
+  } else if (mode.id === 'endless') {
+    bgGrad.addColorStop(0, '#1e2544');
+    bgGrad.addColorStop(0.7, '#181d33');
+    bgGrad.addColorStop(1, '#0f1220');
+  } else {
+    bgGrad.addColorStop(0, '#262732');
+    bgGrad.addColorStop(0.7, '#1e1f28');
+    bgGrad.addColorStop(1, '#17181f');
+  }
   ctx.fillStyle = bgGrad;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
+
   for (let y = 0; y < ROWS; y++){
     for (let x = 0; x < COLS; x++){
-      if ((x + y) % 2 === 0){ ctx.fillStyle = 'rgba(255,255,255,0.016)'; ctx.fillRect(x*CELL, y*CELL, CELL, CELL); }
+      if ((x + y) % 2 === 0){
+        ctx.fillStyle = 'rgba(255,255,255,0.016)';
+        ctx.fillRect(x*CELL, y*CELL, CELL, CELL);
+      }
     }
   }
   ctx.strokeStyle = 'rgba(255,255,255,0.028)'; ctx.lineWidth = 1;
@@ -2497,15 +2827,15 @@ function drawGrid(){
   }
   ctx.strokeStyle = 'rgba(0,0,0,0.35)'; ctx.lineWidth = 4;
   ctx.strokeRect(2, 2, canvas.width-4, canvas.height-4);
-  ctx.strokeStyle = 'rgba(255,255,255,0.07)'; ctx.lineWidth = 1.5;
+  ctx.strokeStyle = mode.walls ? 'rgba(255,255,255,0.07)' : 'rgba(124,138,255,0.2)';
+  ctx.lineWidth = 1.5;
   ctx.strokeRect(3.5, 3.5, canvas.width-7, canvas.height-7);
 
-  // Магнит — подсветка фона
+  // Магнит — подсветка
   if (isBuffActive('magnet')) {
     const t = activeBuffs.magnet.timeLeft;
     ctx.fillStyle = `rgba(255,139,167,${0.05 * (t / activeBuffs.magnet.total)})`;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    // Линии притяжения от фруктов к голове
     const head = snake[0];
     const headX = head.x * CELL + CELL/2;
     const headY = head.y * CELL + CELL/2;
@@ -2518,10 +2848,7 @@ function drawGrid(){
     allFruits.forEach(f => {
       const fx = f.x * CELL + CELL/2;
       const fy = f.y * CELL + CELL/2;
-      ctx.beginPath();
-      ctx.moveTo(fx, fy);
-      ctx.lineTo(headX, headY);
-      ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(fx, fy); ctx.lineTo(headX, headY); ctx.stroke();
     });
     ctx.setLineDash([]);
   }
@@ -2571,6 +2898,119 @@ function drawFruitAt(fruit, isExtra){
 
 function drawFood(){ drawFruitAt(food, false); }
 function drawExtraFoods(){ extraFoods.forEach(f => drawFruitAt(f, true)); }
+
+/* ==== Демон ==== */
+function drawDemonSnake(){
+  if (!demonSnake) return;
+  demonSnake.forEach((seg, i) => {
+    const px = seg.x * CELL, py = seg.y * CELL;
+    const pad = 2, size = CELL - pad*2;
+    const cx = px + CELL/2, cy = py + CELL/2;
+    const isHead = i === 0;
+    const t = gameTime;
+
+    // Аура
+    if (isHead) {
+      const aura = ctx.createRadialGradient(cx, cy, 4, cx, cy, CELL * 1.2);
+      aura.addColorStop(0, 'rgba(180,20,40,0.5)');
+      aura.addColorStop(1, 'rgba(180,20,40,0)');
+      ctx.fillStyle = aura;
+      ctx.beginPath(); ctx.arc(cx, cy, CELL * 1.2, 0, Math.PI*2); ctx.fill();
+    }
+
+    // Тело — тёмно-красное с чёрными гранями
+    const grad = ctx.createLinearGradient(px, py, px + CELL, py + CELL);
+    grad.addColorStop(0, '#5a0a18');
+    grad.addColorStop(1, '#2a0208');
+    ctx.fillStyle = grad;
+
+    if (isHead) {
+      // Голова с рогами
+      const radius = 9;
+      roundRect(ctx, px + pad, py + pad, size, size, radius);
+      ctx.fill();
+      // Рога
+      ctx.fillStyle = '#8a1020';
+      ctx.beginPath();
+      ctx.moveTo(cx - 7, cy - size/2 + 2);
+      ctx.lineTo(cx - 10, cy - size/2 - 8);
+      ctx.lineTo(cx - 4, cy - size/2 - 2);
+      ctx.closePath();
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(cx + 7, cy - size/2 + 2);
+      ctx.lineTo(cx + 10, cy - size/2 - 8);
+      ctx.lineTo(cx + 4, cy - size/2 - 2);
+      ctx.closePath();
+      ctx.fill();
+      // Глаза — светящиеся красные
+      ctx.fillStyle = '#ff2040';
+      ctx.shadowColor = '#ff2040';
+      ctx.shadowBlur = 8;
+      ctx.beginPath(); ctx.arc(cx - 4, cy - 2, 2, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(cx + 4, cy - 2, 2, 0, Math.PI*2); ctx.fill();
+      ctx.shadowBlur = 0;
+      // Зрачки
+      ctx.fillStyle = '#000';
+      ctx.beginPath(); ctx.arc(cx - 4, cy - 2, 0.9, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(cx + 4, cy - 2, 0.9, 0, Math.PI*2); ctx.fill();
+    } else {
+      roundRect(ctx, px + pad, py + pad, size, size, 6);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,20,40,0.3)';
+      ctx.lineWidth = 1;
+      roundRect(ctx, px + pad, py + pad, size, size, 6);
+      ctx.stroke();
+    }
+
+    // Пульсирующее свечение
+    const pulse = 0.5 + 0.5 * Math.sin(t*4 + i*0.5);
+    ctx.fillStyle = `rgba(255,40,60,${0.15 * pulse})`;
+    roundRect(ctx, px + pad, py + pad, size, size, isHead ? 9 : 6);
+    ctx.fill();
+  });
+}
+
+/* ==== Препятствия ==== */
+function drawObstacles(){
+  obstacles.forEach(o => {
+    const cx = o.x * CELL + CELL/2;
+    const cy = o.y * CELL + CELL/2;
+    if (o.type === 'rock') {
+      // Камень
+      const r = CELL * 0.42;
+      const grad = ctx.createRadialGradient(cx - r*0.3, cy - r*0.3, r*0.1, cx, cy, r);
+      grad.addColorStop(0, '#6a6a72');
+      grad.addColorStop(0.7, '#3a3a42');
+      grad.addColorStop(1, '#25252a');
+      ctx.fillStyle = grad;
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.fill();
+      ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.stroke();
+      ctx.fillStyle = 'rgba(255,255,255,0.15)';
+      ctx.beginPath(); ctx.arc(cx - r*0.3, cy - r*0.35, r*0.2, 0, Math.PI*2); ctx.fill();
+    } else {
+      // Шипы
+      const r = CELL * 0.4;
+      ctx.fillStyle = '#8a2030';
+      ctx.beginPath();
+      for (let i = 0; i < 8; i++){
+        const a = (i / 8) * Math.PI * 2;
+        const rr = i % 2 === 0 ? r : r * 0.6;
+        const px = cx + Math.cos(a) * rr;
+        const py = cy + Math.sin(a) * rr;
+        i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+      }
+      ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(255,80,90,0.3)';
+      ctx.beginPath(); ctx.arc(cx, cy, r*0.3, 0, Math.PI*2); ctx.fill();
+    }
+  });
+}
 
 function drawBuffPickup(){
   if (!buffPickup) return;
@@ -2674,14 +3114,10 @@ function drawFace(skin, cx, cy, dir, t, index){
     const px = dir.x * 0.9, py = dir.y * 0.9;
     ctx.beginPath(); ctx.arc(ex1 + px, ey1 + py, 1.5, 0, Math.PI*2); ctx.fill();
     ctx.beginPath(); ctx.arc(ex2 + px, ey2 + py, 1.5, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = 'rgba(255,255,255,0.9)';
-    ctx.beginPath(); ctx.arc(ex1 + px - 0.5, ey1 + py - 0.5, 0.5, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(ex2 + px - 0.5, ey2 + py - 0.5, 0.5, 0, Math.PI*2); ctx.fill();
     ctx.fillStyle = skin.accent;
     ctx.beginPath(); ctx.arc(cx + dir.x * 6, cy + dir.y * 6, 1.8, 0, Math.PI*2); ctx.fill();
     return;
   }
-
   if (faceType === 'dragon'){
     ctx.fillStyle = '#fff';
     ctx.beginPath(); ctx.arc(ex1, ey1, 2.8, 0, Math.PI*2); ctx.fill();
@@ -2690,15 +3126,8 @@ function drawFace(skin, cx, cy, dir, t, index){
     const px = dir.x * 0.6, py = dir.y * 0.6;
     ctx.beginPath(); ctx.ellipse(ex1 + px, ey1 + py, 0.9, 1.9, 0, 0, Math.PI*2); ctx.fill();
     ctx.beginPath(); ctx.ellipse(ex2 + px, ey2 + py, 0.9, 1.9, 0, 0, Math.PI*2); ctx.fill();
-    ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1.3; ctx.lineCap = 'round';
-    ctx.beginPath(); ctx.moveTo(ex1 - 2.5, ey1 - 3); ctx.lineTo(ex1 + 2, ey1 - 3.8); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(ex2 + 2.5, ey2 - 3); ctx.lineTo(ex2 - 2, ey2 - 3.8); ctx.stroke();
-    ctx.fillStyle = '#c9a06b';
-    ctx.beginPath(); ctx.moveTo(cx - 4, cy - 10); ctx.lineTo(cx - 6, cy - 15); ctx.lineTo(cx - 2, cy - 12); ctx.closePath(); ctx.fill();
-    ctx.beginPath(); ctx.moveTo(cx + 4, cy - 10); ctx.lineTo(cx + 6, cy - 15); ctx.lineTo(cx + 2, cy - 12); ctx.closePath(); ctx.fill();
     return;
   }
-
   const blink = Math.sin(t * 2.5 + index * 0.7) > 0.94;
   if (faceType === 'wink'){
     ctx.strokeStyle = '#1c1d22'; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
@@ -2713,18 +3142,8 @@ function drawFace(skin, cx, cy, dir, t, index){
       const px = dir.x * 0.9, py = dir.y * 0.9;
       ctx.beginPath(); ctx.arc(ex1 + px, ey1 + py, 1.5, 0, Math.PI*2); ctx.fill();
       ctx.beginPath(); ctx.arc(ex2 + px, ey2 + py, 1.5, 0, Math.PI*2); ctx.fill();
-      ctx.fillStyle = 'rgba(255,255,255,0.95)';
-      ctx.beginPath(); ctx.arc(ex1 + px - 0.5, ey1 + py - 0.5, 0.6, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(ex2 + px - 0.5, ey2 + py - 0.5, 0.6, 0, Math.PI*2); ctx.fill();
-    } else {
-      ctx.strokeStyle = '#1c1d22'; ctx.lineWidth = 1.5; ctx.lineCap = 'round';
-      ctx.beginPath();
-      ctx.moveTo(ex1 - 2, ey1); ctx.lineTo(ex1 + 2, ey1);
-      ctx.moveTo(ex2 - 2, ey2); ctx.lineTo(ex2 + 2, ey2);
-      ctx.stroke();
     }
   }
-
   if (skin.blush){
     ctx.fillStyle = 'rgba(255,120,150,0.4)';
     const bd = eyeSide + 2.5;
@@ -2736,22 +3155,12 @@ function drawFace(skin, cx, cy, dir, t, index){
     ctx.beginPath(); ctx.arc(bx1, by1, 2.5, 0, Math.PI*2); ctx.fill();
     ctx.beginPath(); ctx.arc(bx2, by2, 2.5, 0, Math.PI*2); ctx.fill();
   }
-
   if (!blink){
     ctx.strokeStyle = '#1c1d22'; ctx.lineWidth = 1.3; ctx.lineCap = 'round';
     const mx = cx + dir.x * 6.5, my = cy + dir.y * 6.5;
     ctx.beginPath();
     if (dir.x === 1 || dir.x === -1) ctx.arc(mx, my, 2.5, dir.x === 1 ? 0.3 : Math.PI - 0.3, dir.x === 1 ? Math.PI - 0.3 : Math.PI * 2 - 0.3);
     else ctx.arc(mx, my, 2.5, dir.y === 1 ? -0.3 : Math.PI + 0.3, dir.y === 1 ? Math.PI + 0.3 : -0.3);
-    ctx.stroke();
-  }
-
-  if (Math.sin(t*5) > 0.85){
-    ctx.strokeStyle = '#ff6b8a'; ctx.lineWidth = 1.8; ctx.lineCap = 'round';
-    const tx = cx + dir.x * (CELL*0.45), ty = cy + dir.y * (CELL*0.45);
-    ctx.beginPath();
-    ctx.moveTo(cx + dir.x*CELL*0.25, cy + dir.y*CELL*0.25);
-    ctx.lineTo(tx, ty);
     ctx.stroke();
   }
 }
@@ -2762,8 +3171,7 @@ function drawSegment(skin, x, y, index, total, t){
   const cx = px + CELL/2, cy = py + CELL/2;
 
   let color1 = skin.colors[0], color2 = skin.colors[1];
-  let size = baseSize, offsetX = 0, offsetY = 0, shape = 'rounded';
-  let alpha = 1;
+  let size = baseSize, offsetX = 0, offsetY = 0, shape = 'rounded', alpha = 1;
 
   if (skin.id === 'gummy'){
     const wobble = Math.sin(t*3 + index*0.6) * 0.5;
@@ -2775,7 +3183,7 @@ function drawSegment(skin, x, y, index, total, t){
     offsetY = wobble * (dir.x !== 0 ? 1 : 0);
     offsetX = wobble * (dir.y !== 0 ? 1 : 0);
   } else if (skin.id === 'bubble'){ shape = 'circle'; size = baseSize * 1.02; }
-  else if (skin.id === 'candy' || skin.id === 'lime' || skin.id === 'orange' || skin.id === 'blueberry' || skin.id === 'watermelon'){ size = baseSize * 0.98; }
+  else if (['candy','lime','orange','blueberry','watermelon'].includes(skin.id)) { size = baseSize * 0.98; }
   else if (skin.id === 'strawberry'){
     const wave = Math.sin(t*3 + index*0.4) * 0.8;
     offsetY = wave * (dir.x !== 0 ? 1 : 0);
@@ -2785,13 +3193,11 @@ function drawSegment(skin, x, y, index, total, t){
     color1 = `hsl(${hue}, 85%, 78%)`;
     color2 = `hsl(${(hue + 40) % 360}, 85%, 68%)`;
     size = baseSize * (0.96 + Math.sin(t*3 + index*0.3) * 0.05);
-  } else if (skin.id === 'dragon' || skin.id === 'phoenix'){ size = baseSize * (0.94 + Math.sin(t*2 + index*0.3) * 0.06); }
+  } else if (['dragon','phoenix'].includes(skin.id)){ size = baseSize * (0.94 + Math.sin(t*2 + index*0.3) * 0.06); }
   else if (skin.gemGradient){
     const w1 = 0.5 + 0.5 * Math.sin(t*1.2 + index * 0.15);
     const w2 = 0.5 + 0.5 * Math.sin(t*1.2 + 1.5 + index * 0.15);
-    const r1 = hexToRgb(skin.colors[0]);
-    const r2 = hexToRgb(skin.colors[1]);
-    const r3 = hexToRgb(skin.accent);
+    const r1 = hexToRgb(skin.colors[0]), r2 = hexToRgb(skin.colors[1]), r3 = hexToRgb(skin.accent);
     const mix1 = { r: r1.r*(1-w1) + r3.r*w1, g: r1.g*(1-w1) + r3.g*w1, b: r1.b*(1-w1) + r3.b*w1 };
     const mix2 = { r: r2.r*(1-w2) + r1.r*w2, g: r2.g*(1-w2) + r1.g*w2, b: r2.b*(1-w2) + r1.b*w2 };
     color1 = rgbToHex(mix1.r, mix1.g, mix1.b);
@@ -2815,13 +3221,10 @@ function drawSegment(skin, x, y, index, total, t){
   ctx.fillStyle = grad;
 
   const radius = index === 0 ? 10 : 7;
-
   if (shape === 'circle'){
     ctx.beginPath(); ctx.arc(drawCx, drawCy, size/2, 0, Math.PI*2); ctx.fill();
     ctx.fillStyle = 'rgba(255,255,255,0.35)';
     ctx.beginPath(); ctx.arc(drawCx - size*0.18, drawCy - size*0.22, size*0.18, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = 'rgba(255,255,255,0.15)';
-    ctx.beginPath(); ctx.arc(drawCx - size*0.28, drawCy - size*0.3, size*0.08, 0, Math.PI*2); ctx.fill();
   } else {
     roundRect(ctx, drawX, drawY, size, size, radius); ctx.fill();
     const shadeGrad = ctx.createLinearGradient(drawX, drawY + size*0.4, drawX, drawY + size);
@@ -2838,10 +3241,7 @@ function drawSegment(skin, x, y, index, total, t){
 
   if (skin.stripes){
     ctx.fillStyle = 'rgba(180,120,40,0.3)';
-    for (let i = 0; i < 2; i++){
-      const sx = drawX + 4 + i * (size - 8) * 0.6;
-      ctx.fillRect(sx, drawY + 4, 1.5, size - 8);
-    }
+    for (let i = 0; i < 2; i++){ const sx = drawX + 4 + i * (size - 8) * 0.6; ctx.fillRect(sx, drawY + 4, 1.5, size - 8); }
   }
   if (skin.spiral){
     ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 1.5;
@@ -2887,12 +3287,6 @@ function drawSegment(skin, x, y, index, total, t){
     ctx.moveTo(drawCx, drawY + 3); ctx.lineTo(drawX + size - 3, drawCy);
     ctx.lineTo(drawCx, drawY + size - 3); ctx.lineTo(drawX + 3, drawCy);
     ctx.closePath(); ctx.stroke();
-    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
-    const inset = 5;
-    ctx.beginPath();
-    ctx.moveTo(drawCx, drawY + inset); ctx.lineTo(drawX + size - inset, drawCy);
-    ctx.lineTo(drawCx, drawY + size - inset); ctx.lineTo(drawX + inset, drawCy);
-    ctx.closePath(); ctx.stroke();
     ctx.fillStyle = 'rgba(255,255,255,0.6)';
     ctx.beginPath(); ctx.arc(drawCx, drawCy, 1.5, 0, Math.PI*2); ctx.fill();
   }
@@ -2936,25 +3330,6 @@ function drawSnake(t){
   for (let i = total - 1; i >= 0; i--){
     drawSegment(skin, snake[i].x, snake[i].y, i, total, t);
   }
-  if (total > 0 && (isBuffActive('magnet') || isBuffActive('speed') || isBuffActive('ghost'))) {
-    const head = snake[0];
-    const cx = head.x * CELL + CELL/2;
-    const cy = head.y * CELL + CELL/2;
-    const radius = CELL * 0.75;
-    const icons = [];
-    if (isBuffActive('speed')) icons.push('⚡');
-    if (isBuffActive('ghost')) icons.push('👻');
-    if (isBuffActive('magnet')) icons.push('🧲');
-    icons.forEach((icon, i) => {
-      const a = -Math.PI / 2 + (i - (icons.length - 1) / 2) * 0.6;
-      const ix = cx + Math.cos(a) * radius;
-      const iy = cy + Math.sin(a) * radius - 12;
-      ctx.font = '13px serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(icon, ix, iy);
-    });
-  }
 }
 
 function drawParticles(){
@@ -2984,13 +3359,31 @@ function loop(now){
   const dt = Math.min(0.05, (now - lastTime) / 1000);
   lastTime = now;
 
+  const mode = MODES[selectedMode];
   if (!paused) gameTime += dt;
-  if (timerRunning && !paused) {
-    time += dt;
-    hudTimer.textContent = time.toFixed(1);
-  }
 
   if (running && !paused) {
+    // Таймер
+    if (timerRunning) {
+      if (mode.timeLimit > 0) {
+        timeRemaining -= dt;
+        if (timeRemaining <= 0) {
+          timeRemaining = 0;
+          updateHUD();
+          return winGame();
+        }
+        hudTimer.textContent = timeRemaining.toFixed(1);
+        if (timeRemaining <= 10) hudTimer.classList.add('warning');
+        else hudTimer.classList.remove('warning');
+        time += dt;
+      } else {
+        time += dt;
+        hudTimer.textContent = time.toFixed(1);
+        hudTimer.classList.remove('warning');
+      }
+    }
+
+    // Скорость базового шага
     const speedOn = isBuffActive('speed');
     const baseStep = speedOn ? 0.145 / 1.75 : 0.145;
     tickAcc += dt;
@@ -2999,11 +3392,17 @@ function loop(now){
       step();
       if (!running) break;
     }
-  }
 
-  if (running && !paused) {
+    // Демон
+    if (running && mode.hasDemon) updateDemonSnake(dt);
+
+    // Баффы
     updateBuffs(dt);
     tickBuffsBarUI();
+    // Комбо
+    updateCombo(dt);
+
+    // Бафф на поле
     if (buffPickup) {
       buffPickup.life -= dt;
       if (buffPickup.life <= 0) buffPickup = null;
@@ -3012,6 +3411,16 @@ function loop(now){
       if (buffSpawnTimer <= 0) {
         spawnBuff();
         buffSpawnTimer = 12 + Math.random() * 8;
+      }
+    }
+
+    // В endless — автоспавн фруктов каждые 3 сек
+    if (mode.endlessFood) {
+      if (!window._endlessSpawnTimer) window._endlessSpawnTimer = 0;
+      window._endlessSpawnTimer -= dt;
+      if (window._endlessSpawnTimer <= 0) {
+        if (1 + extraFoods.length < 5) spawnExtraFood();
+        window._endlessSpawnTimer = 2.5;
       }
     }
   }
@@ -3031,9 +3440,11 @@ function loop(now){
 
   drawGrid();
   drawTrail();
+  drawObstacles();
   drawFood();
   drawExtraFoods();
   drawBuffPickup();
+  if (demonSnake) drawDemonSnake();
   if (snake) drawSnake(gameTime);
   drawParticles();
 
@@ -3077,18 +3488,55 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-let touchStart = null;
-canvas.addEventListener('touchstart', (e) => {
-  touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+/* ==== СВАЙПЫ ПО ВСЕМУ ЭКРАНУ ==== */
+let globalTouchStart = null;
+const SWIPE_MIN_DIST = 24;
+
+function shouldIgnoreSwipe(e){
+  // Игнорируем тапы по кнопкам и панелям
+  if (e.target.closest('.shop, .btn, button, .mobile-shop-screen, .mobile-shop-toggle, .corner-btn, .radio-panel, .case-open-overlay, .profile-in-menu')) return true;
+  if (mobileShopScreen.classList.contains('open')) return true;
+  if (radioOpen) return true;
+  if (caseOpenOverlay.classList.contains('show')) return true;
+  if (overlay && !overlay.classList.contains('hidden')) return true;
+  if (paused) return true;
+  return false;
+}
+
+document.addEventListener('touchstart', (e) => {
+  if (shouldIgnoreSwipe(e)) return;
+  if (!running) return;
+  if (e.touches.length !== 1) return;
+  globalTouchStart = {
+    x: e.touches[0].clientX,
+    y: e.touches[0].clientY,
+    time: Date.now(),
+  };
 }, { passive: true });
-canvas.addEventListener('touchend', (e) => {
-  if (!touchStart || !running || paused) return;
-  const dx = e.changedTouches[0].clientX - touchStart.x;
-  const dy = e.changedTouches[0].clientY - touchStart.y;
-  if (Math.abs(dx) > Math.abs(dy)) setDir(dx > 0 ? 1 : -1, 0);
-  else setDir(0, dy > 0 ? 1 : -1);
-  touchStart = null;
+
+document.addEventListener('touchend', (e) => {
+  if (!globalTouchStart) return;
+  if (!running || paused) { globalTouchStart = null; return; }
+  if (e.changedTouches.length === 0) { globalTouchStart = null; return; }
+
+  const dx = e.changedTouches[0].clientX - globalTouchStart.x;
+  const dy = e.changedTouches[0].clientY - globalTouchStart.y;
+  const dist = Math.sqrt(dx*dx + dy*dy);
+
+  if (dist < SWIPE_MIN_DIST) {
+    globalTouchStart = null;
+    return;
+  }
+
+  if (Math.abs(dx) > Math.abs(dy)) {
+    setDir(dx > 0 ? 1 : -1, 0);
+  } else {
+    setDir(0, dy > 0 ? 1 : -1);
+  }
+  globalTouchStart = null;
 }, { passive: true });
+
+document.addEventListener('touchcancel', () => { globalTouchStart = null; }, { passive: true });
 
 /* ============================================================
    РАДИО UI
@@ -3133,8 +3581,7 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && radioOpe
 document.getElementById('radioPlayBtn').addEventListener('click', () => {
   SFX.resume(); SFX.sfx.click();
   if (Radio.getPlaylist().length === 0) { showToast('Плейлист пуст — добавь треки', 'info', 2000); return; }
-  Radio.toggle();
-  updateRadioUI();
+  Radio.toggle(); updateRadioUI();
 });
 document.getElementById('radioPrev').addEventListener('click', () => { SFX.sfx.click(); Radio.prev(); updateRadioUI(); });
 document.getElementById('radioNext').addEventListener('click', () => { SFX.sfx.click(); Radio.next(); updateRadioUI(); });
@@ -3252,14 +3699,15 @@ function stopRadioProgressLoop(){ if (radioProgressInterval) { clearInterval(rad
    СТАРТ
 ============================================================ */
 function showStartOverlay(){
+  const mode = MODES[selectedMode];
   const totalOwned = state.owned.length;
   const totalSkins = SKINS.length;
   const musicCount = Radio.getPlaylist().length;
-  let line = `Собирай фрукты · Открывай кейсы · Лови баффы`;
+  let line = `Режим: <b style="color:${mode.colorA}">${mode.icon} ${mode.name}</b>`;
   line += `<br><span style="color:#9a9ba4;font-size:12px">Привет, ${escapeHtml(profile.name)}! · Скинов: ${totalOwned}/${totalSkins}`;
   if (musicCount > 0) line += ` · 🎵 ${musicCount}`;
   line += `</span>`;
-  ovTitle.textContent = state.gamesPlayed > 0 ? 'С возвращением!' : 'Змейка v2.5.1';
+  ovTitle.textContent = state.gamesPlayed > 0 ? 'С возвращением!' : 'Змейка v2.6';
   ovText.innerHTML = line;
   ovBtn.textContent = state.gamesPlayed > 0 ? '▶ Продолжить' : '▶ Играть';
   overlay.classList.remove('hidden');
@@ -3283,6 +3731,7 @@ running = false;
 timerRunning = false;
 showStartOverlay();
 
+renderModes();
 renderCases();
 renderCollection();
 renderProfile();
