@@ -3,1688 +3,3304 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#0a0a15">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Pixel Racing Tycoon</title>
+<title>🐍 Змейка — Fun Edition v2.5.1</title>
 <style>
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    -webkit-tap-highlight-color: transparent;
-    -webkit-touch-callout: none;
-  }
-  html, body {
-    height: 100%;
-    width: 100%;
-    overflow: hidden;
-    background: #0a0a15;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Courier New', monospace;
-    color: #eee;
-    user-select: none;
-    -webkit-user-select: none;
-    overscroll-behavior: none;
-    touch-action: manipulation;
-  }
-  #app {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    height: 100dvh;
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
+  * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --gap: 18px;
+    --radius: 20px;
+    --bg-deep: #1c1d22;
+    --bg-panel: #26272e;
+    --bg-panel-2: #2d2e36;
+    --bg-elevated: #33343d;
+    --bg-hover: #3a3b45;
+    --bg-active: #42434e;
+    --border-soft: rgba(255,255,255,.06);
+    --border-mid: rgba(255,255,255,.1);
+    --text-primary: #e8e9ed;
+    --text-secondary: #9a9ba4;
+    --text-muted: #6b6c76;
+    --accent: #7c8aff;
+    --accent-2: #b5a4d4;
+    --accent-3: #e0a47a;
+    --success: #7fb87f;
+    --danger: #d07a7a;
+    --common: #8a8e96;
+    --uncommon: #7fb87f;
+    --rare: #5c9dff;
+    --epic: #b57aff;
+    --legendary: #ffb545;
+    --shadow-soft: 0 1px 2px rgba(0,0,0,.3), 0 2px 8px rgba(0,0,0,.2);
+    --shadow-mid: 0 2px 4px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25);
+    --shadow-deep: 0 4px 8px rgba(0,0,0,.35), 0 16px 40px rgba(0,0,0,.3);
+    --panel-bg: var(--bg-panel);
+    --panel-shadow: var(--shadow-mid);
   }
 
-  #top-bar {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 14px;
-    background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
-    border-bottom: 2px solid #000;
-    gap: 10px;
-  }
-  #money-wrap {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex: 1;
-    min-width: 0;
-  }
-  .money-icon { font-size: 22px; line-height: 1; }
-  #money {
-    font-size: 22px;
-    font-weight: bold;
-    color: #ffcc00;
-    transition: color 0.3s;
-    font-variant-numeric: tabular-nums;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  #money.pulse { color: #4caf50; }
-  #stats-mini {
-    display: flex;
-    gap: 10px;
-    font-size: 11px;
-    color: #888;
-    flex-shrink: 0;
-  }
-  #stats-mini .val {
-    color: #eee;
-    font-weight: bold;
-    font-size: 13px;
-    display: block;
-  }
+  html, body { height: 100%; overflow: hidden; }
 
-  #track-area {
-    flex-shrink: 0;
-    position: relative;
-    background: #050510;
+  body {
+    font-family: -apple-system, 'Segoe UI', 'Inter', Roboto, sans-serif;
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
-    aspect-ratio: 16 / 9;
-    width: 100%;
-  }
-  #track-canvas {
-    display: block;
-    width: 100%;
-    height: 100%;
-    image-rendering: pixelated;
-    image-rendering: crisp-edges;
-    background: #2d5a2d;
-  }
-  .hud {
-    position: absolute;
-    background: rgba(0,0,0,0.75);
-    border: 1px solid #444;
-    border-radius: 6px;
-    padding: 5px 8px;
-    font-size: 10px;
-    line-height: 1.4;
-    pointer-events: none;
-    z-index: 5;
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-  }
-  #hud-topleft { top: 6px; left: 6px; }
-  #hud-topright {
-    top: 6px;
-    right: 6px;
-    min-width: 130px;
-    font-size: 10px;
-  }
-  #hud-topright .hud-title {
-    color: #888;
-    font-size: 9px;
-    margin-bottom: 2px;
-    letter-spacing: 0.5px;
-  }
-  #hud-topright .row {
-    display: flex;
-    justify-content: space-between;
-    gap: 8px;
-    padding: 1px 0;
-  }
-  #hud-topright .row.player {
-    color: #ffcc00;
-    font-weight: bold;
-  }
-  #hud-topright .rank {
-    font-weight: bold;
-    font-size: 10px;
-    padding: 0 4px;
-    border-radius: 3px;
-    margin-left: 4px;
-  }
-  .rank-S { background: #f59e0b; color: #000; }
-  .rank-A { background: #a855f7; color: #fff; }
-  .rank-B { background: #3b82f6; color: #fff; }
-  .rank-C { background: #6b7280; color: #fff; }
-  .rank-D { background: #9ca3af; color: #000; }
-
-  .hud-line { white-space: nowrap; }
-  .hud-line b { color: #ffcc00; }
-
-  #content {
-    flex: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
-    padding: 10px;
-    padding-bottom: 20px;
-    background: #0f1626;
-  }
-  #content::-webkit-scrollbar { width: 4px; }
-  #content::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
-
-  #tab-bar {
-    flex-shrink: 0;
-    display: flex;
-    background: #16213e;
-    border-top: 2px solid #000;
-    padding-bottom: env(safe-area-inset-bottom, 0);
-  }
-  .tab {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 8px 4px;
-    cursor: pointer;
-    background: #16213e;
-    transition: background 0.15s;
-    min-height: 56px;
-    color: #888;
-    font-size: 10px;
-    gap: 3px;
-  }
-  .tab:active { background: #1a2a4a; }
-  .tab.active {
-    background: #1a2a4a;
-    color: #ffcc00;
-    border-top: 3px solid #ffcc00;
-    padding-top: 5px;
-  }
-  .tab-icon { font-size: 22px; line-height: 1; }
-  .tab-label { font-size: 10px; font-weight: bold; letter-spacing: 0.3px; }
-
-  h2 {
-    font-size: 15px;
-    margin-bottom: 10px;
-    color: #ffcc00;
-    letter-spacing: 0.5px;
+    -webkit-font-smoothing: antialiased;
   }
 
-  .hint {
-    font-size: 11px;
-    color: #888;
-    line-height: 1.5;
-    padding: 8px 10px;
-    background: #0a0f1a;
-    border-left: 3px solid #3b82f6;
-    border-radius: 4px;
-    margin-bottom: 10px;
-  }
-  .hint.warn { border-left-color: #f59e0b; }
-
-  .item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px;
-    margin-bottom: 8px;
-    background: #1a1a2e;
-    border: 2px solid #333;
-    border-radius: 8px;
-    position: relative;
-    overflow: hidden;
-  }
-  .item.owned { border-color: #4caf50; }
-  .item.active {
-    border-color: #ffcc00;
-    box-shadow: 0 0 0 2px rgba(255,204,0,0.25);
-  }
-  .item.rarity-common    { border-left: 5px solid #aaa; }
-  .item.rarity-rare      { border-left: 5px solid #3b82f6; }
-  .item.rarity-epic      { border-left: 5px solid #a855f7; }
-  .item.rarity-legendary { border-left: 5px solid #f59e0b; }
-
-  .item-preview {
-    width: 52px;
-    height: 36px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #0a0a1a;
-    border-radius: 4px;
-    border: 1px solid #222;
-    position: relative;
-  }
-  .item-preview canvas {
-    image-rendering: pixelated;
-    image-rendering: crisp-edges;
-  }
-
-  .item-info { flex: 1; min-width: 0; }
-  .item-name {
-    font-size: 14px;
-    font-weight: bold;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-bottom: 2px;
-  }
-  .item-rarity {
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 4px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .item-stats {
-    font-size: 11px;
-    color: #aaa;
-    line-height: 1.4;
-  }
-  .item-stats b { color: #eee; }
-  .rank-badge {
-    display: inline-block;
-    font-size: 10px;
-    font-weight: bold;
-    padding: 1px 5px;
-    border-radius: 3px;
-  }
-
-  .item-action {
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 6px;
-    min-width: 90px;
-  }
-  .item-price {
-    font-size: 12px;
-    font-weight: bold;
-    color: #ffcc00;
-    white-space: nowrap;
-  }
-  .item-price.owned { color: #4caf50; }
-
-  button {
-    font-family: inherit;
-    background: #e94560;
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    padding: 10px 14px;
-    cursor: pointer;
-    font-size: 12px;
-    font-weight: bold;
-    min-height: 40px;
-    min-width: 80px;
-    transition: background 0.15s, transform 0.05s;
-    touch-action: manipulation;
-  }
-  button:active:not(:disabled) {
-    background: #c73a52;
-    transform: scale(0.97);
-  }
-  button:disabled {
-    background: #333;
-    color: #666;
-    cursor: not-allowed;
-  }
-  button.equip { background: #4caf50; }
-  button.equip:active { background: #3d8b40; }
-  button.danger { background: #555; }
-  button.danger:active { background: #444; }
-
-  .stat-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 14px;
-    background: #1a1a2e;
-    border: 2px solid #333;
-    border-radius: 8px;
-    margin-bottom: 6px;
-    font-size: 13px;
-  }
-  .stat-row .label { color: #aaa; }
-  .stat-row .value {
-    font-weight: bold;
-    color: #fff;
-    font-variant-numeric: tabular-nums;
-  }
-  .stat-row .value.gold { color: #ffcc00; }
-  .stat-row .value.green { color: #4caf50; }
-
-  .race-info {
-    background: #1a1a2e;
-    border: 2px solid #333;
-    border-radius: 8px;
-    padding: 14px;
-    margin-bottom: 10px;
-  }
-  .race-info .row {
-    display: flex;
-    justify-content: space-between;
-    padding: 6px 0;
-    font-size: 13px;
-    border-bottom: 1px solid #222;
-  }
-  .race-info .row:last-child { border-bottom: none; }
-  .race-info .label { color: #888; }
-  .race-info .value { font-weight: bold; }
-  .race-info .value.gold { color: #ffcc00; }
-  .race-info .value.green { color: #4caf50; }
-
-  .big-btn {
-    width: 100%;
-    padding: 14px;
-    font-size: 15px;
-    min-height: 52px;
-    margin-top: 6px;
-  }
-
-  .class-table {
-    background: #1a1a2e;
-    border: 2px solid #333;
-    border-radius: 8px;
-    padding: 10px;
-    margin-bottom: 10px;
-    font-size: 11px;
-  }
-  .class-table .class-row {
-    display: flex;
-    align-items: center;
-    padding: 6px 4px;
-    border-bottom: 1px solid #222;
-    gap: 8px;
-  }
-  .class-table .class-row:last-child { border-bottom: none; }
-  .class-table .class-row.current {
-    background: rgba(255,204,0,0.1);
-    border-radius: 4px;
-    padding-left: 8px;
-    padding-right: 8px;
-  }
-  .class-rank {
-    font-weight: bold;
-    font-size: 13px;
-    width: 22px;
-    text-align: center;
-    padding: 2px 0;
-    border-radius: 4px;
-  }
-  .class-name { flex: 1; color: #ccc; }
-  .class-speed { color: #ffcc00; font-weight: bold; font-family: monospace; }
-
-  #modal-overlay {
+  body::before {
+    content: '';
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.85);
-    display: none;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(255,255,255,.02) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(255,255,255,.015) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ===== УГЛОВЫЕ КНОПКИ ===== */
+  .corner-btn {
+    position: fixed;
+    width: 46px; height: 46px;
+    border-radius: 14px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-soft);
+    color: var(--text-primary);
+    font-size: 20px;
+    cursor: pointer;
+    z-index: 100;
+    display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1000;
-    padding: 20px;
+    transition: background .15s, transform .1s;
+    box-shadow: var(--shadow-mid);
+    font-family: inherit;
   }
-  #modal-overlay.show { display: flex; }
-  #modal {
-    background: #1a1a2e;
-    border: 2px solid #444;
-    border-radius: 12px;
-    padding: 20px;
-    max-width: 340px;
-    width: 100%;
+  .corner-btn:hover { background: var(--bg-hover); }
+  .corner-btn:active { transform: scale(.92); }
+
+  .sound-toggle { top: calc(14px + env(safe-area-inset-top)); right: 14px; }
+  .sound-toggle.muted { background: var(--bg-panel); color: var(--text-muted); opacity: .65; }
+  .sound-toggle.muted::after {
+    content: ''; position: absolute; width: 26px; height: 2px;
+    background: currentColor; transform: rotate(-45deg); border-radius: 2px;
   }
-  #modal h3 {
-    font-size: 16px;
-    color: #ffcc00;
-    margin-bottom: 10px;
+
+  .radio-toggle {
+    bottom: calc(14px + env(safe-area-inset-bottom));
+    left: 14px;
+    background: linear-gradient(145deg, #35374a, #26283a);
+    border-color: rgba(124,138,255,.25);
+    font-size: 22px;
+    position: fixed;
   }
-  #modal p {
-    font-size: 13px;
-    color: #ccc;
-    line-height: 1.5;
-    margin-bottom: 16px;
+  .radio-toggle:hover {
+    background: linear-gradient(145deg, #3d3f55, #2d2f45);
+    border-color: rgba(124,138,255,.4);
   }
-  .modal-buttons {
+  .radio-toggle.playing::before {
+    content: ''; position: absolute; inset: -3px; border-radius: 17px;
+    border: 2px solid var(--accent); opacity: .6;
+    animation: radioPulse 2s infinite ease-out; pointer-events: none;
+  }
+  @keyframes radioPulse { 0% { transform: scale(1); opacity: .6; } 100% { transform: scale(1.25); opacity: 0; } }
+  .radio-toggle.playing::after {
+    content: ''; position: absolute; top: 6px; right: 6px;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #7fb87f; box-shadow: 0 0 6px rgba(127,184,127,.8);
+    animation: radioDot 1.2s infinite alternate;
+  }
+  @keyframes radioDot { from { opacity: 1; transform: scale(1); } to { opacity: .55; transform: scale(.85); } }
+
+  .game-wrap {
+    position: relative; z-index: 1;
+    display: flex; gap: var(--gap);
+    padding: var(--gap);
+    width: 100%; height: 100%;
+    max-width: 1400px; max-height: 100vh;
+  }
+
+  .board-panel {
+    position: relative;
+    padding: 12px;
+    background: var(--panel-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--panel-shadow);
+    border: 1px solid var(--border-soft);
+    display: flex; flex-direction: column;
+    flex-shrink: 0;
+  }
+
+  .hud {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 10px; padding: 0 2px; gap: 8px;
+  }
+  .hud .stat {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 13.5px; font-weight: 600;
+    background: var(--bg-elevated);
+    padding: 6px 12px; border-radius: 10px;
+    border: 1px solid var(--border-soft);
+    white-space: nowrap;
+    color: var(--text-secondary);
+  }
+  .hud .stat .val { color: var(--text-primary); font-variant-numeric: tabular-nums; }
+  .hud .stat .val.apples { color: var(--accent-3); }
+  .hud .stat .val.timer { color: var(--accent); }
+  .hud .stat .val.score { color: var(--accent-2); }
+
+  .canvas-wrap {
+    position: relative; line-height: 0;
+    border-radius: 14px; overflow: hidden;
+    background: var(--bg-panel-2);
+  }
+
+  canvas {
+    display: block;
+    border-radius: 14px;
+    background: #232428;
+    touch-action: none;
+    width: 100%; height: auto;
+    aspect-ratio: 1 / 1;
+  }
+
+  /* ===== Панель усилителей ПОД полем ===== */
+  .buffs-bar {
     display: flex;
     gap: 8px;
-  }
-  .modal-buttons button {
-    flex: 1;
-    min-height: 44px;
-  }
-  .modal-buttons .cancel { background: #555; }
-  .modal-buttons .cancel:active { background: #444; }
-
-  #toast-container {
-    position: fixed;
-    left: 50%;
-    transform: translateX(-50%);
-    bottom: calc(72px + env(safe-area-inset-bottom, 0));
-    z-index: 500;
-    pointer-events: none;
-    display: flex;
-    flex-direction: column;
+    margin-top: 10px;
+    padding: 8px 4px 2px 4px;
+    min-height: 62px;
+    justify-content: center;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 6px;
-    width: 90%;
-    max-width: 320px;
+    transition: all .25s;
+  }
+  .buffs-bar.empty::after {
+    content: 'Здесь появятся активные усилители';
+    color: var(--text-muted);
+    font-size: 11.5px;
+    font-style: italic;
+    letter-spacing: .2px;
+  }
+
+  .buff-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px 6px 6px;
+    border-radius: 12px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-mid);
+    position: relative;
+    overflow: hidden;
+    min-width: 110px;
+    animation: buffIn .35s cubic-bezier(.2,.9,.3,1.3);
+    box-shadow: var(--shadow-soft);
+  }
+  @keyframes buffIn {
+    from { opacity: 0; transform: scale(.7) translateY(-10px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .buff-chip.ending { animation: buffEnding .8s infinite; }
+  @keyframes buffEnding { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+
+  .buff-chip .buff-icon {
+    width: 36px; height: 36px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    background: linear-gradient(135deg, var(--buff-color-a), var(--buff-color-b));
+    box-shadow: inset 0 -2px 6px rgba(0,0,0,.3), inset 0 2px 4px rgba(255,255,255,.2);
+    flex-shrink: 0;
+    position: relative;
+  }
+  .buff-chip .buff-icon::after {
+    content: '';
+    position: absolute;
+    top: 4px; left: 6px;
+    width: 12px; height: 5px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.4);
+    filter: blur(1.5px);
+  }
+
+  .buff-chip .buff-info { display: flex; flex-direction: column; gap: 1px; flex: 1; min-width: 0; }
+  .buff-chip .buff-name { font-size: 11.5px; font-weight: 700; color: var(--text-primary); white-space: nowrap; }
+  .buff-chip .buff-time { font-size: 12.5px; font-weight: 700; color: var(--buff-color-a); font-variant-numeric: tabular-nums; }
+  .buff-chip .buff-progress {
+    position: absolute; bottom: 0; left: 0; height: 3px;
+    background: linear-gradient(90deg, var(--buff-color-a), var(--buff-color-b));
+    transition: width .1s linear; border-radius: 0 3px 3px 0;
+  }
+
+  .buff-chip.magnet    { --buff-color-a: #ff8ba7; --buff-color-b: #d04a6e; }
+  .buff-chip.speed     { --buff-color-a: #ffe066; --buff-color-b: #d4a017; }
+  .buff-chip.ghost     { --buff-color-a: #b5a4d4; --buff-color-b: #7a6a9a; }
+  .buff-chip.multifruit{ --buff-color-a: #7fb87f; --buff-color-b: #4a8a4a; }
+
+  .pause-indicator {
+    position: absolute; inset: 0;
+    display: none;
+    align-items: center; justify-content: center;
+    background: rgba(28,29,34,.7);
+    backdrop-filter: blur(4px);
+    z-index: 8;
+    border-radius: 14px;
+    pointer-events: none;
+    animation: pauseFadeIn .25s ease;
+  }
+  .pause-indicator.show { display: flex; }
+  @keyframes pauseFadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .pause-icon {
+    width: 96px; height: 96px;
+    border-radius: 50%;
+    background: rgba(51,52,61,.85);
+    border: 2px solid rgba(124,138,255,.35);
+    display: flex; align-items: center; justify-content: center;
+    gap: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.5);
+    animation: pausePulse 2s infinite ease-in-out;
+  }
+  @keyframes pausePulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04); } }
+  .pause-icon .bar {
+    width: 10px; height: 38px;
+    background: var(--accent); border-radius: 4px;
+    box-shadow: 0 0 12px rgba(124,138,255,.6);
+  }
+  .pause-label {
+    position: absolute; bottom: 22%;
+    font-size: 13px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--text-primary); opacity: .8;
+  }
+
+  /* ===== МЕНЮ (бывший магазин) ===== */
+  .shop {
+    background: var(--panel-bg);
+    border-radius: var(--radius);
+    padding: 16px;
+    box-shadow: var(--panel-shadow);
+    border: 1px solid var(--border-soft);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .shop-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px; flex-shrink: 0; gap: 8px;
+  }
+  .shop h2 { font-size: 15px; color: var(--text-primary); letter-spacing: .3px; font-weight: 600; }
+  .shop-wallet {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 12px; font-weight: 600;
+    color: var(--accent-3);
+    background: var(--bg-elevated);
+    padding: 4px 9px; border-radius: 8px;
+    border: 1px solid var(--border-soft);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .shop-tabs {
+    display: flex; gap: 4px; margin-bottom: 12px; flex-shrink: 0;
+    background: var(--bg-elevated); padding: 4px; border-radius: 10px;
+  }
+  .shop-tab {
+    flex: 1; padding: 8px 4px;
+    border-radius: 7px;
+    background: transparent; border: none;
+    color: var(--text-secondary);
+    font-size: 11.5px; font-weight: 600;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+    font-family: inherit;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .shop-tab:hover { color: var(--text-primary); }
+  .shop-tab.active {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .shop-pane {
+    display: none; flex: 1; min-height: 0;
+    flex-direction: column;
+  }
+  .shop-pane.active { display: flex; }
+
+  .shop-list {
+    overflow-y: auto; overflow-x: hidden;
+    display: flex; flex-direction: column; gap: 10px;
+    padding-right: 6px; flex: 1; min-height: 0;
+    scrollbar-width: thin; scrollbar-color: var(--border-mid) transparent;
+    -webkit-overflow-scrolling: touch;
+  }
+  .shop-list::-webkit-scrollbar { width: 6px; }
+  .shop-list::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 10px; }
+
+  .case-card {
+    position: relative; border-radius: 14px; padding: 14px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-soft);
+    cursor: pointer;
+    transition: transform .15s, border-color .15s, background .15s;
+    overflow: hidden;
+  }
+  .case-card:hover { transform: translateY(-2px); border-color: var(--border-mid); background: var(--bg-hover); }
+  .case-card:active { transform: translateY(0) scale(.99); }
+  .case-card::before {
+    content: ''; position: absolute; inset: 0; border-radius: 14px; padding: 1px;
+    background: linear-gradient(135deg, var(--case-color-a), var(--case-color-b));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    opacity: .5; pointer-events: none; transition: opacity .15s;
+  }
+  .case-card:hover::before { opacity: .9; }
+  .case-card.emerald { --case-color-a: #2fbf71; --case-color-b: #0f7a4a; }
+  .case-card.ruby    { --case-color-a: #ff4a6e; --case-color-b: #b02040; }
+  .case-card.sapphire{ --case-color-a: #4a9eff; --case-color-b: #1a4fb8; }
+  .case-card.amethyst{ --case-color-a: #b57aff; --case-color-b: #6a2fc4; }
+
+  .case-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .case-icon {
+    width: 52px; height: 52px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px;
+    background: linear-gradient(135deg, var(--case-color-a), var(--case-color-b));
+    box-shadow: 0 4px 14px rgba(0,0,0,.35), inset 0 -4px 8px rgba(0,0,0,.3), inset 0 4px 8px rgba(255,255,255,.15);
+    flex-shrink: 0; position: relative; overflow: hidden;
+  }
+  .case-icon::after {
+    content: ''; position: absolute; top: 6px; left: 8px;
+    width: 20px; height: 8px; border-radius: 50%;
+    background: rgba(255,255,255,.35); filter: blur(2px);
+  }
+  .case-info { flex: 1; min-width: 0; }
+  .case-name { font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 3px; }
+  .case-sub { font-size: 11px; color: var(--text-secondary); }
+  .case-price {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: 10px; border-top: 1px solid var(--border-soft);
+    font-size: 12px;
+  }
+  .case-price-label { color: var(--text-muted); }
+  .case-price-val { color: var(--accent-3); font-weight: 700; font-size: 13px; font-variant-numeric: tabular-nums; }
+  .case-price-val.cant-afford { color: var(--danger); }
+
+  .collection-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px; overflow-y: auto;
+    padding-right: 6px; flex: 1; min-height: 0;
+    scrollbar-width: thin; scrollbar-color: var(--border-mid) transparent;
+    -webkit-overflow-scrolling: touch;
+  }
+  .collection-grid::-webkit-scrollbar { width: 6px; }
+  .collection-grid::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 10px; }
+
+  .skin-tile {
+    position: relative; border-radius: 12px; padding: 10px 8px;
+    background: var(--bg-elevated); border: 1px solid var(--border-soft);
+    cursor: pointer; transition: transform .15s, border-color .15s;
+    text-align: center; overflow: hidden;
+  }
+  .skin-tile:hover { transform: translateY(-2px); }
+  .skin-tile:active { transform: scale(.97); }
+  .skin-tile.active { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+  .skin-tile.locked { opacity: .35; cursor: default; }
+  .skin-tile.locked:hover { transform: none; }
+  .skin-tile-preview {
+    width: 100%; aspect-ratio: 1 / 1;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; margin-bottom: 6px;
+    box-shadow: inset 0 0 15px rgba(0,0,0,.4);
+    position: relative; overflow: hidden;
+  }
+  .skin-tile.locked .skin-tile-preview { filter: grayscale(1) brightness(.4); }
+  .skin-tile-name {
+    font-size: 11px; font-weight: 600; color: var(--text-primary);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    margin-bottom: 3px;
+  }
+  .skin-tile.locked .skin-tile-name { color: var(--text-muted); }
+
+  .rarity-badge {
+    display: inline-block; font-size: 9px; font-weight: 700;
+    letter-spacing: .6px; text-transform: uppercase;
+    padding: 2px 6px; border-radius: 4px;
+    background: var(--bg-active); color: var(--text-muted);
+  }
+  .rarity-badge.common    { background: rgba(138,142,150,.18); color: var(--common); }
+  .rarity-badge.uncommon  { background: rgba(127,184,127,.18); color: var(--uncommon); }
+  .rarity-badge.rare      { background: rgba(92,157,255,.18); color: var(--rare); }
+  .rarity-badge.epic      { background: rgba(181,122,255,.18); color: var(--epic); }
+  .rarity-badge.legendary {
+    background: linear-gradient(90deg, rgba(255,181,69,.25), rgba(255,215,120,.25));
+    color: var(--legendary);
+    animation: legendaryBadge 2s infinite alternate;
+  }
+  @keyframes legendaryBadge { from { box-shadow: 0 0 0 rgba(255,181,69,0); } to { box-shadow: 0 0 12px rgba(255,181,69,.5); } }
+
+  .btn-play {
+    margin-top: 12px; padding: 13px;
+    font-size: 14px; font-weight: 700; letter-spacing: .8px;
+    text-transform: uppercase;
+    color: #1a1b20; background: var(--accent);
+    border: none; border-radius: 12px;
+    cursor: pointer;
+    transition: background .15s, transform .1s;
+    font-family: inherit; flex-shrink: 0;
+    box-shadow: var(--shadow-soft);
+  }
+  .btn-play:hover { background: #8b97ff; }
+  .btn-play:active { transform: scale(.98); }
+
+  .overlay {
+    position: absolute; inset: 12px;
+    border-radius: 14px;
+    background: rgba(28,29,34,.92);
+    backdrop-filter: blur(6px);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 14px; text-align: center;
+    z-index: 10; padding: 20px;
+    animation: fadeIn .25s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .overlay.hidden { display: none; }
+  .overlay h1 { font-size: clamp(22px, 5vw, 32px); color: var(--text-primary); letter-spacing: -.5px; font-weight: 700; }
+  .overlay p { color: var(--text-secondary); font-size: clamp(12px, 2.5vw, 14px); line-height: 1.7; }
+  .overlay .big-stat { font-size: clamp(18px, 3.5vw, 22px); color: var(--accent-3); font-weight: 700; }
+  .btn {
+    padding: 12px 30px;
+    font-size: 14px; font-weight: 700;
+    border: none; border-radius: 12px;
+    cursor: pointer; font-family: inherit;
+    transition: background .15s, transform .1s;
+    background: var(--accent); color: #1a1b20;
+    letter-spacing: .5px; box-shadow: var(--shadow-soft);
+  }
+  .btn:hover { background: #8b97ff; }
+  .btn:active { transform: scale(.98); }
+
+  /* ===== ПРОФИЛЬ ВНУТРИ МЕНЮ ===== */
+  .profile-in-menu {
+    display: flex; flex-direction: column; gap: 12px;
+    overflow-y: auto;
+    padding-right: 6px;
+    flex: 1; min-height: 0;
+    scrollbar-width: thin; scrollbar-color: var(--border-mid) transparent;
+  }
+  .profile-in-menu::-webkit-scrollbar { width: 6px; }
+  .profile-in-menu::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 10px; }
+
+  .profile-avatar-row {
+    display: flex; align-items: center; gap: 14px;
+    padding: 4px 0;
+    flex-shrink: 0;
+  }
+  .profile-avatar {
+    width: 64px; height: 64px; border-radius: 16px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px;
+    box-shadow: 0 4px 14px rgba(124,138,255,.35), inset 0 -4px 8px rgba(0,0,0,.25), inset 0 4px 8px rgba(255,255,255,.15);
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform .15s;
+  }
+  .profile-avatar:hover { transform: scale(1.05); }
+  .profile-avatar:active { transform: scale(.98); }
+  .profile-avatar::after {
+    content: ''; position: absolute; top: 6px; left: 10px;
+    width: 22px; height: 8px; border-radius: 50%;
+    background: rgba(255,255,255,.4);
+    filter: blur(2px);
+  }
+  .profile-name-block { flex: 1; min-width: 0; }
+  .profile-name {
+    font-size: 17px; font-weight: 700;
+    color: var(--text-primary);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    cursor: pointer;
+    padding: 2px 6px; margin-left: -6px;
+    border-radius: 6px;
+    transition: background .15s;
+  }
+  .profile-name:hover { background: var(--bg-elevated); }
+  .profile-name-edit { font-size: 10.5px; color: var(--text-muted); margin-top: 3px; letter-spacing: .2px; }
+
+  .profile-stats {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .profile-stat {
+    background: rgba(0,0,0,.2);
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    padding: 10px;
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .profile-stat .label {
+    font-size: 10.5px; color: var(--text-muted);
+    letter-spacing: .3px; text-transform: uppercase;
+    font-weight: 600;
+  }
+  .profile-stat .value {
+    font-size: 17px; font-weight: 700;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+  }
+  .profile-stat .value.gold { color: var(--legendary); }
+  .profile-stat .value.blue { color: var(--accent); }
+  .profile-stat .value.green { color: var(--success); }
+
+  .profile-section-title {
+    font-size: 11px; font-weight: 700; letter-spacing: 1.2px;
+    text-transform: uppercase; color: var(--text-muted);
+    padding-top: 6px;
+    flex-shrink: 0;
+  }
+
+  .rarity-progress {
+    display: flex; flex-direction: column; gap: 6px;
+    flex-shrink: 0;
+  }
+  .rarity-row {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 11.5px;
+  }
+  .rarity-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .rarity-row.common    .rarity-dot { background: var(--common); }
+  .rarity-row.uncommon  .rarity-dot { background: var(--uncommon); }
+  .rarity-row.rare      .rarity-dot { background: var(--rare); }
+  .rarity-row.epic      .rarity-dot { background: var(--epic); }
+  .rarity-row.legendary .rarity-dot { background: var(--legendary); box-shadow: 0 0 8px var(--legendary); }
+  .rarity-row .label { color: var(--text-secondary); flex: 1; font-weight: 600; }
+  .rarity-row .count { color: var(--text-primary); font-weight: 700; font-variant-numeric: tabular-nums; }
+  .rarity-row .count.done { color: var(--success); }
+
+  .btn-danger {
+    padding: 10px;
+    font-size: 12px; font-weight: 700;
+    border-radius: 10px; cursor: pointer;
+    background: rgba(208,122,122,.15);
+    border: 1px solid rgba(208,122,122,.4);
+    color: var(--danger);
+    font-family: inherit;
+    transition: background .15s;
+    margin-top: 4px;
+    flex-shrink: 0;
+  }
+  .btn-danger:hover { background: rgba(208,122,122,.25); }
+
+  /* ===== ОВЕРЛЕЙ ОТКРЫТИЯ КЕЙСА ===== */
+  .case-open-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(10,10,16,.94);
+    backdrop-filter: blur(8px);
+    z-index: 1000;
+    flex-direction: column; align-items: center; justify-content: center;
+    padding: 20px;
+    animation: fadeIn .3s ease;
+  }
+  .case-open-overlay.show { display: flex; }
+
+  .case-open-header { text-align: center; margin-bottom: 30px; flex-shrink: 0; }
+  .case-open-title { font-size: 20px; font-weight: 700; color: var(--text-primary); letter-spacing: .5px; }
+  .case-open-sub { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+
+  .roulette-wrap {
+    position: relative; width: 100%; max-width: 720px;
+    height: 130px; margin-bottom: 30px;
+    overflow: hidden; border-radius: 16px;
+    background: linear-gradient(180deg, rgba(0,0,0,.5), rgba(0,0,0,.2));
+    border: 1px solid var(--border-mid);
+    box-shadow: inset 0 0 30px rgba(0,0,0,.6);
+    flex-shrink: 0;
+  }
+  .roulette-wrap::before, .roulette-wrap::after {
+    content: ''; position: absolute; top: 0; bottom: 0; width: 80px;
+    z-index: 3; pointer-events: none;
+  }
+  .roulette-wrap::before { left: 0; background: linear-gradient(90deg, rgba(10,10,16,1), rgba(10,10,16,0)); }
+  .roulette-wrap::after { right: 0; background: linear-gradient(-90deg, rgba(10,10,16,1), rgba(10,10,16,0)); }
+
+  .roulette-marker {
+    position: absolute; top: 0; bottom: 0; left: 50%;
+    width: 3px;
+    background: linear-gradient(180deg, #ffb545, #ff5e7a);
+    transform: translateX(-50%); z-index: 4;
+    box-shadow: 0 0 12px rgba(255,181,69,.8);
+    pointer-events: none;
+  }
+  .roulette-marker::before, .roulette-marker::after {
+    content: ''; position: absolute; left: 50%;
+    transform: translateX(-50%);
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+  }
+  .roulette-marker::before { top: -2px; border-top: 10px solid #ffb545; }
+  .roulette-marker::after { bottom: -2px; border-bottom: 10px solid #ffb545; }
+
+  .roulette-track {
+    position: absolute; top: 0; left: 0;
+    height: 100%; display: flex; align-items: center;
+    transition: transform 5s cubic-bezier(.15, .6, .2, 1);
+    will-change: transform; padding: 0 20px;
+  }
+
+  .roulette-item {
+    flex-shrink: 0;
+    width: 100px; height: 106px;
+    margin: 0 5px; border-radius: 12px;
+    background: var(--bg-elevated);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 4px; border: 2px solid;
+    position: relative; overflow: hidden;
+  }
+  .roulette-item.common    { border-color: var(--common); background: linear-gradient(160deg, rgba(138,142,150,.2), rgba(138,142,150,.05)); }
+  .roulette-item.uncommon  { border-color: var(--uncommon); background: linear-gradient(160deg, rgba(127,184,127,.2), rgba(127,184,127,.05)); }
+  .roulette-item.rare      { border-color: var(--rare); background: linear-gradient(160deg, rgba(92,157,255,.2), rgba(92,157,255,.05)); }
+  .roulette-item.epic      { border-color: var(--epic); background: linear-gradient(160deg, rgba(181,122,255,.2), rgba(181,122,255,.05)); }
+  .roulette-item.legendary {
+    border-color: var(--legendary);
+    background: linear-gradient(160deg, rgba(255,181,69,.25), rgba(255,215,120,.08));
+    animation: legendaryItem 1.5s infinite alternate;
+  }
+  @keyframes legendaryItem {
+    from { box-shadow: 0 0 8px rgba(255,181,69,.3); }
+    to   { box-shadow: 0 0 24px rgba(255,181,69,.8), inset 0 0 20px rgba(255,181,69,.3); }
+  }
+
+  .roulette-item-icon {
+    width: 52px; height: 52px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px;
+    box-shadow: inset 0 0 12px rgba(0,0,0,.5);
+  }
+  .roulette-item-name {
+    font-size: 10px; font-weight: 600; color: var(--text-primary);
+    text-align: center; padding: 0 4px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    max-width: 100%;
+  }
+
+  .case-result {
+    display: none; flex-direction: column; align-items: center;
+    gap: 18px;
+    animation: resultIn .5s cubic-bezier(.2,.9,.3,1.3);
+  }
+  .case-result.show { display: flex; }
+  @keyframes resultIn { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: scale(1); } }
+
+  .case-result-icon {
+    width: 140px; height: 140px; border-radius: 24px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 70px; position: relative;
+    box-shadow: 0 8px 32px rgba(0,0,0,.6), inset 0 -6px 16px rgba(0,0,0,.4), inset 0 6px 16px rgba(255,255,255,.2);
+    animation: resultFloat 3s infinite ease-in-out;
+  }
+  @keyframes resultFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+  .case-result-icon::after {
+    content: ''; position: absolute; inset: -20px;
+    border-radius: 30px; background: inherit;
+    filter: blur(20px); opacity: .5;
+    z-index: -1;
+    animation: resultGlow 2s infinite alternate;
+  }
+  @keyframes resultGlow { from { opacity: .3; } to { opacity: .7; } }
+
+  .case-result-name {
+    font-size: 22px; font-weight: 800; color: var(--text-primary);
+    text-align: center; letter-spacing: -.3px;
+  }
+  .case-result-rarity {
+    font-size: 12px; font-weight: 700; letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 5px 14px; border-radius: 8px;
+  }
+  .case-result-rarity.common    { background: rgba(138,142,150,.2); color: var(--common); }
+  .case-result-rarity.uncommon  { background: rgba(127,184,127,.2); color: var(--uncommon); }
+  .case-result-rarity.rare      { background: rgba(92,157,255,.2); color: var(--rare); }
+  .case-result-rarity.epic      { background: rgba(181,122,255,.2); color: var(--epic); }
+  .case-result-rarity.legendary {
+    background: linear-gradient(90deg, rgba(255,181,69,.3), rgba(255,215,120,.3));
+    color: var(--legendary);
+  }
+
+  .case-result-actions {
+    display: flex; gap: 10px; margin-top: 10px;
+    flex-wrap: wrap; justify-content: center;
+  }
+  .btn-secondary {
+    padding: 12px 24px; font-size: 13px; font-weight: 700;
+    border-radius: 12px; cursor: pointer; font-family: inherit;
+    transition: background .15s, transform .1s;
+    background: var(--bg-elevated); color: var(--text-primary);
+    border: 1px solid var(--border-mid);
+    letter-spacing: .3px;
+  }
+  .btn-secondary:hover { background: var(--bg-hover); }
+  .btn-secondary:active { transform: scale(.97); }
+
+  .confetti {
+    position: absolute; width: 8px; height: 14px;
+    opacity: 0; pointer-events: none;
+    animation: confettiFall 3s ease-out forwards;
+  }
+  @keyframes confettiFall {
+    0%   { opacity: 1; transform: translate(0, -100px) rotate(0deg); }
+    100% { opacity: 0; transform: translate(var(--dx, 0px), 100vh) rotate(720deg); }
+  }
+
+  /* ===== МОБИЛЬНОЕ МЕНЮ ===== */
+  .mobile-shop-screen {
+    display: none; position: fixed; inset: 0;
+    background: var(--bg-deep); z-index: 200;
+    flex-direction: column;
+    padding: calc(16px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom)) 16px;
+    transform: translateX(100%);
+    transition: transform .28s cubic-bezier(.2,.9,.3,1);
+    will-change: transform;
+  }
+  .mobile-shop-screen.open { transform: translateX(0); }
+  .mobile-shop-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px; padding-bottom: 14px;
+    border-bottom: 1px solid var(--border-soft);
+    flex-shrink: 0;
+  }
+  .mobile-shop-header h2 { font-size: 20px; font-weight: 700; color: var(--text-primary); letter-spacing: -.3px; }
+  .mobile-shop-header .header-left { display: flex; align-items: center; gap: 10px; }
+  .mobile-shop-header .apples-badge {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 13px; font-weight: 600; color: var(--accent-3);
+    background: var(--bg-elevated); padding: 6px 12px;
+    border-radius: 10px; border: 1px solid var(--border-soft);
+    font-variant-numeric: tabular-nums;
+  }
+  .mobile-close-btn {
+    width: 40px; height: 40px; border-radius: 12px;
+    background: var(--bg-elevated); color: var(--text-primary);
+    border: 1px solid var(--border-soft);
+    font-size: 20px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .15s, transform .1s;
+    font-family: inherit; line-height: 1;
+  }
+  .mobile-close-btn:hover { background: var(--bg-hover); }
+  .mobile-close-btn:active { transform: scale(.92); }
+
+  .mobile-shop-list {
+    flex: 1; overflow-y: auto; overflow-x: hidden;
+    display: flex; flex-direction: column; gap: 12px;
+    padding: 4px 4px 20px 4px;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+  }
+
+  .mobile-shop-toggle {
+    display: none; position: fixed;
+    bottom: calc(20px + env(safe-area-inset-bottom)); right: 20px;
+    height: 56px; padding: 0 22px 0 18px;
+    border-radius: 16px;
+    background: var(--accent); color: #1a1b20;
+    border: none; font-size: 15px; font-weight: 700;
+    font-family: inherit;
+    box-shadow: var(--shadow-deep);
+    cursor: pointer; z-index: 50;
+    align-items: center; gap: 8px;
+    transition: transform .15s, background .15s;
+  }
+  .mobile-shop-toggle:active { transform: scale(.94); }
+  .mobile-shop-toggle .toggle-icon { font-size: 20px; }
+
+  /* ===== РАДИО ===== */
+  .radio-panel {
+    display: none; position: fixed;
+    bottom: calc(80px + env(safe-area-inset-bottom)); left: 14px;
+    width: 360px; max-width: calc(100vw - 28px);
+    background: linear-gradient(165deg, #2b2d3a 0%, #22232e 100%);
+    border: 1px solid var(--border-mid);
+    border-radius: 20px; box-shadow: var(--shadow-deep);
+    z-index: 210; padding: 16px;
+    flex-direction: column; gap: 12px;
+    animation: radioSlideIn .28s cubic-bezier(.2,.9,.3,1.1);
+    max-height: calc(100vh - 140px);
+    overflow: hidden;
+  }
+  .radio-panel.open { display: flex; }
+  @keyframes radioSlideIn {
+    from { opacity: 0; transform: translateY(20px) scale(.95); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .radio-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-bottom: 12px; border-bottom: 1px solid var(--border-soft);
+    flex-shrink: 0;
+  }
+  .radio-title {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 15px; font-weight: 700; letter-spacing: .3px;
+  }
+  .radio-title-icon {
+    width: 32px; height: 32px; border-radius: 9px;
+    background: linear-gradient(145deg, var(--accent), #5c6eff);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    box-shadow: 0 2px 8px rgba(124,138,255,.4);
+  }
+  .radio-close {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: var(--bg-elevated); border: 1px solid var(--border-soft);
+    color: var(--text-primary); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; transition: background .15s; font-family: inherit;
+  }
+  .radio-close:hover { background: var(--bg-hover); }
+  .radio-now {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px; background: rgba(0,0,0,.25);
+    border-radius: 12px; border: 1px solid var(--border-soft);
+    flex-shrink: 0;
+  }
+  .radio-now-art {
+    width: 52px; height: 52px; border-radius: 10px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    position: relative; overflow: hidden;
+  }
+  .radio-now-art.playing::after {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle, rgba(255,255,255,.2), transparent 70%);
+    animation: radioArt 2s infinite alternate;
+  }
+  @keyframes radioArt { from { transform: scale(.8); opacity: .3; } to { transform: scale(1.2); opacity: .7; } }
+  .radio-now-info { flex: 1; min-width: 0; }
+  .radio-now-title {
+    font-size: 14px; font-weight: 700; color: var(--text-primary);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .radio-now-artist {
+    font-size: 11.5px; color: var(--text-secondary); margin-top: 3px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .radio-progress {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 10.5px; color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+  }
+  .radio-progress-track {
+    flex: 1; height: 4px; background: rgba(255,255,255,.06);
+    border-radius: 3px; overflow: hidden;
+    position: relative; cursor: pointer;
+  }
+  .radio-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    border-radius: 3px; width: 0%;
+    transition: width .2s linear;
+  }
+  .radio-controls {
+    display: flex; align-items: center; justify-content: center;
+    gap: 12px; flex-shrink: 0;
+  }
+  .radio-btn {
+    width: 42px; height: 42px; border-radius: 12px;
+    background: var(--bg-elevated); border: 1px solid var(--border-soft);
+    color: var(--text-primary); font-size: 16px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .15s, transform .1s;
+    font-family: inherit;
+  }
+  .radio-btn:hover { background: var(--bg-hover); }
+  .radio-btn:active { transform: scale(.92); }
+  .radio-btn.play-btn-main {
+    width: 54px; height: 54px; border-radius: 16px;
+    background: var(--accent); color: #1a1b20;
+    font-size: 22px; border: none;
+    box-shadow: 0 4px 16px rgba(124,138,255,.4);
+  }
+  .radio-btn.play-btn-main:hover { background: #8b97ff; }
+  .radio-btn.play-btn-main:active { transform: scale(.94); }
+  .radio-playlist-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: 8px; flex-shrink: 0;
+  }
+  .radio-playlist-header h3 {
+    font-size: 12px; font-weight: 700; letter-spacing: 1.2px;
+    text-transform: uppercase; color: var(--text-muted);
+  }
+  .radio-add-btn {
+    font-size: 11px; padding: 5px 10px;
+    border-radius: 8px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-mid);
+    color: var(--text-primary);
+    cursor: pointer; font-weight: 600;
+    font-family: inherit;
+    transition: background .15s;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .radio-add-btn:hover { background: var(--bg-hover); }
+  .radio-add-btn input { display: none; }
+  .radio-playlist {
+    overflow-y: auto; overflow-x: hidden;
+    max-height: 200px; min-height: 60px;
+    display: flex; flex-direction: column; gap: 6px;
+    padding-right: 4px; margin: 0 -4px;
+    scrollbar-width: thin; scrollbar-color: var(--border-mid) transparent;
+    -webkit-overflow-scrolling: touch;
+  }
+  .radio-track {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 10px; border-radius: 10px;
+    background: var(--bg-elevated); border: 1px solid transparent;
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+    flex-shrink: 0; position: relative;
+  }
+  .radio-track:hover { background: var(--bg-hover); }
+  .radio-track.active { background: rgba(124,138,255,.12); border-color: var(--accent); }
+  .radio-track.active::before {
+    content: '▶'; font-size: 9px;
+    position: absolute; left: -2px;
+    color: var(--accent);
+    animation: trackPlaying 1.5s infinite alternate;
+  }
+  @keyframes trackPlaying { from { opacity: .4; } to { opacity: 1; } }
+  .radio-track-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: var(--bg-active);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0; overflow: hidden;
+  }
+  .radio-track-info { flex: 1; min-width: 0; }
+  .radio-track-name {
+    font-size: 12.5px; font-weight: 600; color: var(--text-primary);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .radio-track-meta {
+    font-size: 10.5px; color: var(--text-muted); margin-top: 2px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .radio-track-remove {
+    width: 24px; height: 24px; border-radius: 6px;
+    background: transparent; border: none;
+    color: var(--text-muted); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    opacity: 0;
+    transition: opacity .15s, background .15s, color .15s;
+    font-family: inherit; flex-shrink: 0;
+  }
+  .radio-track:hover .radio-track-remove { opacity: 1; }
+  .radio-track-remove:hover { background: rgba(208,122,122,.2); color: var(--danger); }
+  .radio-empty { text-align: center; padding: 18px 12px; color: var(--text-muted); font-size: 11.5px; line-height: 1.6; }
+  .radio-empty-icon { font-size: 32px; margin-bottom: 8px; opacity: .5; }
+  .radio-empty-hint { margin-top: 6px; font-size: 10.5px; color: var(--text-muted); font-style: italic; }
+  .radio-volume {
+    display: flex; align-items: center; gap: 10px;
+    padding-top: 8px; border-top: 1px solid var(--border-soft);
+    font-size: 14px; color: var(--text-secondary);
+    flex-shrink: 0;
+  }
+  .radio-volume input[type="range"] {
+    flex: 1; height: 4px;
+    -webkit-appearance: none; appearance: none;
+    background: rgba(255,255,255,.08);
+    border-radius: 3px; outline: none; cursor: pointer;
+  }
+  .radio-volume input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 14px; height: 14px; border-radius: 50%;
+    background: var(--accent); cursor: pointer;
+    box-shadow: 0 0 6px rgba(124,138,255,.6);
+  }
+  .radio-volume input[type="range"]::-moz-range-thumb {
+    width: 14px; height: 14px; border-radius: 50%;
+    background: var(--accent); border: none; cursor: pointer;
+  }
+
+  /* ===== TOAST ===== */
+  .toast-container {
+    position: fixed; top: calc(16px + env(safe-area-inset-top));
+    left: 50%; transform: translateX(-50%);
+    z-index: 500;
+    display: flex; flex-direction: column; gap: 8px;
+    align-items: center; pointer-events: none;
+    width: 90%; max-width: 400px;
   }
   .toast {
-    background: rgba(0,0,0,0.92);
-    border: 2px solid #4caf50;
-    border-radius: 8px;
-    padding: 8px 14px;
-    font-size: 13px;
-    font-weight: bold;
-    color: #4caf50;
-    animation: toastAnim 2s ease-out forwards;
-    text-align: center;
-    width: 100%;
+    padding: 12px 18px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-mid);
+    border-radius: 12px;
+    box-shadow: var(--shadow-deep);
+    font-size: 13px; font-weight: 600; color: var(--text-primary);
+    display: flex; align-items: center; gap: 10px;
+    animation: toastIn .3s cubic-bezier(.2,.9,.3,1.3);
+    white-space: nowrap; max-width: 100%; overflow: hidden;
+    text-overflow: ellipsis;
   }
-  .toast.win { border-color: #ffcc00; color: #ffcc00; }
-  .toast.info { border-color: #3b82f6; color: #3b82f6; }
-  .toast.lose { border-color: #888; color: #ccc; }
-  @keyframes toastAnim {
-    0%   { opacity: 0; transform: translateY(20px); }
-    10%  { opacity: 1; transform: translateY(0); }
-    80%  { opacity: 1; transform: translateY(0); }
-    100% { opacity: 0; transform: translateY(-10px); }
+  .toast.success { border-color: var(--success); color: var(--success); }
+  .toast.error   { border-color: var(--danger); color: var(--danger); }
+  .toast.info    { border-color: var(--accent); color: var(--accent); }
+  .toast.buff    { border-color: var(--legendary); color: var(--legendary); font-size: 14px; padding: 14px 22px; }
+  .toast.fade-out { animation: toastOut .3s forwards; }
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateY(-20px) scale(.9); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes toastOut { to { opacity: 0; transform: translateY(-20px) scale(.9); } }
+
+  /* ===== DEVICE LAYOUTS ===== */
+  .device-phone .game-wrap {
+    flex-direction: column; align-items: center;
+    padding: 10px; gap: 10px;
+    justify-content: flex-start;
+  }
+  .device-phone .board-panel { width: 100%; max-width: min(96vw, 480px); padding: 9px; }
+  .device-phone .hud .stat { font-size: 12px; padding: 5px 9px; gap: 4px; }
+  .device-phone .hud .stat .val { font-size: 12px; }
+  .device-phone .shop { display: none; }
+  .device-phone .mobile-shop-toggle { display: flex; }
+  .device-phone .mobile-shop-screen { display: flex; }
+  .device-phone .corner-btn { width: 42px; height: 42px; font-size: 18px; }
+  .device-phone .sound-toggle { top: calc(10px + env(safe-area-inset-top)); right: 10px; }
+  .device-phone .radio-toggle { bottom: calc(10px + env(safe-area-inset-bottom)); left: 10px; }
+  .device-phone .radio-panel {
+    bottom: calc(70px + env(safe-area-inset-bottom));
+    left: 10px; right: 10px; width: auto; max-width: none;
+    max-height: 65vh;
+  }
+  .device-phone .mobile-shop-toggle { bottom: calc(20px + env(safe-area-inset-bottom)); right: 20px; }
+  .device-phone .buffs-bar { min-height: 55px; padding: 6px 2px 0 2px; gap: 6px; }
+  .device-phone .buff-chip { min-width: 95px; padding: 5px 9px 5px 5px; }
+  .device-phone .buff-chip .buff-icon { width: 30px; height: 30px; font-size: 17px; }
+  .device-phone .buff-chip .buff-name { font-size: 10.5px; }
+  .device-phone .buff-chip .buff-time { font-size: 11.5px; }
+
+  @media (orientation: landscape) and (max-height: 500px) {
+    .device-phone .game-wrap { flex-direction: row; align-items: center; justify-content: center; }
+    .device-phone .board-panel { max-height: 96vh; }
+    .device-phone .hud { margin-bottom: 5px; }
+    .device-phone .hud .stat { font-size: 11px; padding: 3px 8px; }
+    .device-phone .buffs-bar { min-height: 45px; margin-top: 6px; }
   }
 
-  #error-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.95);
-    color: #ff5555;
-    padding: 20px;
-    font-family: monospace;
-    font-size: 12px;
-    z-index: 9999;
-    display: none;
-    overflow: auto;
-    white-space: pre-wrap;
+  .device-tablet .game-wrap {
+    flex-direction: column; align-items: center;
+    padding: 14px; gap: 14px;
+  }
+  .device-tablet .board-panel { max-width: min(80vw, 600px); }
+  .device-tablet .shop { width: 100%; max-width: min(80vw, 600px); max-height: 40vh; }
+  .device-tablet .collection-grid { grid-template-columns: repeat(4, 1fr); }
+
+  @media (orientation: landscape) {
+    .device-tablet .game-wrap { flex-direction: row; align-items: stretch; }
+    .device-tablet .board-panel { max-height: calc(100vh - 28px); flex-shrink: 0; }
+    .device-tablet .shop { width: 320px; max-width: none; max-height: calc(100vh - 28px); }
+    .device-tablet .collection-grid { grid-template-columns: repeat(2, 1fr); }
   }
 
-  @media (max-width: 360px) {
-    .item-preview { width: 42px; height: 30px; }
-    .item-action { min-width: 76px; }
-    .item-name { font-size: 13px; }
-    #money { font-size: 19px; }
-    .tab-label { font-size: 9px; }
+  .device-desktop .game-wrap {
+    flex-direction: row; align-items: center; justify-content: center;
+    gap: 22px;
+  }
+  .device-desktop .board-panel { max-height: calc(100vh - 36px); }
+  .device-desktop canvas {
+    width: min(560px, calc(100vh - 190px), 60vw);
+    height: min(560px, calc(100vh - 190px), 60vw);
+  }
+  .device-desktop .shop { width: 340px; max-height: min(560px, calc(100vh - 36px)); }
+
+  @media (max-height: 640px) {
+    .device-desktop canvas {
+      width: min(440px, calc(100vh - 170px), 55vw);
+      height: min(440px, calc(100vh - 170px), 55vw);
+    }
+  }
+  @media (max-width: 900px) {
+    .device-desktop .game-wrap { gap: 14px; }
+    .device-desktop .shop { width: 290px; }
   }
 </style>
 </head>
 <body>
 
-<div id="app">
-  <div id="top-bar">
-    <div id="money-wrap">
-      <span class="money-icon">💰</span>
-      <span id="money">0</span>
+<button class="corner-btn sound-toggle" id="soundToggle" aria-label="Звук">🔊</button>
+<button class="corner-btn radio-toggle" id="radioToggle" aria-label="Радио">📻</button>
+
+<div class="game-wrap">
+  <div class="board-panel">
+    <div class="hud">
+      <div class="stat">🍎 <span class="val apples" id="hudApples">0</span></div>
+      <div class="stat">⏱ <span class="val timer" id="hudTimer">0.0</span></div>
+      <div class="stat">🏆 <span class="val score" id="hudScore">0</span></div>
     </div>
-    <div id="stats-mini">
-      <div><span class="val" id="mini-laps">0</span>Круги</div>
-      <div><span class="val" id="mini-wins">0</span>Победы</div>
+    <div class="canvas-wrap">
+      <canvas id="game" width="480" height="480"></canvas>
+      <div class="overlay" id="overlay">
+        <h1 id="ovTitle">Змейка</h1>
+        <p id="ovText"></p>
+        <button class="btn" id="ovBtn">Играть</button>
+      </div>
+      <div class="pause-indicator" id="pauseIndicator">
+        <div class="pause-icon">
+          <div class="bar"></div>
+          <div class="bar"></div>
+        </div>
+        <div class="pause-label">Пауза</div>
+      </div>
     </div>
+    <div class="buffs-bar empty" id="buffsBar"></div>
   </div>
 
-  <div id="track-area">
-    <canvas id="track-canvas" width="640" height="360"></canvas>
-    <div class="hud" id="hud-topleft">
-      <div class="hud-line">🏁 <b id="hud-track">—</b></div>
-      <div class="hud-line">Круг: <b id="hud-lap">0</b> · Позиция: <b id="hud-place">—</b></div>
+  <!-- МЕНЮ -->
+  <div class="shop" id="shop">
+    <div class="shop-header">
+      <h2>Меню</h2>
+      <div class="shop-wallet">🍎 <span id="shopApples">0</span></div>
     </div>
-    <div class="hud" id="hud-topright">
-      <div class="hud-title">ПОЗИЦИИ</div>
+    <div class="shop-tabs">
+      <button class="shop-tab active" data-tab="cases">📦 Кейсы</button>
+      <button class="shop-tab" data-tab="collection">👕 Скины</button>
+      <button class="shop-tab" data-tab="profile">👤 Профиль</button>
+    </div>
+    <div class="shop-pane active" id="paneCases">
+      <div class="shop-list" id="casesList"></div>
+    </div>
+    <div class="shop-pane" id="paneCollection">
+      <div class="collection-grid" id="collectionGrid"></div>
+    </div>
+    <div class="shop-pane" id="paneProfile">
+      <div class="profile-in-menu" id="profileInMenu"></div>
+    </div>
+    <button class="btn-play" id="playBtn">▶ Играть</button>
+  </div>
+</div>
+
+<button class="mobile-shop-toggle" id="mobileShopToggle">
+  <span class="toggle-icon">📦</span>
+  <span>Меню</span>
+</button>
+
+<div class="mobile-shop-screen" id="mobileShopScreen">
+  <div class="mobile-shop-header">
+    <div class="header-left">
+      <h2>Меню</h2>
+      <div class="apples-badge">🍎 <span id="mobileApples">0</span></div>
+    </div>
+    <button class="mobile-close-btn" id="mobileCloseBtn">✕</button>
+  </div>
+  <div class="shop-tabs">
+    <button class="shop-tab active" data-tab="cases">📦 Кейсы</button>
+    <button class="shop-tab" data-tab="collection">👕 Скины</button>
+    <button class="shop-tab" data-tab="profile">👤 Профиль</button>
+  </div>
+  <div class="shop-pane active" id="mobilePaneCases" style="flex:1;min-height:0">
+    <div class="mobile-shop-list" id="mobileCasesList"></div>
+  </div>
+  <div class="shop-pane" id="mobilePaneCollection" style="flex:1;min-height:0">
+    <div class="collection-grid" id="mobileCollectionGrid"></div>
+  </div>
+  <div class="shop-pane" id="mobilePaneProfile" style="flex:1;min-height:0">
+    <div class="profile-in-menu" id="mobileProfileInMenu"></div>
+  </div>
+</div>
+
+<div class="radio-panel" id="radioPanel">
+  <div class="radio-header">
+    <div class="radio-title">
+      <div class="radio-title-icon">📻</div>
+      <span>Моё радио</span>
+    </div>
+    <button class="radio-close" id="radioClose" aria-label="Закрыть">✕</button>
+  </div>
+  <div class="radio-now">
+    <div class="radio-now-art" id="radioNowArt">🎵</div>
+    <div class="radio-now-info">
+      <div class="radio-now-title" id="radioNowTitle">Трек не выбран</div>
+      <div class="radio-now-artist" id="radioNowArtist">Добавь треки или положи их в music/</div>
     </div>
   </div>
+  <div class="radio-progress">
+    <span id="radioTimeNow">0:00</span>
+    <div class="radio-progress-track" id="radioProgressTrack">
+      <div class="radio-progress-fill" id="radioProgressFill"></div>
+    </div>
+    <span id="radioTimeTotal">--:--</span>
+  </div>
+  <div class="radio-controls">
+    <button class="radio-btn" id="radioPrev" aria-label="Предыдущий">⏮</button>
+    <button class="radio-btn play-btn-main" id="radioPlayBtn" aria-label="Играть">▶</button>
+    <button class="radio-btn" id="radioNext" aria-label="Следующий">⏭</button>
+  </div>
+  <div class="radio-playlist-header">
+    <h3>Плейлист</h3>
+    <button class="radio-add-btn" id="radioAddBtn">
+      ➕ Добавить
+      <input type="file" id="radioFileInput" accept="audio/*" multiple>
+    </button>
+  </div>
+  <div class="radio-playlist" id="radioPlaylist"></div>
+  <div class="radio-volume">
+    <span>🔊</span>
+    <input type="range" id="radioVolume" min="0" max="100" value="60">
+    <span id="radioVolumeLabel">60%</span>
+  </div>
+</div>
 
-  <div id="content"></div>
-
-  <div id="tab-bar">
-    <div class="tab active" data-tab="race">
-      <div class="tab-icon">🏁</div>
-      <div class="tab-label">Гонка</div>
-    </div>
-    <div class="tab" data-tab="cars">
-      <div class="tab-icon">🚗</div>
-      <div class="tab-label">Гараж</div>
-    </div>
-    <div class="tab" data-tab="tracks">
-      <div class="tab-icon">🛣️</div>
-      <div class="tab-label">Трассы</div>
-    </div>
-    <div class="tab" data-tab="profile">
-      <div class="tab-icon">👤</div>
-      <div class="tab-label">Профиль</div>
+<div class="case-open-overlay" id="caseOpenOverlay">
+  <div class="case-open-header">
+    <div class="case-open-title" id="caseOpenTitle">Открытие кейса</div>
+    <div class="case-open-sub" id="caseOpenSub">Испытай удачу!</div>
+  </div>
+  <div class="roulette-wrap" id="rouletteWrap">
+    <div class="roulette-marker"></div>
+    <div class="roulette-track" id="rouletteTrack"></div>
+  </div>
+  <div class="case-result" id="caseResult">
+    <div class="case-result-icon" id="caseResultIcon">💎</div>
+    <div class="case-result-name" id="caseResultName">Скин</div>
+    <div class="case-result-rarity" id="caseResultRarity">Редкость</div>
+    <div class="case-result-actions">
+      <button class="btn-secondary" id="caseResultOpenAgain">📦 Открыть ещё</button>
+      <button class="btn" id="caseResultClose">✓ Отлично</button>
     </div>
   </div>
 </div>
 
-<div id="modal-overlay">
-  <div id="modal">
-    <h3 id="modal-title">Подтверждение</h3>
-    <p id="modal-text">Вы уверены?</p>
-    <div class="modal-buttons">
-      <button class="cancel" id="modal-cancel">Отмена</button>
-      <button id="modal-confirm">ОК</button>
-    </div>
-  </div>
-</div>
-
-<div id="toast-container"></div>
-<div id="error-overlay"></div>
+<div class="toast-container" id="toastContainer"></div>
 
 <script>
-'use strict';
+/* ============================================================
+   v2.5.1 — Меню с профилем + фикс магнита + фикс баффов
+============================================================ */
 
-/* =========== ОТЛОВ ОШИБОК =========== */
-window.addEventListener('error', function(e) {
-  var ov = document.getElementById('error-overlay');
-  ov.style.display = 'block';
-  ov.textContent += 'ОШИБКА: ' + e.message + '\n  Строка: ' + e.lineno + ':' + e.colno + '\n' +
-    (e.error && e.error.stack ? e.error.stack : '') + '\n\n';
-});
-window.addEventListener('unhandledrejection', function(e) {
-  var ov = document.getElementById('error-overlay');
-  ov.style.display = 'block';
-  ov.textContent += 'PROMISE REJECTION: ' + e.reason + '\n\n';
-});
-
-/* =========================================================
-   КОНСТАНТЫ
-   ========================================================= */
-var CANVAS_W = 640;
-var CANVAS_H = 360;
-
-var TRACK = {
-  cx: CANVAS_W / 2,
-  cy: CANVAS_H / 2,
-  rx: 220,
-  ry: 110,
-  width: 56
+/* ============================================================
+   ГЛОБАЛЬНЫЙ MUTE
+============================================================ */
+const GlobalMute = {
+  muted: false,
+  listeners: [],
+  set(v){ this.muted = v; this.listeners.forEach(fn => { try { fn(v); } catch(e){} }); },
+  get(){ return this.muted; },
+  onChange(fn){ this.listeners.push(fn); }
 };
 
-/* Размер машинки на canvas (внутренние пиксели) */
-var CAR_W = 48;
-var CAR_H = 30;
-
-var CLASSES = {
-  legendary: { rank: 'S', label: 'Легендарная', color: '#f59e0b', baseLapTime: 4.0, multiplier: 3.5 },
-  epic:      { rank: 'A', label: 'Эпическая',   color: '#a855f7', baseLapTime: 5.4, multiplier: 2.2 },
-  rare:      { rank: 'B', label: 'Редкая',      color: '#3b82f6', baseLapTime: 7.0, multiplier: 1.5 },
-  common:    { rank: 'C', label: 'Обычная',     color: '#aaa',    baseLapTime: 9.0, multiplier: 1.0 }
-};
-
-var RARITY_ORDER = ['common', 'rare', 'epic', 'legendary'];
-var INTRA_CLASS_VARIANCE = 0.03;
-
-/* =========================================================
-   МАШИНЫ
-   ========================================================= */
-var CARS = [
-  { id: 'lada',    name: 'Lada 2107',      rarity: 'common',    speedVariance: -0.8, price: 0,       color: '#c9a227' },
-  { id: 'civic',   name: 'Honda Civic',    rarity: 'common',    speedVariance:  0.0, price: 800,     color: '#e0e0e0' },
-  { id: 'golf',    name: 'VW Golf GTI',    rarity: 'common',    speedVariance:  0.7, price: 2500,    color: '#d32f2f' },
-  { id: 'bmw_m3',  name: 'BMW M3 E30',     rarity: 'rare',      speedVariance: -0.6, price: 8000,    color: '#f5f5f5' },
-  { id: 'supra',   name: 'Toyota Supra',   rarity: 'rare',      speedVariance:  0.1, price: 14000,   color: '#ff6f00' },
-  { id: 'gtr',     name: 'Nissan GT-R',    rarity: 'rare',      speedVariance:  0.7, price: 22000,   color: '#1e88e5' },
-  { id: 'porsche', name: 'Porsche 911',    rarity: 'epic',      speedVariance: -0.5, price: 65000,   color: '#fbc02d' },
-  { id: 'ferrari', name: 'Ferrari F40',    rarity: 'epic',      speedVariance:  0.6, price: 130000,  color: '#d32f2f' },
-  { id: 'lambo',   name: 'Lamborghini',    rarity: 'legendary', speedVariance: -0.4, price: 320000,  color: '#00e676' },
-  { id: 'bugatti', name: 'Bugatti Chiron', rarity: 'legendary', speedVariance:  0.6, price: 800000,  color: '#2979ff' }
-];
-
-var TRACKS = [
-  { id: 'oval',   name: 'Деревенский овал', rarity: 'common',    rewardMult: 1.0, price: 0,      style: 'country' },
-  { id: 'city',   name: 'Городское кольцо', rarity: 'common',    rewardMult: 1.3, price: 2500,   style: 'city'    },
-  { id: 'desert', name: 'Пустынный трек',   rarity: 'rare',      rewardMult: 1.8, price: 10000,  style: 'desert'  },
-  { id: 'snow',   name: 'Зимняя трасса',    rarity: 'rare',      rewardMult: 2.3, price: 25000,  style: 'snow'    },
-  { id: 'night',  name: 'Ночной город',     rarity: 'epic',      rewardMult: 3.2, price: 70000,  style: 'night'   },
-  { id: 'monaco', name: 'Монако',           rarity: 'epic',      rewardMult: 4.5, price: 180000, style: 'monaco'  },
-  { id: 'legend', name: 'Легендарный трек', rarity: 'legendary', rewardMult: 7.0, price: 600000, style: 'legend'  }
-];
-
-var BASE_REWARD = 100;
-var PLACE_BONUS = { 1: 3.0, 2: 2.0, 3: 1.5, 4: 1.2, 5: 1.0, 6: 0.9 };
-
-var PALETTES = {
-  country: { bg: '#3a7d3a', road: '#4a4a4a', line: '#e0e0e0', accent: '#2d5a2d', border: '#1a3a1a' },
-  city:    { bg: '#3a3a5a', road: '#333333', line: '#ffcc00', accent: '#222222', border: '#111111' },
-  desert:  { bg: '#c2a878', road: '#6b5a3a', line: '#ffffff', accent: '#a08858', border: '#5a4828' },
-  snow:    { bg: '#d8e8f0', road: '#5a5a6a', line: '#ffffff', accent: '#b0c8d8', border: '#8098a8' },
-  night:   { bg: '#0a0a1a', road: '#222222', line: '#ffcc00', accent: '#050510', border: '#000000' },
-  monaco:  { bg: '#1e3a5a', road: '#444444', line: '#ff5555', accent: '#0a1a2a', border: '#050a15' },
-  legend:  { bg: '#2a0a3a', road: '#3a1a4a', line: '#ff00ff', accent: '#1a0525', border: '#0a0212' }
-};
-
-/* =========================================================
-   СПРАЙТЫ МАШИН
-   =========================================================
-   Проблема «зашакаленности» была из-за того, что большой PNG
-   сжимался сразу в 16×10 с дробным масштабом и интерполяцией
-   «ближайший сосед», которая при уменьшении даёт потерю строк.
-
-   Решение: при загрузке сразу готовим уменьшенную копию
-   на offscreen-canvas через ЦЕЛОЧИСЛЕННЫЙ коэффициент,
-   с сохранением пропорций и центрированием.
-   Готовый «спрайт-подарок» кэшируется и используется в drawImage 1:1.
-   ========================================================= */
-var SPRITE_DIR = 'images/';
-var SPRITE_EXT = '.png';
-var spriteCache = {}; // id -> { ready, failed, canvas }
-
-function getSprite(id) {
-  return spriteCache[id] || null;
-}
-
-/* Из готового image делает canvas размера CAR_W×CAR_H:
-   1) считает целочисленный коэффициент уменьшения,
-   2) уменьшает до промежуточного размера (ближайший сосед),
-   3) центрирует в CAR_W×CAR_H с прозрачным фоном. */
-function bakeSprite(img) {
-  var iw = img.naturalWidth;
-  var ih = img.naturalHeight;
-  if (!iw || !ih) return null;
-
-  // 1) Подбираем целочисленный масштаб так, чтобы картинка влезла в CAR_W×CAR_H
-  var scale = Math.min(CAR_W / iw, CAR_H / ih);
-  // Работаем только с целыми 1..N. Если спрайт меньше целевого — увеличим (тоже целым).
-  var intScale;
-  if (scale >= 1) {
-    intScale = Math.floor(scale);
-    if (intScale < 1) intScale = 1;
-  } else {
-    // Уменьшение: 1/2, 1/3, 1/4...  (обратное значение)
-    intScale = 1 / Math.ceil(1 / scale);
+/* ============================================================
+   SFX
+============================================================ */
+const SFX = (() => {
+  let ctx = null, sfxGain = null;
+  function init(){
+    if (ctx) return;
+    try {
+      ctx = new (window.AudioContext || window.webkitAudioContext)();
+      sfxGain = ctx.createGain();
+      sfxGain.gain.value = 0.5;
+      sfxGain.connect(ctx.destination);
+    } catch(e) {}
   }
-
-  var sw = Math.max(1, Math.round(iw * intScale));
-  var sh = Math.max(1, Math.round(ih * intScale));
-
-  // 2) Промежуточный canvas — рисуем с отключённым сглаживанием
-  var tmp = document.createElement('canvas');
-  tmp.width = sw;
-  tmp.height = sh;
-  var tctx = tmp.getContext('2d');
-  tctx.imageSmoothingEnabled = false;
-  tctx.mozImageSmoothingEnabled = false;
-  tctx.webkitImageSmoothingEnabled = false;
-  tctx.msImageSmoothingEnabled = false;
-  tctx.drawImage(img, 0, 0, iw, ih, 0, 0, sw, sh);
-
-  // 3) Финальный canvas ровно CAR_W×CAR_H с центрированием
-  var out = document.createElement('canvas');
-  out.width = CAR_W;
-  out.height = CAR_H;
-  var octx = out.getContext('2d');
-  octx.imageSmoothingEnabled = false;
-  octx.mozImageSmoothingEnabled = false;
-  octx.webkitImageSmoothingEnabled = false;
-  octx.msImageSmoothingEnabled = false;
-
-  var dx = Math.floor((CAR_W - sw) / 2);
-  var dy = Math.floor((CAR_H - sh) / 2);
-  octx.drawImage(tmp, 0, 0, sw, sh, dx, dy, sw, sh);
-
-  return out;
-}
-
-function loadSprite(car, onDone) {
-  var entry = { img: new Image(), ready: false, failed: false, canvas: null };
-  spriteCache[car.id] = entry;
-
-  var finished = false;
-  function finish(ok) {
-    if (finished) return;
-    finished = true;
-    entry.ready = ok;
-    entry.failed = !ok;
-    if (onDone) onDone(ok);
+  function resume(){ init(); if (ctx && ctx.state === 'suspended') ctx.resume(); }
+  function play(freq, dur, type = 'sine', vol = 0.15, detune = 0){
+    if (GlobalMute.get()) return;
+    init();
+    if (!ctx) return;
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = type; o.frequency.value = freq;
+    if (detune) o.detune.value = detune;
+    const t = ctx.currentTime;
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(vol, t + 0.008);
+    g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    o.connect(g); g.connect(sfxGain);
+    o.start(t); o.stop(t + dur + 0.02);
   }
-
-  entry.img.onload = function() {
-    if (entry.img.naturalWidth > 0) {
-      try {
-        entry.canvas = bakeSprite(entry.img);
-        finish(!!entry.canvas);
-      } catch (e) {
-        finish(false);
-      }
-    } else {
-      finish(false);
-    }
+  function arp(notes, spacing = 0.06, type = 'triangle', vol = 0.12){
+    if (GlobalMute.get()) return;
+    notes.forEach((freq, i) => setTimeout(() => play(freq, 0.12, type, vol), i * spacing * 1000));
+  }
+  const sfx = {
+    eat(){ play(720, 0.09, 'triangle', 0.14); setTimeout(() => play(920, 0.09, 'triangle', 0.12), 60); setTimeout(() => play(1150, 0.11, 'triangle', 0.10), 120); },
+    turn(){ play(880, 0.03, 'sine', 0.05); },
+    die(){ play(420, 0.18, 'sawtooth', 0.12); setTimeout(() => play(320, 0.20, 'sawtooth', 0.12), 130); setTimeout(() => play(220, 0.35, 'sawtooth', 0.12), 280); setTimeout(() => play(140, 0.6, 'sine', 0.10), 460); },
+    win(){ arp([523, 659, 784, 1046, 1318], 70, 'triangle', 0.13); },
+    buy(){ arp([659, 784, 988, 1318], 55, 'triangle', 0.14); play(1568, 0.3, 'sine', 0.08, 0); },
+    equip(){ play(660, 0.08, 'triangle', 0.10); setTimeout(() => play(990, 0.12, 'triangle', 0.10), 50); },
+    deny(){ play(200, 0.1, 'square', 0.08); setTimeout(() => play(150, 0.15, 'square', 0.08), 90); },
+    click(){ play(1200, 0.02, 'sine', 0.06); },
+    hover(){ play(1400, 0.02, 'sine', 0.03); },
+    start(){ arp([523, 784, 1046], 80, 'triangle', 0.12); },
+    pause(){ play(660, 0.06, 'sine', 0.08); setTimeout(() => play(440, 0.1, 'sine', 0.08), 50); },
+    unpause(){ play(440, 0.06, 'sine', 0.08); setTimeout(() => play(660, 0.1, 'sine', 0.08), 50); },
+    caseSpin(){ [440, 460, 480, 500, 520, 540, 560, 580].forEach((f, i) => setTimeout(() => play(f, 0.03, 'square', 0.05), i * 550)); },
+    caseReveal(rarity){
+      if (rarity === 'legendary') { arp([523, 659, 784, 1046, 1318, 1568], 60, 'triangle', 0.15); setTimeout(() => arp([2093], 60, 'sine', 0.1), 400); }
+      else if (rarity === 'epic') { arp([440, 554, 659, 880], 70, 'triangle', 0.13); }
+      else if (rarity === 'rare') { arp([392, 523, 659], 80, 'triangle', 0.11); }
+      else { play(440, 0.15, 'triangle', 0.1); setTimeout(() => play(523, 0.15, 'triangle', 0.1), 100); }
+    },
+    buffPickup(){
+      play(880, 0.1, 'triangle', 0.13);
+      setTimeout(() => play(1174, 0.1, 'triangle', 0.13), 60);
+      setTimeout(() => play(1568, 0.15, 'triangle', 0.12), 120);
+      setTimeout(() => play(2093, 0.2, 'sine', 0.08), 200);
+    },
+    buffExpire(){ play(660, 0.1, 'sine', 0.08); setTimeout(() => play(440, 0.15, 'sine', 0.06), 80); setTimeout(() => play(330, 0.2, 'sine', 0.05), 160); },
+    buffWarning(){ play(880, 0.05, 'square', 0.05); },
   };
-  entry.img.onerror = function() { finish(false); };
-  setTimeout(function() { finish(false); }, 3000);
+  return { play, arp, sfx, resume };
+})();
 
-  try {
-    entry.img.src = SPRITE_DIR + car.id + SPRITE_EXT;
-  } catch (e) {
-    finish(false);
+/* ============================================================
+   RADIO
+============================================================ */
+const Radio = (() => {
+  const STORAGE_INDEX  = 'snake_v23_radio_index';
+  const STORAGE_VOLUME = 'snake_v23_radio_volume';
+  const MUSIC_FOLDER   = 'music';
+  const MANIFEST_PATH  = 'music/manifest.json';
+  let playlist = [];
+  let currentIndex = -1;
+  let playing = false;
+  let audioEl = null;
+  let volume = 0.6;
+
+  async function loadFolderPlaylist(){
+    try {
+      const resp = await fetch(MANIFEST_PATH);
+      if (!resp.ok) throw new Error('no manifest');
+      const data = await resp.json();
+      let items = [];
+      if (Array.isArray(data)) items = data.map(f => ({ file: f }));
+      else if (data && Array.isArray(data.tracks)) items = data.tracks;
+      const loaded = [];
+      for (const item of items) {
+        if (!item.file) continue;
+        const url = `${MUSIC_FOLDER}/${encodeURIComponent(item.file)}`;
+        let exists = true;
+        try { const head = await fetch(url, { method: 'HEAD' }); exists = head.ok; } catch(e) { exists = false; }
+        if (!exists) continue;
+        loaded.push({ id: 'folder_' + item.file, name: item.name || item.file.replace(/\.[^.]+$/, ''), artist: item.artist || 'Из папки music/', url, kind: 'folder', icon: '📁' });
+      }
+      return loaded;
+    } catch(e) { return []; }
   }
-}
 
-function preloadAllSprites(onAllDone) {
-  var total = CARS.length;
-  var loaded = 0;
-  var called = false;
-
-  function tryFinish() {
-    loaded++;
-    if (loaded >= total && !called) {
-      called = true;
-      onAllDone();
+  function addFiles(files){
+    const added = [];
+    for (const f of files) {
+      if (!f.type.startsWith('audio/') && !/\.(mp3|wav|ogg|m4a|flac|aac|opus|webm)$/i.test(f.name)) continue;
+      const url = URL.createObjectURL(f);
+      const track = { id: 'file_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8), name: f.name.replace(/\.[^.]+$/, ''), artist: 'Локальный файл', url, kind: 'user', icon: '🎵' };
+      playlist.push(track);
+      added.push(track);
     }
+    return added;
   }
 
-  for (var i = 0; i < CARS.length; i++) {
-    loadSprite(CARS[i], tryFinish);
+  async function init(){
+    try { const v = localStorage.getItem(STORAGE_VOLUME); if (v) volume = Math.max(0, Math.min(1, parseFloat(v))); } catch(e){}
+    const folderTracks = await loadFolderPlaylist();
+    playlist = folderTracks;
+    try { const idx = parseInt(localStorage.getItem(STORAGE_INDEX) ?? '-1', 10); if (idx >= 0 && idx < playlist.length) currentIndex = idx; } catch(e){}
+    return folderTracks.length;
   }
-}
 
-/* =========== ВСПОМОГАТЕЛЬНОЕ =========== */
-function getCar(id)   { for (var i = 0; i < CARS.length; i++)   if (CARS[i].id === id)   return CARS[i];   return null; }
-function getTrack(id) { for (var i = 0; i < TRACKS.length; i++) if (TRACKS[i].id === id) return TRACKS[i]; return null; }
-function getCarClass(car) { return CLASSES[car.rarity]; }
+  function saveIndex(){ try { localStorage.setItem(STORAGE_INDEX, String(currentIndex)); } catch(e){} }
+  function saveVolume(){ try { localStorage.setItem(STORAGE_VOLUME, String(volume)); } catch(e){} }
+  function getPlaylist(){ return playlist; }
+  function getCurrentIndex(){ return currentIndex; }
+  function getCurrentTrack(){ return currentIndex >= 0 ? playlist[currentIndex] : null; }
+  function isPlaying(){ return playing; }
+  function getVolume(){ return volume; }
 
-function getCarLapTime(car) {
-  var base = CLASSES[car.rarity].baseLapTime;
-  var variance = car.speedVariance * INTRA_CLASS_VARIANCE;
-  return base * (1 - variance);
-}
+  function stopAudioElement(){
+    if (audioEl) { try { audioEl.pause(); } catch(e){} audioEl.removeAttribute('src'); audioEl.load(); audioEl = null; }
+  }
+  function startAudioElement(track){
+    stopAudioElement();
+    audioEl = new Audio(track.url);
+    audioEl.volume = GlobalMute.get() ? 0 : volume;
+    audioEl.loop = false;
+    audioEl.crossOrigin = 'anonymous';
+    audioEl.addEventListener('ended', () => next());
+    audioEl.addEventListener('timeupdate', () => updateProgressUI());
+    audioEl.addEventListener('loadedmetadata', () => updateProgressUI());
+    audioEl.play().catch(e => { console.warn('Не удалось запустить трек', e); });
+  }
+  function play(index){
+    if (index !== undefined && index !== null) { if (index < 0 || index >= playlist.length) return; currentIndex = index; }
+    if (currentIndex < 0 && playlist.length > 0) currentIndex = 0;
+    const track = getCurrentTrack();
+    if (!track) return;
+    stopAudioElement();
+    playing = true;
+    SFX.resume();
+    startAudioElement(track);
+    saveIndex();
+  }
+  function pause(){ if (!playing) return; playing = false; if (audioEl) { try { audioEl.pause(); } catch(e){} } }
+  function stop(){ playing = false; stopAudioElement(); }
+  function toggle(){ if (playing) pause(); else play(); }
+  function next(){ if (playlist.length === 0) return; let idx = currentIndex + 1; if (idx >= playlist.length) idx = 0; play(idx); }
+  function prev(){ if (playlist.length === 0) return; let idx = currentIndex - 1; if (idx < 0) idx = playlist.length - 1; play(idx); }
+  function remove(index){
+    if (index < 0 || index >= playlist.length) return;
+    const track = playlist[index];
+    if (track.kind === 'folder') return;
+    if (track.kind === 'user' && track.url) URL.revokeObjectURL(track.url);
+    const wasCurrent = index === currentIndex;
+    playlist.splice(index, 1);
+    if (playlist.length === 0) { currentIndex = -1; stop(); }
+    else if (wasCurrent) { currentIndex = Math.min(index, playlist.length - 1); if (playing) play(currentIndex); }
+    else if (index < currentIndex) { currentIndex--; }
+    saveIndex();
+  }
+  function setVolume(v){ volume = Math.max(0, Math.min(1, v)); if (audioEl) audioEl.volume = GlobalMute.get() ? 0 : volume; saveVolume(); }
+  function getProgress(){ if (audioEl && audioEl.duration) return { current: audioEl.currentTime || 0, total: audioEl.duration || 0, percent: (audioEl.currentTime / audioEl.duration) * 100 }; return { current: 0, total: 0, percent: 0 }; }
+  function seek(percent){ if (audioEl && audioEl.duration) audioEl.currentTime = Math.max(0, Math.min(1, percent)) * audioEl.duration; }
 
-/* =========== СОСТОЯНИЕ =========== */
-var state = {
-  money: 500,
-  laps: 0,
-  wins: 0,
-  ownedCars: ['lada'],
-  ownedTracks: ['oval'],
-  activeCar: 'lada',
-  activeTrack: 'oval',
-  activeTab: 'race'
+  GlobalMute.onChange((muted) => { if (audioEl) audioEl.volume = muted ? 0 : volume; });
+
+  return { init, saveIndex, saveVolume, getPlaylist, getCurrentIndex, getCurrentTrack, isPlaying, getVolume, play, pause, stop, toggle, next, prev, addFiles, remove, setVolume, getProgress, seek };
+})();
+
+/* ============================================================
+   РЕДКОСТИ / СКИНЫ / КЕЙСЫ
+============================================================ */
+const RARITIES = {
+  common:    { name: 'Обычный',      weight: 60, color: '#8a8e96' },
+  uncommon:  { name: 'Необычный',    weight: 25, color: '#7fb87f' },
+  rare:      { name: 'Редкий',       weight: 10, color: '#5c9dff' },
+  epic:      { name: 'Эпический',    weight: 4,  color: '#b57aff' },
+  legendary: { name: 'ЛЕГЕНДАРНЫЙ',  weight: 1,  color: '#ffb545' },
 };
 
-var racers = [];
-var sessionStart = 0;
-var shopButtonRefreshers = [];
+const SKINS = [
+  { id:'gummy',  name:'Мармеладка', rarity:'common', icon:'🍬', colors:['#ff8ba7','#ff6b8a'], accent:'#ffe5ec', trait:'Сладость', face:'happy', blush:true },
+  { id:'mint',   name:'Мята',       rarity:'common', icon:'🍃', colors:['#8fd9b6','#5ec99a'], accent:'#d6f5e7', trait:'Подмигивает', face:'wink' },
+  { id:'banana', name:'Бананас',    rarity:'common', icon:'🍌', colors:['#ffd76e','#f5c042'], accent:'#fff2c2', trait:'Полосочки', face:'happy', stripes:true },
+  { id:'peach',  name:'Персик',     rarity:'common', icon:'🍑', colors:['#ffb89a','#f08b6a'], accent:'#ffe4d5', trait:'Пушистый', face:'happy', blush:true },
+  { id:'bubble', name:'Пузырик',    rarity:'uncommon', icon:'🫧', colors:['#9ecbff','#7ab0f0'], accent:'#dceaff', trait:'Круглый', face:'happy', shape:'circle', shine:true },
+  { id:'candy',  name:'Конфетка',   rarity:'uncommon', icon:'🍭', colors:['#c6a0f6','#a87ee8'], accent:'#e8d5ff', trait:'Спираль', face:'happy', spiral:true },
+  { id:'lime',   name:'Лайм',       rarity:'uncommon', icon:'🍈', colors:['#c9e878','#9bc94a'], accent:'#f0f8c8', trait:'Кисленький', face:'wink', stripes:true },
+  { id:'orange', name:'Апельсин',   rarity:'uncommon', icon:'🍊', colors:['#ffb066','#f08a3a'], accent:'#ffe0c0', trait:'Сочный', face:'happy', blush:true },
+  { id:'panda',      name:'Панда',      rarity:'rare', icon:'🐼', colors:['#f2f2f2','#e0e0e0'], accent:'#2a2a30', trait:'Пятнышки', face:'panda', particles:true },
+  { id:'strawberry', name:'Земляника',  rarity:'rare', icon:'🍓', colors:['#ff7a8a','#e85a6d'], accent:'#ffd5db', trait:'В крапинку', face:'happy', seeds:true, particles:true },
+  { id:'blueberry',  name:'Голубика',   rarity:'rare', icon:'🫐', colors:['#6e8fdb','#4a6cc4'], accent:'#d5deff', trait:'Ягодный', face:'happy', seeds:true, particles:true },
+  { id:'watermelon', name:'Арбузик',    rarity:'rare', icon:'🍉', colors:['#ff6b8a','#5ec99a'], accent:'#d6f5e7', trait:'Полосатый', face:'happy', stripes:true, particles:true },
+  { id:'lemon',   name:'Лимончик',   rarity:'epic', icon:'🍋', colors:['#ffe066','#f0c944'], accent:'#fff7d1', trait:'Искрится', face:'happy', sparkle:true, particles:true },
+  { id:'unicorn', name:'Единорожка', rarity:'epic', icon:'🦄', colors:['#ffb6e0','#c9a9ff'], accent:'#fff0fa', trait:'Радужный', face:'happy', rainbow:true, particles:true, horn:true },
+  { id:'dragon',  name:'Дракоша',    rarity:'epic', icon:'🐲', colors:['#8ee06b','#5cc448'], accent:'#d4f5c8', trait:'Огонёк', face:'dragon', scales:true, particles:true },
+  { id:'phoenix', name:'Феникс',     rarity:'epic', icon:'🔥', colors:['#ff9a4a','#ff5e3a'], accent:'#ffd5b0', trait:'Пламя', face:'dragon', scales:true, sparkle:true, particles:true },
+  { id:'emerald', name:'Изумруд', rarity:'legendary', icon:'💚', colors:['#2fbf71','#0f7a4a'], accent:'#a8f0cc', trait:'Драгоценный', face:'happy', gemGradient: true, gem: 'emerald', sparkle:true, particles:true, scales:true },
+  { id:'ruby', name:'Рубин', rarity:'legendary', icon:'❤️', colors:['#ff4a6e','#b02040'], accent:'#ffc2d1', trait:'Драгоценный', face:'happy', gemGradient: true, gem: 'ruby', sparkle:true, particles:true, scales:true },
+  { id:'sapphire', name:'Сапфир', rarity:'legendary', icon:'💙', colors:['#4a9eff','#1a4fb8'], accent:'#c2dfff', trait:'Драгоценный', face:'happy', gemGradient: true, gem: 'sapphire', sparkle:true, particles:true, scales:true },
+  { id:'amethyst', name:'Аметист', rarity:'legendary', icon:'💜', colors:['#b57aff','#6a2fc4'], accent:'#e5d5ff', trait:'Драгоценный', face:'happy', gemGradient: true, gem: 'amethyst', sparkle:true, particles:true, scales:true },
+];
 
-/* =========== СОХРАНЕНИЕ =========== */
-function save() {
-  try {
-    localStorage.setItem('pixelRacingTycoon', JSON.stringify({
-      money: state.money,
-      laps: state.laps,
-      wins: state.wins,
-      ownedCars: state.ownedCars,
-      ownedTracks: state.ownedTracks,
-      activeCar: state.activeCar,
-      activeTrack: state.activeTrack
-    }));
-  } catch (e) {}
-}
+const CASES = [
+  { id:'emerald', name:'Изумрудный кейс', sub:'Зелёный свет удачи', icon:'💚', colorA:'#2fbf71', colorB:'#0f7a4a', price:30,
+    pool:['gummy','mint','banana','peach','bubble','candy','lime','orange','panda','strawberry','lemon','emerald'] },
+  { id:'ruby', name:'Рубиновый кейс', sub:'Огненный блеск', icon:'❤️', colorA:'#ff4a6e', colorB:'#b02040', price:60,
+    pool:['gummy','mint','banana','peach','bubble','candy','lime','orange','strawberry','blueberry','watermelon','phoenix','ruby'] },
+  { id:'sapphire', name:'Сапфировый кейс', sub:'Ледяная глубина', icon:'💙', colorA:'#4a9eff', colorB:'#1a4fb8', price:120,
+    pool:['gummy','mint','banana','peach','bubble','candy','lime','orange','panda','blueberry','watermelon','dragon','sapphire'] },
+  { id:'amethyst', name:'Аметистовый кейс', sub:'Тайна фиолета', icon:'💜', colorA:'#b57aff', colorB:'#6a2fc4', price:250,
+    pool:['gummy','mint','banana','peach','bubble','candy','lime','orange','panda','strawberry','blueberry','watermelon','lemon','unicorn','dragon','phoenix','amethyst'] },
+];
+
+function getCase(id){ return CASES.find(c => c.id === id); }
+function getSkin(id){ return SKINS.find(s => s.id === id) || SKINS[0]; }
+
+/* ============================================================
+   СОСТОЯНИЕ + ПРОФИЛЬ
+============================================================ */
+const STORAGE_KEY = 'snake_v2_save';
+const AUDIO_KEY = 'snake_v24_audio_muted';
+const PROFILE_KEY = 'snake_v25_profile';
+
+let state = {
+  apples: 50, owned: ['gummy'], active: 'gummy',
+  bestScore: 0, totalApples: 0, gamesPlayed: 0,
+  casesOpened: 0, buffsPicked: 0, version: '2.5.1',
+};
+
+let profile = { name: 'Игрок', avatar: '🐍', created: Date.now() };
+
+function save() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e){} }
+function saveProfile() { try { localStorage.setItem(PROFILE_KEY, JSON.stringify(profile)); } catch(e){} }
 
 function load() {
   try {
-    var raw = localStorage.getItem('pixelRacingTycoon');
-    if (!raw) return;
-    var d = JSON.parse(raw);
-    if (typeof d.money === 'number') state.money = d.money;
-    if (typeof d.laps === 'number') state.laps = d.laps;
-    if (typeof d.wins === 'number') state.wins = d.wins;
-    if (Object.prototype.toString.call(d.ownedCars) === '[object Array]') state.ownedCars = d.ownedCars;
-    if (Object.prototype.toString.call(d.ownedTracks) === '[object Array]') state.ownedTracks = d.ownedTracks;
-    if (typeof d.activeCar === 'string') state.activeCar = d.activeCar;
-    if (typeof d.activeTrack === 'string') state.activeTrack = d.activeTrack;
-    if (state.ownedCars.indexOf(state.activeCar) === -1) state.activeCar = 'lada';
-    if (state.ownedTracks.indexOf(state.activeTrack) === -1) state.activeTrack = 'oval';
-  } catch (e) {}
-}
-
-/* =========== CANVAS =========== */
-var canvas = document.getElementById('track-canvas');
-var ctx = canvas.getContext('2d');
-ctx.imageSmoothingEnabled = false;
-
-/* =========== ГЕОМЕТРИЯ =========== */
-function trackPos(t, offset) {
-  if (typeof offset !== 'number') offset = 0;
-  var rx = TRACK.rx + offset;
-  var ry = TRACK.ry + offset;
-  return {
-    x: TRACK.cx + rx * Math.sin(t),
-    y: TRACK.cy - ry * Math.cos(t)
-  };
-}
-
-function trackAngle(t) {
-  return Math.atan2(TRACK.ry * Math.sin(t), TRACK.rx * Math.cos(t));
-}
-
-/* =========================================================
-   ПОДБОР ИИ
-   ========================================================= */
-function pickAIOpponents(playerCar) {
-  var playerIdx = RARITY_ORDER.indexOf(playerCar.rarity);
-  var result = [];
-  var usedIds = {};
-
-  function pickFromRarity(rarity) {
-    var pool = [];
-    for (var i = 0; i < CARS.length; i++) {
-      var c = CARS[i];
-      if (c.rarity !== rarity) continue;
-      if (c.id === playerCar.id) continue;
-      if (usedIds[c.id]) continue;
-      pool.push(c);
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const p = JSON.parse(raw);
+      state.apples      = Number.isFinite(p.apples) ? p.apples : 50;
+      state.owned       = Array.isArray(p.owned) && p.owned.length ? p.owned.filter(id => SKINS.some(s => s.id === id)) : ['gummy'];
+      if (!state.owned.includes('gummy')) state.owned.unshift('gummy');
+      state.active      = state.owned.includes(p.active) ? p.active : 'gummy';
+      state.bestScore   = Number.isFinite(p.bestScore) ? p.bestScore : 0;
+      state.totalApples = Number.isFinite(p.totalApples) ? p.totalApples : 0;
+      state.gamesPlayed = Number.isFinite(p.gamesPlayed) ? p.gamesPlayed : 0;
+      state.casesOpened = Number.isFinite(p.casesOpened) ? p.casesOpened : 0;
+      state.buffsPicked = Number.isFinite(p.buffsPicked) ? p.buffsPicked : 0;
     }
-    if (pool.length === 0) return null;
-    var chosen = pool[Math.floor(Math.random() * pool.length)];
-    usedIds[chosen.id] = true;
-    return chosen;
-  }
-
-  if (playerIdx > 0) {
-    var lower = pickFromRarity(RARITY_ORDER[playerIdx - 1]);
-    if (lower) result.push(lower);
-  }
-
-  for (var k = 0; k < 2; k++) {
-    var same = pickFromRarity(playerCar.rarity);
-    if (same) result.push(same);
-  }
-
-  if (playerIdx < RARITY_ORDER.length - 1) {
-    var higher = pickFromRarity(RARITY_ORDER[playerIdx + 1]);
-    if (higher) result.push(higher);
-  }
-
-  var fallbackOrder = [];
-  if (playerIdx > 0) fallbackOrder.push(RARITY_ORDER[playerIdx - 1]);
-  fallbackOrder.push(playerCar.rarity);
-  if (playerIdx < RARITY_ORDER.length - 1) fallbackOrder.push(RARITY_ORDER[playerIdx + 1]);
-
-  while (result.length < 5) {
-    var picked = false;
-    for (var f = 0; f < fallbackOrder.length && !picked; f++) {
-      var candidate = pickFromRarity(fallbackOrder[f]);
-      if (candidate) {
-        result.push(candidate);
-        picked = true;
-      }
-    }
-    if (!picked) break;
-  }
-
-  return result.slice(0, 5);
-}
-
-/* =========================================================
-   НАСТРОЙКА ГОНЩИКОВ
-   ========================================================= */
-function setupRacers() {
-  racers = [];
-  var playerCar = getCar(state.activeCar);
-  if (!playerCar) playerCar = CARS[0];
-
-  var aiCars = pickAIOpponents(playerCar);
-
-  racers.push({
-    isPlayer: true,
-    car: playerCar,
-    t: -0.15,
-    lane: -14,
-    laps: 0,
-    place: 1,
-    lapTime: getCarLapTime(playerCar),
-    color: playerCar.color,
-    progress: 0
-  });
-
-  for (var i = 0; i < aiCars.length; i++) {
-    var car = aiCars[i];
-    var idx = i + 1;
-    var row = Math.floor(idx / 2);
-    var col = idx % 2;
-    var t0 = -0.15 - row * 0.18;
-    var lane = col === 0 ? -14 : 14;
-
-    racers.push({
-      isPlayer: false,
-      car: car,
-      t: t0,
-      lane: lane,
-      laps: 0,
-      place: idx + 1,
-      lapTime: getCarLapTime(car),
-      color: car.color,
-      progress: 0
-    });
-  }
-
-  sessionStart = performance.now();
-  refreshLeaderboard();
-}
-
-/* =========== ИГРОВОЙ ЦИКЛ =========== */
-var lastTime = 0;
-var lastLeaderboardUpdate = 0;
-
-function gameLoop(time) {
+  } catch(e){}
   try {
-    var dt = (time - lastTime) / 1000;
-    if (dt > 0.05) dt = 0.05;
-    if (dt < 0) dt = 0;
-    lastTime = time;
-
-    updateGame(dt);
-    renderGame();
-    updateHUD();
-
-    if (time - lastLeaderboardUpdate > 200) {
-      lastLeaderboardUpdate = time;
-      refreshLeaderboard();
+    const raw = localStorage.getItem(PROFILE_KEY);
+    if (raw) {
+      const p = JSON.parse(raw);
+      profile.name = (typeof p.name === 'string' && p.name.trim()) ? p.name.trim().slice(0, 20) : 'Игрок';
+      profile.avatar = typeof p.avatar === 'string' ? p.avatar : '🐍';
+      profile.created = p.created || Date.now();
     }
-  } catch (e) {
-    var ov = document.getElementById('error-overlay');
-    ov.style.display = 'block';
-    ov.textContent += 'LOOP ERROR: ' + e.message + '\n' + (e.stack || '') + '\n\n';
-  }
+  } catch(e){}
+}
+load();
 
-  requestAnimationFrame(gameLoop);
+let soundMuted = false;
+try { soundMuted = localStorage.getItem(AUDIO_KEY) === '1'; } catch(e){}
+GlobalMute.set(soundMuted);
+
+function applySoundToggleUI(){
+  const btn = document.getElementById('soundToggle');
+  if (soundMuted) { btn.classList.add('muted'); btn.textContent = '🔇'; }
+  else { btn.classList.remove('muted'); btn.textContent = '🔊'; }
+}
+applySoundToggleUI();
+
+document.getElementById('soundToggle').addEventListener('click', () => {
+  SFX.resume();
+  soundMuted = !soundMuted;
+  GlobalMute.set(soundMuted);
+  try { localStorage.setItem(AUDIO_KEY, soundMuted ? '1' : '0'); } catch(e){}
+  applySoundToggleUI();
+  if (!soundMuted) SFX.sfx.click();
+});
+
+/* ============================================================
+   TOAST
+============================================================ */
+const toastContainer = document.getElementById('toastContainer');
+function showToast(text, type = 'info', duration = 2200){
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  el.textContent = text;
+  toastContainer.appendChild(el);
+  setTimeout(() => {
+    el.classList.add('fade-out');
+    setTimeout(() => el.remove(), 300);
+  }, duration);
 }
 
-function updateGame(dt) {
-  if (racers.length === 0) return;
-  var TWO_PI = Math.PI * 2;
-  var i, r;
+/* ============================================================
+   ОПРЕДЕЛЕНИЕ УСТРОЙСТВА
+============================================================ */
+function detectDevice(){
+  const ua = navigator.userAgent;
+  const w = window.innerWidth, h = window.innerHeight;
+  const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+  const isIPad = /iPad/.test(ua) || (ua.includes('Mac') && 'ontouchend' in document);
+  let device = 'desktop';
+  if (isIPad) device = 'tablet';
+  else if (/Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua)) { device = (Math.min(w, h) >= 600) ? 'tablet' : 'phone'; }
+  else if (isTouch && Math.min(w, h) >= 600) device = 'tablet';
+  if (w < 520 && !isIPad) device = 'phone';
+  const wasPhone = document.body.classList.contains('device-phone');
+  document.body.classList.remove('device-phone', 'device-tablet', 'device-desktop');
+  document.body.classList.add('device-' + device);
+  document.body.dataset.device = device;
+  if (wasPhone && device !== 'phone') closeMobileShop();
+}
+detectDevice();
+let resizeTimeout;
+window.addEventListener('resize', () => { clearTimeout(resizeTimeout); resizeTimeout = setTimeout(detectDevice, 200); });
+window.addEventListener('orientationchange', () => setTimeout(detectDevice, 250));
 
-  for (i = 0; i < racers.length; i++) {
-    r = racers[i];
-    r.t += (TWO_PI / r.lapTime) * dt;
-    while (r.t >= TWO_PI) {
-      r.t -= TWO_PI;
-      r.laps += 1;
-      onLapComplete(r);
-    }
-    r.progress = r.laps * TWO_PI + r.t;
+/* ============================================================
+   КОНФИГ
+============================================================ */
+const CELL = 24;
+const COLS = 20;
+const ROWS = 20;
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+
+const hudApples = document.getElementById('hudApples');
+const hudTimer = document.getElementById('hudTimer');
+const hudScore = document.getElementById('hudScore');
+const shopApples = document.getElementById('shopApples');
+const mobileApples = document.getElementById('mobileApples');
+const overlay = document.getElementById('overlay');
+const ovTitle = document.getElementById('ovTitle');
+const ovText = document.getElementById('ovText');
+const ovBtn = document.getElementById('ovBtn');
+const playBtn = document.getElementById('playBtn');
+const pauseIndicator = document.getElementById('pauseIndicator');
+const buffsBar = document.getElementById('buffsBar');
+
+const casesList = document.getElementById('casesList');
+const mobileCasesList = document.getElementById('mobileCasesList');
+const collectionGrid = document.getElementById('collectionGrid');
+const mobileCollectionGrid = document.getElementById('mobileCollectionGrid');
+const profileInMenu = document.getElementById('profileInMenu');
+const mobileProfileInMenu = document.getElementById('mobileProfileInMenu');
+const mobileShopScreen = document.getElementById('mobileShopScreen');
+const mobileShopToggle = document.getElementById('mobileShopToggle');
+const mobileCloseBtn = document.getElementById('mobileCloseBtn');
+
+/* ============================================================
+   УСИЛИТЕЛИ — массив с гарантированной ротацией
+============================================================ */
+const BUFFS_LIST = [
+  { id: 'magnet',     name: 'Магнит',      icon: '🧲', duration: 5,  colorA: '#ff8ba7', colorB: '#d04a6e', desc: 'Притягивает все фрукты' },
+  { id: 'speed',      name: 'Ускорение',   icon: '⚡', duration: 5,  colorA: '#ffe066', colorB: '#d4a017', desc: 'Скорость ×1.75' },
+  { id: 'ghost',      name: 'Призрак',     icon: '👻', duration: 7,  colorA: '#b5a4d4', colorB: '#7a6a9a', desc: 'Проходит сквозь тело' },
+  { id: 'multifruit', name: 'Мультифрукт', icon: '🍇', duration: 10, colorA: '#7fb87f', colorB: '#4a8a4a', desc: 'Больше фруктов на поле' },
+];
+
+const BUFFS = {};
+BUFFS_LIST.forEach(b => { BUFFS[b.id] = b; });
+
+// Защита от повторения одного и того же баффа
+let lastBuffType = null;
+let sameTypeStreak = 0;
+
+function pickRandomBuffType(){
+  let pool = BUFFS_LIST;
+  if (lastBuffType && sameTypeStreak >= 1) {
+    pool = BUFFS_LIST.filter(b => b.id !== lastBuffType);
+    if (pool.length === 0) pool = BUFFS_LIST;
   }
+  const picked = pool[Math.floor(Math.random() * pool.length)];
+  if (picked.id === lastBuffType) { sameTypeStreak++; }
+  else { sameTypeStreak = 1; lastBuffType = picked.id; }
+  return picked.id;
+}
 
-  var sorted = racers.slice().sort(function(a, b) { return b.progress - a.progress; });
-  for (i = 0; i < sorted.length; i++) {
-    sorted[i].place = i + 1;
+let activeBuffs = {};
+function isBuffActive(id){ return id in activeBuffs; }
+
+function activateBuff(id){
+  const cfg = BUFFS[id];
+  if (!cfg) return;
+  const isNew = !isBuffActive(id);
+  activeBuffs[id] = { timeLeft: cfg.duration, total: cfg.duration };
+  state.buffsPicked++;
+  if (isNew) {
+    SFX.sfx.buffPickup();
+    showToast(`${cfg.icon} ${cfg.name}! ${cfg.desc}`, 'buff', 2400);
+    spawnBuffEffect(id);
+    if (id === 'multifruit') { for (let i = 0; i < 3; i++) spawnExtraFood(); }
+  }
+  updateBuffsBar();
+}
+
+function updateBuffs(dt){
+  for (const id in activeBuffs) {
+    const b = activeBuffs[id];
+    b.timeLeft -= dt;
+    if (b.timeLeft <= 2 && b.timeLeft > 0) {
+      if (!b._warned || Date.now() - b._warned > 500) { SFX.sfx.buffWarning(); b._warned = Date.now(); }
+    }
+    if (b.timeLeft <= 0) {
+      delete activeBuffs[id];
+      SFX.sfx.buffExpire();
+      if (id === 'multifruit') extraFoods = [];
+      updateBuffsBar();
+    }
   }
 }
 
-function onLapComplete(r) {
-  if (!r.isPlayer) return;
-  var track = getTrack(state.activeTrack);
-  var classMult = getCarClass(r.car).multiplier;
-  var placeBonus = PLACE_BONUS[r.place] || 1.0;
-  var reward = Math.floor(BASE_REWARD * track.rewardMult * classMult * placeBonus);
-
-  state.money += reward;
-  state.laps += 1;
-  if (r.place === 1) state.wins += 1;
-
-  updateMoneyDisplay(true);
-  updateMiniStats();
-  save();
-
-  var placeLabels = ['', '1-е', '2-е', '3-е', '4-е', '5-е', '6-е'];
-  var placeLabel = placeLabels[r.place] || (r.place + '-е');
-  showToast('+$' + reward.toLocaleString('ru-RU'), r.place === 1 ? 'win' : '');
-  showToast(placeLabel + ' место · круг ' + r.laps, 'info');
-}
-
-/* =========== ОТРИСОВКА =========== */
-function renderGame() {
-  var track = getTrack(state.activeTrack);
-  if (!track) return;
-  var c = PALETTES[track.style] || PALETTES.country;
-  var i;
-
-  ctx.fillStyle = c.bg;
-  ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
-
-  ctx.fillStyle = c.accent;
-  for (i = 0; i < 400; i++) {
-    var x = (i * 137) % CANVAS_W;
-    var y = (i * 89) % CANVAS_H;
-    var dx = (x - TRACK.cx) / (TRACK.rx + TRACK.width);
-    var dy = (y - TRACK.cy) / (TRACK.ry + TRACK.width);
-    if (dx * dx + dy * dy > 1.15) {
-      ctx.fillRect(Math.floor(x / 8) * 8, Math.floor(y / 8) * 8, 4, 4);
-    }
+function updateBuffsBar(){
+  const ids = Object.keys(activeBuffs);
+  if (ids.length === 0) {
+    buffsBar.classList.add('empty');
+    buffsBar.innerHTML = '';
+    return;
   }
-
-  ctx.strokeStyle = c.border;
-  ctx.lineWidth = TRACK.width + 6;
-  ctx.beginPath();
-  ctx.ellipse(TRACK.cx, TRACK.cy, TRACK.rx, TRACK.ry, 0, 0, Math.PI * 2);
-  ctx.stroke();
-
-  ctx.strokeStyle = c.road;
-  ctx.lineWidth = TRACK.width;
-  ctx.beginPath();
-  ctx.ellipse(TRACK.cx, TRACK.cy, TRACK.rx, TRACK.ry, 0, 0, Math.PI * 2);
-  ctx.stroke();
-
-  ctx.strokeStyle = c.line;
-  ctx.lineWidth = 2;
-  ctx.setLineDash([10, 14]);
-  ctx.beginPath();
-  ctx.ellipse(TRACK.cx, TRACK.cy, TRACK.rx, TRACK.ry, 0, 0, Math.PI * 2);
-  ctx.stroke();
-  ctx.setLineDash([]);
-
-  var st = trackPos(0, -TRACK.width / 2);
-  var sb = trackPos(0, TRACK.width / 2);
-  ctx.strokeStyle = '#fff';
-  ctx.lineWidth = 4;
-  ctx.setLineDash([4, 4]);
-  ctx.beginPath();
-  ctx.moveTo(st.x, st.y);
-  ctx.lineTo(sb.x, sb.y);
-  ctx.stroke();
-  ctx.setLineDash([]);
-
-  var sorted = racers.slice().sort(function(a, b) {
-    return trackPos(a.t, a.lane).y - trackPos(b.t, b.lane).y;
+  buffsBar.classList.remove('empty');
+  buffsBar.innerHTML = '';
+  ids.forEach(id => {
+    const cfg = BUFFS[id];
+    const b = activeBuffs[id];
+    const chip = document.createElement('div');
+    chip.className = 'buff-chip ' + id + (b.timeLeft <= 2 ? ' ending' : '');
+    chip.innerHTML = `
+      <div class="buff-icon">${cfg.icon}</div>
+      <div class="buff-info">
+        <div class="buff-name">${cfg.name}</div>
+        <div class="buff-time">${b.timeLeft.toFixed(1)}с</div>
+      </div>
+      <div class="buff-progress" style="width:${(b.timeLeft / b.total) * 100}%"></div>
+    `;
+    buffsBar.appendChild(chip);
   });
-  for (i = 0; i < sorted.length; i++) {
-    var r = sorted[i];
-    var p = trackPos(r.t, r.lane);
-    var angle = trackAngle(r.t);
-    drawCar(p.x, p.y, angle, r.color, r.isPlayer, r.car.rarity, r.car.id);
+}
+
+function tickBuffsBarUI(){
+  const chips = buffsBar.children;
+  const ids = Object.keys(activeBuffs);
+  if (chips.length !== ids.length) { updateBuffsBar(); return; }
+  ids.forEach((id, i) => {
+    const b = activeBuffs[id];
+    const chip = chips[i];
+    if (!chip) return;
+    const timeEl = chip.querySelector('.buff-time');
+    const progEl = chip.querySelector('.buff-progress');
+    if (timeEl) timeEl.textContent = b.timeLeft.toFixed(1) + 'с';
+    if (progEl) progEl.style.width = Math.max(0, (b.timeLeft / b.total) * 100) + '%';
+    if (b.timeLeft <= 2 && !chip.classList.contains('ending')) chip.classList.add('ending');
+    if (b.timeLeft > 2 && chip.classList.contains('ending')) chip.classList.remove('ending');
+  });
+}
+
+function spawnBuffEffect(id){
+  const cfg = BUFFS[id];
+  const cx = canvas.width / 2, cy = canvas.height / 2;
+  for (let i = 0; i < 40; i++){
+    const a = Math.random() * Math.PI * 2;
+    const sp = 1 + Math.random() * 5;
+    particles.push({ type: 'dot', x: cx, y: cy, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: 1, maxLife: 0.9 + Math.random() * 0.6, size: 3 + Math.random() * 4, color: cfg.colorA });
+  }
+  for (let i = 0; i < 16; i++){
+    const a = (i / 16) * Math.PI * 2;
+    particles.push({ type: 'dot', x: cx + Math.cos(a) * 10, y: cy + Math.sin(a) * 10, vx: Math.cos(a) * 2, vy: Math.sin(a) * 2, life: 1, maxLife: 1, size: 5, color: cfg.colorB });
   }
 }
 
-/* Отрисовка одной машинки.
-   У игрока тень НЕ рисуется — она конфликтует с самим спрайтом
-   (у спрайта своя тень нарисована автором).
-   У ИИ рисуем процедурную тень под процедурной машинкой. */
-function drawCar(x, y, angle, color, isPlayer, rarity, carId) {
-  x = Math.round(x);
-  y = Math.round(y);
+/* ============================================================
+   ПРОФИЛЬ — рендер внутри меню
+============================================================ */
+const AVATAR_OPTIONS = ['🐍','🦎','🐉','🐲','🦖','🐢','🦂','🐊','🦕','🐸','🦄','👾'];
+
+function buildProfileHTML(){
+  return `
+    <div class="profile-avatar-row">
+      <div class="profile-avatar" data-action="avatar">${profile.avatar}</div>
+      <div class="profile-name-block">
+        <div class="profile-name" data-action="name" title="Нажми, чтобы изменить">${escapeHtml(profile.name)}</div>
+        <div class="profile-name-edit">нажми на имя, чтобы изменить</div>
+      </div>
+    </div>
+    <div class="profile-stats">
+      <div class="profile-stat">
+        <div class="label">Рекорд</div>
+        <div class="value gold">${state.bestScore}</div>
+      </div>
+      <div class="profile-stat">
+        <div class="label">Игр сыграно</div>
+        <div class="value blue">${state.gamesPlayed}</div>
+      </div>
+      <div class="profile-stat">
+        <div class="label">Всего фруктов</div>
+        <div class="value green">${state.totalApples}</div>
+      </div>
+      <div class="profile-stat">
+        <div class="label">Кейсов открыто</div>
+        <div class="value">${state.casesOpened}</div>
+      </div>
+    </div>
+    <div class="profile-section-title">Коллекция по редкости</div>
+    <div class="rarity-progress">
+      ${buildRarityRows()}
+    </div>
+    <button class="btn-danger" data-action="reset">🗑 Сбросить прогресс</button>
+  `;
+}
+
+function buildRarityRows(){
+  const groups = { common: [], uncommon: [], rare: [], epic: [], legendary: [] };
+  SKINS.forEach(s => { if (groups[s.rarity]) groups[s.rarity].push(s); });
+  return ['common','uncommon','rare','epic','legendary'].map(rarity => {
+    const all = groups[rarity];
+    const owned = all.filter(s => state.owned.includes(s.id)).length;
+    const total = all.length;
+    const done = owned === total;
+    return `
+      <div class="rarity-row ${rarity}">
+        <div class="rarity-dot"></div>
+        <div class="label">${RARITIES[rarity].name}</div>
+        <div class="count ${done ? 'done' : ''}">${owned}/${total}${done ? ' ✓' : ''}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+}
+
+function renderProfile(){
+  profileInMenu.innerHTML = buildProfileHTML();
+  mobileProfileInMenu.innerHTML = buildProfileHTML();
+  attachProfileHandlers(profileInMenu);
+  attachProfileHandlers(mobileProfileInMenu);
+}
+
+function attachProfileHandlers(root){
+  root.querySelectorAll('[data-action]').forEach(el => {
+    const action = el.dataset.action;
+    if (action === 'avatar') {
+      el.addEventListener('click', () => {
+        const idx = AVATAR_OPTIONS.indexOf(profile.avatar);
+        profile.avatar = AVATAR_OPTIONS[(idx + 1) % AVATAR_OPTIONS.length];
+        saveProfile();
+        renderProfile();
+        SFX.sfx.equip();
+      });
+    } else if (action === 'name') {
+      el.addEventListener('click', () => {
+        const newName = prompt('Введите новое имя (до 20 символов):', profile.name);
+        if (newName === null) return;
+        const trimmed = newName.trim().slice(0, 20);
+        if (trimmed) {
+          profile.name = trimmed;
+          saveProfile();
+          renderProfile();
+          showToast(`Имя изменено: ${profile.name}`, 'success', 1500);
+        }
+      });
+    } else if (action === 'reset') {
+      el.addEventListener('click', () => {
+        const ok = confirm('Ты уверен? Весь прогресс (скины, яблоки, рекорды) будет удалён.');
+        if (!ok) return;
+        state = { apples: 50, owned: ['gummy'], active: 'gummy', bestScore: 0, totalApples: 0, gamesPlayed: 0, casesOpened: 0, buffsPicked: 0, version: '2.5.1' };
+        save();
+        renderCases();
+        renderCollection();
+        renderProfile();
+        updateHUD();
+        showToast('Прогресс сброшен', 'info', 1800);
+        SFX.sfx.deny();
+      });
+    }
+  });
+}
+
+/* ============================================================
+   МОБИЛЬНОЕ МЕНЮ
+============================================================ */
+function openMobileShop(){
+  SFX.resume();
+  SFX.sfx.click();
+  mobileShopScreen.classList.add('open');
+  document.body.classList.add('shop-open');
+  document.body.style.overflow = 'hidden';
+}
+function closeMobileShop(){
+  mobileShopScreen.classList.remove('open');
+  document.body.classList.remove('shop-open');
+  document.body.style.overflow = '';
+}
+mobileShopToggle.addEventListener('click', (e) => { e.stopPropagation(); openMobileShop(); });
+mobileCloseBtn.addEventListener('click', (e) => { e.stopPropagation(); SFX.sfx.click(); closeMobileShop(); });
+
+/* ============================================================
+   TABS
+============================================================ */
+document.querySelectorAll('.shop-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const target = tab.dataset.tab;
+    const container = tab.closest('.shop') || tab.closest('.mobile-shop-screen');
+    if (!container) return;
+    container.querySelectorAll('.shop-tab').forEach(t => t.classList.toggle('active', t === tab));
+    container.querySelectorAll('.shop-pane').forEach(p => {
+      const isTarget = p.id.toLowerCase().includes(target);
+      p.classList.toggle('active', isTarget);
+    });
+    SFX.sfx.click();
+  });
+});
+
+/* ============================================================
+   РЕНДЕР КЕЙСОВ
+============================================================ */
+function createCaseCard(cs){
+  const card = document.createElement('div');
+  card.className = 'case-card ' + cs.id;
+  card.style.setProperty('--case-color-a', cs.colorA);
+  card.style.setProperty('--case-color-b', cs.colorB);
+  const canAfford = state.apples >= cs.price;
+  card.innerHTML = `
+    <div class="case-header">
+      <div class="case-icon">${cs.icon}</div>
+      <div class="case-info">
+        <div class="case-name">${cs.name}</div>
+        <div class="case-sub">${cs.sub}</div>
+      </div>
+    </div>
+    <div class="case-price">
+      <span class="case-price-label">Открыть за</span>
+      <span class="case-price-val ${canAfford ? '' : 'cant-afford'}">🍎 ${cs.price}</span>
+    </div>
+  `;
+  card.addEventListener('click', () => openCase(cs));
+  card.addEventListener('mouseenter', () => SFX.sfx.hover());
+  return card;
+}
+
+function renderCases(){
+  casesList.innerHTML = '';
+  mobileCasesList.innerHTML = '';
+  CASES.forEach(cs => {
+    casesList.appendChild(createCaseCard(cs));
+    mobileCasesList.appendChild(createCaseCard(cs));
+  });
+  updateHUD();
+}
+
+function createSkinTile(skin){
+  const owned = state.owned.includes(skin.id);
+  const active = state.active === skin.id;
+  const tile = document.createElement('div');
+  tile.className = 'skin-tile' + (active ? ' active' : '') + (!owned ? ' locked' : '');
+  tile.dataset.skinId = skin.id;
+  const previewBg = skin.gemGradient
+    ? `linear-gradient(135deg, ${skin.colors[0]}, ${skin.colors[1]}, ${skin.colors[0]})`
+    : `linear-gradient(135deg, ${skin.colors[0]}, ${skin.colors[1]})`;
+  tile.innerHTML = `
+    <div class="skin-tile-preview" style="background:${previewBg}">
+      <span>${owned ? skin.icon : '❔'}</span>
+    </div>
+    <div class="skin-tile-name">${owned ? skin.name : '???'}</div>
+    <div class="rarity-badge ${skin.rarity}">${RARITIES[skin.rarity].name}</div>
+  `;
+  if (owned) {
+    tile.addEventListener('click', () => {
+      if (state.active !== skin.id) {
+        state.active = skin.id;
+        save(); renderCollection(); renderCases();
+        spawnBurst(canvas.width/2, canvas.height/2, skin.colors[0], 22);
+        spawnHearts(canvas.width/2, canvas.height/2, 6);
+        showToast(`Надет скин «${skin.name}»`, 'success', 1500);
+        SFX.sfx.equip();
+      }
+    });
+    tile.addEventListener('mouseenter', () => SFX.sfx.hover());
+  }
+  return tile;
+}
+
+function renderCollection(){
+  collectionGrid.innerHTML = '';
+  mobileCollectionGrid.innerHTML = '';
+  SKINS.forEach(skin => {
+    collectionGrid.appendChild(createSkinTile(skin));
+    mobileCollectionGrid.appendChild(createSkinTile(skin));
+  });
+}
+
+/* ============================================================
+   КЕЙСЫ — открытие
+============================================================ */
+let currentCase = null;
+
+function openCase(cs){
+  SFX.resume();
+  if (state.apples < cs.price) {
+    showToast(`Не хватает ${cs.price - state.apples} 🍎`, 'error', 1800);
+    SFX.sfx.deny();
+    return;
+  }
+  state.apples -= cs.price;
+  state.casesOpened++;
+  save();
+  renderCases();
+  currentCase = cs;
+  const droppedSkin = rollFromCase(cs);
+  caseResult.classList.remove('show');
+  rouletteTrack.style.transition = 'none';
+  rouletteTrack.style.transform = 'translateX(0)';
+  caseOpenOverlay.classList.add('show');
+  caseOpenTitle.textContent = cs.name;
+  caseOpenSub.textContent = cs.sub;
+  const rouletteItems = [];
+  const TOTAL_ITEMS = 60;
+  const WINNER_INDEX = 52;
+  for (let i = 0; i < TOTAL_ITEMS; i++){
+    let skin;
+    if (i === WINNER_INDEX) skin = droppedSkin;
+    else { const randId = cs.pool[Math.floor(Math.random() * cs.pool.length)]; skin = getSkin(randId); }
+    rouletteItems.push(skin);
+  }
+  rouletteTrack.innerHTML = '';
+  rouletteItems.forEach(skin => {
+    const item = document.createElement('div');
+    item.className = 'roulette-item ' + skin.rarity;
+    const bg = skin.gemGradient
+      ? `linear-gradient(135deg, ${skin.colors[0]}, ${skin.colors[1]}, ${skin.colors[0]})`
+      : `linear-gradient(135deg, ${skin.colors[0]}, ${skin.colors[1]})`;
+    item.innerHTML = `
+      <div class="roulette-item-icon" style="background:${bg}">${skin.icon}</div>
+      <div class="roulette-item-name">${skin.name}</div>
+    `;
+    rouletteTrack.appendChild(item);
+  });
+  SFX.sfx.caseSpin();
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const itemWidth = 110;
+      const containerWidth = document.getElementById('rouletteWrap').offsetWidth;
+      const winnerCenter = WINNER_INDEX * itemWidth + itemWidth / 2 + 20;
+      const targetX = containerWidth / 2 - winnerCenter;
+      const jitter = (Math.random() - 0.5) * 40;
+      rouletteTrack.style.transition = 'transform 5s cubic-bezier(.15, .6, .2, 1)';
+      rouletteTrack.style.transform = `translateX(${targetX + jitter}px)`;
+      setTimeout(() => revealResult(droppedSkin), 5100);
+    });
+  });
+}
+
+function rollFromCase(cs){
+  const items = cs.pool.map(id => { const skin = getSkin(id); return { skin, weight: RARITIES[skin.rarity].weight }; });
+  const totalWeight = items.reduce((sum, it) => sum + it.weight, 0);
+  let roll = Math.random() * totalWeight;
+  for (const it of items) { roll -= it.weight; if (roll <= 0) return it.skin; }
+  return items[items.length - 1].skin;
+}
+
+function revealResult(skin){
+  const isNew = !state.owned.includes(skin.id);
+  if (isNew) { state.owned.push(skin.id); save(); }
+  renderCollection();
+  renderProfile();
+  const bg = skin.gemGradient
+    ? `linear-gradient(135deg, ${skin.colors[0]}, ${skin.colors[1]}, ${skin.colors[0]})`
+    : `linear-gradient(135deg, ${skin.colors[0]}, ${skin.colors[1]})`;
+  caseResultIcon.style.background = bg;
+  caseResultIcon.textContent = skin.icon;
+  caseResultName.textContent = skin.name + (isNew ? ' ✨' : ' (повтор)');
+  caseResultRarity.textContent = RARITIES[skin.rarity].name;
+  caseResultRarity.className = 'case-result-rarity ' + skin.rarity;
+  caseResult.classList.add('show');
+  SFX.sfx.caseReveal(skin.rarity);
+  if (skin.rarity === 'epic' || skin.rarity === 'legendary') spawnConfetti(skin.rarity === 'legendary' ? 80 : 40);
+  if (isNew) showToast(`✨ Новый скин: ${skin.name}!`, 'success', 2500);
+  else showToast(`Повтор: ${skin.name}`, 'info', 1800);
+}
+
+function spawnConfetti(count){
+  const colors = ['#ff4a6e','#ffb545','#4a9eff','#b57aff','#7fb87f','#fff'];
+  for (let i = 0; i < count; i++){
+    const el = document.createElement('div');
+    el.className = 'confetti';
+    el.style.left = (Math.random() * 100) + '%';
+    el.style.top = '-20px';
+    el.style.background = colors[Math.floor(Math.random() * colors.length)];
+    el.style.animationDelay = (Math.random() * 0.5) + 's';
+    el.style.setProperty('--dx', ((Math.random() - 0.5) * 300) + 'px');
+    caseOpenOverlay.appendChild(el);
+    setTimeout(() => el.remove(), 3500);
+  }
+}
+
+caseResultClose.addEventListener('click', () => { caseOpenOverlay.classList.remove('show'); caseResult.classList.remove('show'); SFX.sfx.click(); });
+caseResultOpenAgain.addEventListener('click', () => { if (!currentCase) return; caseOpenOverlay.classList.remove('show'); caseResult.classList.remove('show'); SFX.sfx.click(); setTimeout(() => openCase(currentCase), 200); });
+
+/* ============================================================
+   ИГРОВЫЕ ПЕРЕМЕННЫЕ
+============================================================ */
+let snake, dir, nextDir, food, extraFoods = [], score, running, gameOver;
+let time = 0, timerRunning = false;
+let tickAcc = 0;
+let particles = [];
+let foodPulse = 0;
+let shake = 0;
+let lastTime = performance.now();
+let gameTime = 0;
+let trailSpots = [];
+let foodEatenPulse = 0;
+let buffSpawnTimer = 0;
+let buffPickup = null;
+
+/* ============================================================
+   ПАУЗА
+============================================================ */
+let paused = false;
+let pausedByRadio = false;
+
+function pauseGame(reason = 'user'){
+  if (!running || paused) return;
+  paused = true;
+  pausedByRadio = (reason === 'radio');
+  SFX.sfx.pause();
+  pauseIndicator.classList.add('show');
+}
+function resumeGame(){
+  if (!running || !paused) return;
+  paused = false;
+  pausedByRadio = false;
+  SFX.sfx.unpause();
+  pauseIndicator.classList.remove('show');
+}
+function togglePause(){ if (!running) return; if (paused) resumeGame(); else pauseGame('user'); }
+
+/* ============================================================
+   ИГРА
+============================================================ */
+function resetGame(){
+  snake = [{x:10,y:10},{x:9,y:10},{x:8,y:10}];
+  dir = {x:1,y:0}; nextDir = {x:1,y:0};
+  score = 0; time = 0; tickAcc = 0;
+  food = null; extraFoods = []; particles = []; trailSpots = []; shake = 0;
+  foodEatenPulse = 0;
+  activeBuffs = {};
+  buffPickup = null;
+  buffSpawnTimer = 5 + Math.random() * 3;
+  lastBuffType = null;
+  sameTypeStreak = 0;
+  gameOver = false; running = true; timerRunning = true;
+  paused = false;
+  pauseIndicator.classList.remove('show');
+  spawnFood();
+  updateBuffsBar();
+  updateHUD();
+}
+
+function isCellFreeForBuff(x, y){
+  if (snake.some(s => s.x === x && s.y === y)) return false;
+  if (food && food.x === x && food.y === y) return false;
+  if (extraFoods.some(f => f.x === x && f.y === y)) return false;
+  if (buffPickup && buffPickup.x === x && buffPickup.y === y) return false;
+  return true;
+}
+
+function spawnFood(){
+  const free = [];
+  for (let y=0; y<ROWS; y++)
+    for (let x=0; x<COLS; x++)
+      if (isCellFreeForBuff(x, y)) free.push({x,y});
+  if (free.length === 0) { winGame(); return; }
+  food = free[Math.floor(Math.random()*free.length)];
+  food.type = Math.floor(Math.random()*6);
+  food.spawnT = 0;
+}
+
+function spawnExtraFood(){
+  if (extraFoods.length >= 5) return;
+  const free = [];
+  for (let y=0; y<ROWS; y++)
+    for (let x=0; x<COLS; x++)
+      if (isCellFreeForBuff(x, y)) free.push({x,y});
+  if (free.length === 0) return;
+  const pos = free[Math.floor(Math.random()*free.length)];
+  extraFoods.push({ x: pos.x, y: pos.y, type: Math.floor(Math.random()*6), spawnT: 0 });
+}
+
+function spawnBuff(){
+  const free = [];
+  for (let y = 0; y < ROWS; y++){
+    for (let x = 0; x < COLS; x++){
+      if (isCellFreeForBuff(x, y)) free.push({ x, y });
+    }
+  }
+  if (free.length === 0) return;
+  const pos = free[Math.floor(Math.random() * free.length)];
+  const type = pickRandomBuffType();
+  buffPickup = { x: pos.x, y: pos.y, type, spawnT: 0, life: 12 };
+  console.log('[BUFF SPAWN]', type, 'at', pos.x, pos.y);
+}
+
+function updateHUD(){
+  hudApples.textContent = state.apples;
+  hudScore.textContent = score ?? 0;
+  hudTimer.textContent = time.toFixed(1);
+  shopApples.textContent = state.apples;
+  mobileApples.textContent = state.apples;
+}
+
+const FRUITS = [
+  { emoji:'🍎', color:'#ff5e7a' },
+  { emoji:'🍌', color:'#ffd76e' },
+  { emoji:'🍇', color:'#b07de0' },
+  { emoji:'🍓', color:'#ff7a8a' },
+  { emoji:'🍊', color:'#ffa95c' },
+  { emoji:'🍒', color:'#e8556b' },
+];
+
+/**
+ * ===== ИСПРАВЛЕННЫЙ МАГНИТ =====
+ * Логика:
+ *  - Все фрукты (основной + дополнительные) двигаются на 1 клетку в сторону головы змейки.
+ *  - Если фрукт уже на позиции головы или в 1 клетке — он "долетает" (подбирается).
+ *  - Не пересекаются между собой и не попадают в тело змейки (кроме головы).
+ */
+function applyMagnet(){
+  if (!isBuffActive('magnet')) return;
+  const head = snake[0];
+
+  // Собираем все "магнитные" фрукты: основной + дополнительные
+  const allFruits = [];
+  if (food) allFruits.push({ ref: food, isExtra: false, idx: -1 });
+  extraFoods.forEach((f, i) => allFruits.push({ ref: f, isExtra: true, idx: i }));
+
+  // Устанавливаем множество занятых клеток (кроме головы и самого фрукта)
+  // чтобы фрукты не накладывались друг на друга
+  const eatenExtras = [];
+
+  // Сначала собираем все "целевые" позиции, чтобы разом двигать
+  const moves = [];
+
+  allFruits.forEach(entry => {
+    const f = entry.ref;
+    const dx = head.x - f.x;
+    const dy = head.y - f.y;
+    if (dx === 0 && dy === 0) return; // уже под головой — подберётся в step()
+
+    // Смещаем только по доминирующей оси, максимум на 1
+    let nx = f.x, ny = f.y;
+    if (Math.abs(dx) >= Math.abs(dy)) {
+      nx = f.x + Math.sign(dx);
+    } else {
+      ny = f.y + Math.sign(dy);
+    }
+
+    // Проверка границ
+    if (nx < 0 || nx >= COLS || ny < 0 || ny >= ROWS) return;
+
+    // Не двигаться в тело змейки (кроме головы)
+    const inBody = snake.slice(1).some(s => s.x === nx && s.y === ny);
+    if (inBody) return;
+
+    // Не двигаться в другой фрукт (проверим после сбора всех moves)
+    moves.push({ entry, nx, ny });
+  });
+
+  // Проверяем, что целевые позиции не совпадают между собой
+  // и не заняты другими фруктами
+  const targets = {};
+  moves.forEach(m => {
+    const key = m.nx + ',' + m.ny;
+    if (!targets[key]) targets[key] = [];
+    targets[key].push(m);
+  });
+
+  // Отсеиваем конфликты: если двое хотят в одну клетку, оставляем ближайшего
+  const finalMoves = [];
+  const takenKeys = new Set();
+
+  moves.forEach(m => {
+    const key = m.nx + ',' + m.ny;
+    // Проверка, что клетка не занята другим "неподвижным" фруктом
+    const occupiedByOtherFruit = allFruits.some(other => {
+      if (other.ref === m.entry.ref) return false;
+      // если другой фрукт двигается в эту же клетку — пропускаем
+      return other.ref.x === m.nx && other.ref.y === m.ny;
+    });
+    if (occupiedByOtherFruit) return;
+    if (targets[key].length > 1) {
+      // конфликт — берём только первый
+      if (takenKeys.has(key)) return;
+      takenKeys.add(key);
+    }
+    finalMoves.push(m);
+  });
+
+  // Применяем движения
+  finalMoves.forEach(m => {
+    m.entry.ref.x = m.nx;
+    m.entry.ref.y = m.ny;
+  });
+}
+
+function step(){
+  dir = nextDir;
+  const head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
+  if (head.x < 0 || head.x >= COLS || head.y < 0 || head.y >= ROWS) return die();
+
+  const ghostOn = isBuffActive('ghost');
+  if (!ghostOn) {
+    for (let i = 0; i < snake.length - 1; i++) {
+      if (snake[i].x === head.x && snake[i].y === head.y) return die();
+    }
+  }
+
+  snake.unshift(head);
+
+  const skin = getSkin(state.active);
+  if (skin.particles) {
+    trailSpots.push({ x: head.x, y: head.y, life: 1, color: skin.colors[0] });
+    if (trailSpots.length > 40) trailSpots.shift();
+  }
+
+  let ate = false;
+
+  // ==== Подбор основного фрукта ====
+  if (food && head.x === food.x && head.y === food.y) {
+    score++; state.apples++; state.totalApples++;
+    if (score > state.bestScore) state.bestScore = score;
+    save();
+    SFX.sfx.eat();
+    foodEatenPulse = 1;
+    spawnBurst(head.x*CELL + CELL/2, head.y*CELL + CELL/2, FRUITS[food.type].color, 16);
+    spawnHearts(head.x*CELL + CELL/2, head.y*CELL + CELL/2, 2);
+    spawnFood();
+    ate = true;
+  }
+
+  // ==== Подбор дополнительных фруктов ====
+  for (let i = extraFoods.length - 1; i >= 0; i--) {
+    const ef = extraFoods[i];
+    if (head.x === ef.x && head.y === ef.y) {
+      score++; state.apples++; state.totalApples++;
+      if (score > state.bestScore) state.bestScore = score;
+      save();
+      SFX.sfx.eat();
+      spawnBurst(ef.x*CELL + CELL/2, ef.y*CELL + CELL/2, FRUITS[ef.type].color, 12);
+      extraFoods.splice(i, 1);
+      ate = true;
+    }
+  }
+
+  // ==== Подбор баффа ====
+  if (buffPickup && head.x === buffPickup.x && head.y === buffPickup.y) {
+    console.log('[BUFF PICKED]', buffPickup.type);
+    activateBuff(buffPickup.type);
+    buffPickup = null;
+    ate = true;
+  }
+
+  if (ate) { updateHUD(); renderCases(); }
+  else { snake.pop(); }
+
+  // ==== Магнит: тянем фрукты к голове ====
+  applyMagnet();
+
+  if (snake.length === COLS * ROWS) winGame();
+}
+
+function die(){
+  running = false; timerRunning = false; gameOver = true;
+  shake = 12;
+  state.gamesPlayed++;
+  save();
+  SFX.sfx.die();
+  const skin = getSkin(state.active);
+  spawnBurst(snake[0].x*CELL + CELL/2, snake[0].y*CELL + CELL/2, skin.colors[0], 34);
+  const isRecord = score > 0 && score === state.bestScore;
+  ovTitle.textContent = isRecord ? '🏆 Новый рекорд!' : 'Ой-ой 🙈';
+  ovText.innerHTML = `
+    Счёт: <span class="big-stat">${score}</span><br>
+    Время: ${time.toFixed(1)} сек<br>
+    Рекорд: ${state.bestScore}<br>
+    <span style="color:#e0a47a;font-size:13px;margin-top:8px;display:inline-block">
+      +${score} 🍎 заработано
+    </span>
+  `;
+  ovBtn.textContent = 'Ещё раз';
+  overlay.classList.remove('hidden');
+  pauseIndicator.classList.remove('show');
+  updateHUD();
+  updateBuffsBar();
+  renderProfile();
+}
+
+function winGame(){
+  running = false; timerRunning = false;
+  state.gamesPlayed++;
+  save();
+  SFX.sfx.win();
+  ovTitle.textContent = 'Вау, победа! 🎉';
+  ovText.innerHTML = `Всё поле твоё!<br>Время: ${time.toFixed(1)} сек<br>Счёт: ${score}`;
+  ovBtn.textContent = 'Ещё раз';
+  overlay.classList.remove('hidden');
+  pauseIndicator.classList.remove('show');
+  updateBuffsBar();
+}
+
+/* ============================================================
+   ЧАСТИЦЫ
+============================================================ */
+function spawnBurst(x, y, color, count){
+  for (let i = 0; i < count; i++){
+    const a = Math.random() * Math.PI * 2;
+    const sp = 0.8 + Math.random() * 3.5;
+    particles.push({ type:'dot', x, y, vx: Math.cos(a)*sp, vy: Math.sin(a)*sp, life: 1, maxLife: .6 + Math.random()*.6, size: 2 + Math.random()*3.5, color });
+  }
+}
+function spawnHearts(x, y, count){
+  for (let i = 0; i < count; i++){
+    particles.push({ type:'heart', x: x + (Math.random()-0.5)*20, y: y + (Math.random()-0.5)*20, vx: (Math.random()-0.5)*0.8, vy: -1 - Math.random()*1.2, life: 1, maxLife: 1.1, size: 8 + Math.random()*4, color: ['#ff8ba7','#ff6b8a','#ffb6e0'][Math.floor(Math.random()*3)] });
+  }
+}
+function updateParticles(dt){
+  for (let i = particles.length - 1; i >= 0; i--){
+    const p = particles[i];
+    p.x += p.vx * dt * 60; p.y += p.vy * dt * 60;
+    if (p.type === 'dot') { p.vx *= 0.93; p.vy *= 0.93; p.vy += 0.1 * dt * 60; }
+    else { p.vy *= 0.98; }
+    p.life -= dt / p.maxLife;
+    if (p.life <= 0) particles.splice(i, 1);
+  }
+  for (let i = trailSpots.length - 1; i >= 0; i--){
+    trailSpots[i].life -= dt * 0.7;
+    if (trailSpots[i].life <= 0) trailSpots.splice(i, 1);
+  }
+}
+
+/* ============================================================
+   ЦВЕТОВЫЕ ХЕЛПЕРЫ
+============================================================ */
+function hexToRgb(hex){ const n = parseInt(hex.replace('#',''), 16); return { r: (n>>16)&255, g: (n>>8)&255, b: n&255 }; }
+function rgbToHex(r, g, b){ return '#' + [r,g,b].map(v => Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')).join(''); }
+function shade(hex, factor){ const { r, g, b } = hexToRgb(hex); return rgbToHex(r*factor, g*factor, b*factor); }
+function rgba(hex, a){ const { r, g, b } = hexToRgb(hex); return `rgba(${r},${g},${b},${a})`; }
+
+/* ============================================================
+   ОТРИСОВКА
+============================================================ */
+function drawGrid(){
+  const bgGrad = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 40, canvas.width/2, canvas.height/2, canvas.width * 0.75);
+  bgGrad.addColorStop(0, '#262732'); bgGrad.addColorStop(0.7, '#1e1f28'); bgGrad.addColorStop(1, '#17181f');
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  for (let y = 0; y < ROWS; y++){
+    for (let x = 0; x < COLS; x++){
+      if ((x + y) % 2 === 0){ ctx.fillStyle = 'rgba(255,255,255,0.016)'; ctx.fillRect(x*CELL, y*CELL, CELL, CELL); }
+    }
+  }
+  ctx.strokeStyle = 'rgba(255,255,255,0.028)'; ctx.lineWidth = 1;
+  for (let i = 1; i < COLS; i++){
+    ctx.beginPath(); ctx.moveTo(i*CELL, 0); ctx.lineTo(i*CELL, canvas.height); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, i*CELL); ctx.lineTo(canvas.width, i*CELL); ctx.stroke();
+  }
+  ctx.strokeStyle = 'rgba(0,0,0,0.35)'; ctx.lineWidth = 4;
+  ctx.strokeRect(2, 2, canvas.width-4, canvas.height-4);
+  ctx.strokeStyle = 'rgba(255,255,255,0.07)'; ctx.lineWidth = 1.5;
+  ctx.strokeRect(3.5, 3.5, canvas.width-7, canvas.height-7);
+
+  // Магнит — подсветка фона
+  if (isBuffActive('magnet')) {
+    const t = activeBuffs.magnet.timeLeft;
+    ctx.fillStyle = `rgba(255,139,167,${0.05 * (t / activeBuffs.magnet.total)})`;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // Линии притяжения от фруктов к голове
+    const head = snake[0];
+    const headX = head.x * CELL + CELL/2;
+    const headY = head.y * CELL + CELL/2;
+    const allFruits = [];
+    if (food) allFruits.push(food);
+    extraFoods.forEach(f => allFruits.push(f));
+    ctx.strokeStyle = 'rgba(255,139,167,0.25)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 4]);
+    allFruits.forEach(f => {
+      const fx = f.x * CELL + CELL/2;
+      const fy = f.y * CELL + CELL/2;
+      ctx.beginPath();
+      ctx.moveTo(fx, fy);
+      ctx.lineTo(headX, headY);
+      ctx.stroke();
+    });
+    ctx.setLineDash([]);
+  }
+}
+
+function drawFruitAt(fruit, isExtra){
+  if (!fruit) return;
+  foodPulse += 0.08;
+  fruit.spawnT = Math.min(1, (fruit.spawnT || 0) + 0.05);
+  const spawnScale = 1 - Math.pow(1 - fruit.spawnT, 3);
+  const pulse = 1 + Math.sin(foodPulse) * 0.12;
+  const cx = fruit.x * CELL + CELL/2;
+  const cy = fruit.y * CELL + CELL/2;
+  const r = CELL * 0.36 * pulse * spawnScale * (isExtra ? 0.85 : 1);
+  const fr = FRUITS[fruit.type];
+  if (r < 0.5) return;
+
+  const glow1 = ctx.createRadialGradient(cx, cy, r*0.5, cx, cy, r*2.4);
+  glow1.addColorStop(0, rgba(fr.color, 0.32));
+  glow1.addColorStop(0.5, rgba(fr.color, 0.1));
+  glow1.addColorStop(1, rgba(fr.color, 0));
+  ctx.fillStyle = glow1;
+  ctx.beginPath(); ctx.arc(cx, cy, r*2.4, 0, Math.PI*2); ctx.fill();
+
+  ctx.fillStyle = 'rgba(0,0,0,0.35)';
+  ctx.beginPath(); ctx.ellipse(cx, cy + r*0.75, r*0.9, r*0.35, 0, 0, Math.PI*2); ctx.fill();
+
+  const bodyGrad = ctx.createRadialGradient(cx - r*0.3, cy - r*0.35, r*0.1, cx, cy, r);
+  bodyGrad.addColorStop(0, shade(fr.color, 1.35));
+  bodyGrad.addColorStop(0.6, fr.color);
+  bodyGrad.addColorStop(1, shade(fr.color, 0.75));
+  ctx.fillStyle = bodyGrad;
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.fill();
+
+  ctx.strokeStyle = rgba(shade(fr.color, 0.5), 0.6);
+  ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.stroke();
+
+  ctx.fillStyle = 'rgba(255,255,255,0.42)';
+  ctx.beginPath(); ctx.ellipse(cx - r*0.3, cy - r*0.4, r*0.35, r*0.22, -0.5, 0, Math.PI*2); ctx.fill();
+
+  ctx.font = `${Math.floor(CELL*(isExtra ? 0.55 : 0.66))}px serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(fr.emoji, cx, cy + 1.5);
+}
+
+function drawFood(){ drawFruitAt(food, false); }
+function drawExtraFoods(){ extraFoods.forEach(f => drawFruitAt(f, true)); }
+
+function drawBuffPickup(){
+  if (!buffPickup) return;
+  const cfg = BUFFS[buffPickup.type];
+  const cx = buffPickup.x * CELL + CELL/2;
+  const cy = buffPickup.y * CELL + CELL/2;
+  const t = gameTime;
+  const float = Math.sin(t * 3) * 2;
+  const scale = 1 + Math.sin(t * 5) * 0.08;
+  const r = CELL * 0.42 * scale;
+
+  const glow = ctx.createRadialGradient(cx, cy + float, r*0.5, cx, cy + float, r*2.2);
+  glow.addColorStop(0, rgba(cfg.colorA, 0.6));
+  glow.addColorStop(0.5, rgba(cfg.colorA, 0.15));
+  glow.addColorStop(1, rgba(cfg.colorA, 0));
+  ctx.fillStyle = glow;
+  ctx.beginPath(); ctx.arc(cx, cy + float, r*2.2, 0, Math.PI*2); ctx.fill();
 
   ctx.save();
-  ctx.translate(x, y);
-  ctx.rotate(angle);
-
-  var sprite = getSprite(carId);
-  var usedSprite = false;
-
-  if (sprite && sprite.ready && sprite.canvas) {
-    // canvas уже ровно CAR_W×CAR_H, рисуем 1:1 с округлением в целые координаты
-    ctx.imageSmoothingEnabled = false;
-    var dx = -Math.floor(CAR_W / 2);
-    var dy = -Math.floor(CAR_H / 2);
-    ctx.drawImage(sprite.canvas, dx, dy);
-    usedSprite = true;
+  ctx.translate(cx, cy + float);
+  ctx.rotate(t * 1.5);
+  ctx.strokeStyle = rgba(cfg.colorA, 0.5);
+  ctx.lineWidth = 1.5;
+  for (let i = 0; i < 4; i++){
+    const a = (i / 4) * Math.PI * 2;
+    ctx.beginPath();
+    ctx.moveTo(Math.cos(a) * r * 1.3, Math.sin(a) * r * 1.3);
+    ctx.lineTo(Math.cos(a) * r * 1.7, Math.sin(a) * r * 1.7);
+    ctx.stroke();
   }
-
-  if (!usedSprite) {
-    // Процедурная пиксельная машинка (fallback) — только ей нужна тень
-    ctx.fillStyle = 'rgba(0,0,0,0.35)';
-    ctx.fillRect(-7, -3, 16, 10);
-
-    ctx.fillStyle = color;
-    ctx.fillRect(-8, -5, 16, 10);
-
-    ctx.fillStyle = '#7eaac9';
-    ctx.fillRect(3, -4, 4, 8);
-
-    ctx.fillStyle = '#4a6d88';
-    ctx.fillRect(-6, -3, 3, 6);
-
-    ctx.fillStyle = '#111';
-    ctx.fillRect(-6, -6, 4, 2);
-    ctx.fillRect(2, -6, 4, 2);
-    ctx.fillRect(-6, 4, 4, 2);
-    ctx.fillRect(2, 4, 4, 2);
-  }
-
   ctx.restore();
 
-  // Указатель над игроком — единственный маркер, обводки и тени нет
-  if (isPlayer) {
-    ctx.fillStyle = '#ffcc00';
-    ctx.beginPath();
-    ctx.moveTo(x, y - 14);
-    ctx.lineTo(x - 5, y - 21);
-    ctx.lineTo(x + 5, y - 21);
-    ctx.closePath();
-    ctx.fill();
+  const grad = ctx.createRadialGradient(cx - r*0.3, cy + float - r*0.3, r*0.1, cx, cy + float, r);
+  grad.addColorStop(0, shade(cfg.colorA, 1.3));
+  grad.addColorStop(0.6, cfg.colorA);
+  grad.addColorStop(1, cfg.colorB);
+  ctx.fillStyle = grad;
+  ctx.beginPath(); ctx.arc(cx, cy + float, r, 0, Math.PI*2); ctx.fill();
 
-    ctx.strokeStyle = 'rgba(0,0,0,0.8)';
-    ctx.lineWidth = 1;
+  ctx.strokeStyle = 'rgba(255,255,255,0.65)';
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(cx, cy + float, r, 0, Math.PI*2); ctx.stroke();
+
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  ctx.beginPath(); ctx.ellipse(cx - r*0.3, cy + float - r*0.4, r*0.35, r*0.2, -0.5, 0, Math.PI*2); ctx.fill();
+
+  ctx.font = `${Math.floor(CELL * 0.6)}px serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(cfg.icon, cx, cy + float + 1);
+
+  if (buffPickup.life < 4){
+    ctx.fillStyle = `rgba(255,255,255,${Math.sin(t*10) * 0.3 + 0.7})`;
+    ctx.font = '10px system-ui';
+    ctx.fillText(Math.ceil(buffPickup.life) + 'с', cx, cy + float + r + 10);
+  }
+}
+
+function drawTrail(){
+  trailSpots.forEach(spot => {
+    const cx = spot.x * CELL + CELL/2;
+    const cy = spot.y * CELL + CELL/2;
+    ctx.globalAlpha = spot.life * 0.35;
+    ctx.fillStyle = spot.color;
+    ctx.beginPath(); ctx.arc(cx, cy, CELL * 0.3 * spot.life, 0, Math.PI*2); ctx.fill();
+  });
+  ctx.globalAlpha = 1;
+}
+
+function roundRect(ctx, x, y, w, h, r){
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function drawFace(skin, cx, cy, dir, t, index){
+  const faceType = skin.face || 'happy';
+  let ex1, ey1, ex2, ey2;
+  const eyeDist = 3.6, eyeSide = 4.5;
+  if (dir.x === 1)       { ex1 = cx + eyeSide; ey1 = cy - eyeDist; ex2 = cx + eyeSide; ey2 = cy + eyeDist; }
+  else if (dir.x === -1) { ex1 = cx - eyeSide; ey1 = cy - eyeDist; ex2 = cx - eyeSide; ey2 = cy + eyeDist; }
+  else if (dir.y === 1)  { ex1 = cx - eyeDist; ey1 = cy + eyeSide; ex2 = cx + eyeDist; ey2 = cy + eyeSide; }
+  else                   { ex1 = cx - eyeDist; ey1 = cy - eyeSide; ex2 = cx + eyeDist; ey2 = cy - eyeSide; }
+
+  if (faceType === 'panda'){
+    ctx.fillStyle = skin.accent;
+    ctx.beginPath(); ctx.arc(ex1, ey1, 4.2, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(ex2, ey2, 4.2, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(ex1, ey1, 2.6, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(ex2, ey2, 2.6, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#111';
+    const px = dir.x * 0.9, py = dir.y * 0.9;
+    ctx.beginPath(); ctx.arc(ex1 + px, ey1 + py, 1.5, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(ex2 + px, ey2 + py, 1.5, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    ctx.beginPath(); ctx.arc(ex1 + px - 0.5, ey1 + py - 0.5, 0.5, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(ex2 + px - 0.5, ey2 + py - 0.5, 0.5, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = skin.accent;
+    ctx.beginPath(); ctx.arc(cx + dir.x * 6, cy + dir.y * 6, 1.8, 0, Math.PI*2); ctx.fill();
+    return;
+  }
+
+  if (faceType === 'dragon'){
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(ex1, ey1, 2.8, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(ex2, ey2, 2.8, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#1a1a1a';
+    const px = dir.x * 0.6, py = dir.y * 0.6;
+    ctx.beginPath(); ctx.ellipse(ex1 + px, ey1 + py, 0.9, 1.9, 0, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(ex2 + px, ey2 + py, 0.9, 1.9, 0, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1.3; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(ex1 - 2.5, ey1 - 3); ctx.lineTo(ex1 + 2, ey1 - 3.8); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(ex2 + 2.5, ey2 - 3); ctx.lineTo(ex2 - 2, ey2 - 3.8); ctx.stroke();
+    ctx.fillStyle = '#c9a06b';
+    ctx.beginPath(); ctx.moveTo(cx - 4, cy - 10); ctx.lineTo(cx - 6, cy - 15); ctx.lineTo(cx - 2, cy - 12); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(cx + 4, cy - 10); ctx.lineTo(cx + 6, cy - 15); ctx.lineTo(cx + 2, cy - 12); ctx.closePath(); ctx.fill();
+    return;
+  }
+
+  const blink = Math.sin(t * 2.5 + index * 0.7) > 0.94;
+  if (faceType === 'wink'){
+    ctx.strokeStyle = '#1c1d22'; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.arc(ex1, ey1, 2.2, Math.PI * 1.1, Math.PI * 1.9); ctx.stroke();
+    if (!blink){ ctx.fillStyle = '#1c1d22'; ctx.beginPath(); ctx.arc(ex2, ey2, 2.2, 0, Math.PI*2); ctx.fill(); }
+  } else {
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(ex1, ey1, 2.6, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(ex2, ey2, 2.6, 0, Math.PI*2); ctx.fill();
+    if (!blink){
+      ctx.fillStyle = '#1c1d22';
+      const px = dir.x * 0.9, py = dir.y * 0.9;
+      ctx.beginPath(); ctx.arc(ex1 + px, ey1 + py, 1.5, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(ex2 + px, ey2 + py, 1.5, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.95)';
+      ctx.beginPath(); ctx.arc(ex1 + px - 0.5, ey1 + py - 0.5, 0.6, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(ex2 + px - 0.5, ey2 + py - 0.5, 0.6, 0, Math.PI*2); ctx.fill();
+    } else {
+      ctx.strokeStyle = '#1c1d22'; ctx.lineWidth = 1.5; ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(ex1 - 2, ey1); ctx.lineTo(ex1 + 2, ey1);
+      ctx.moveTo(ex2 - 2, ey2); ctx.lineTo(ex2 + 2, ey2);
+      ctx.stroke();
+    }
+  }
+
+  if (skin.blush){
+    ctx.fillStyle = 'rgba(255,120,150,0.4)';
+    const bd = eyeSide + 2.5;
+    let bx1, by1, bx2, by2;
+    if (dir.x === 1)       { bx1 = cx + bd; by1 = cy - eyeDist - 1; bx2 = cx + bd; by2 = cy + eyeDist + 1; }
+    else if (dir.x === -1) { bx1 = cx - bd; by1 = cy - eyeDist - 1; bx2 = cx - bd; by2 = cy + eyeDist + 1; }
+    else if (dir.y === 1)  { bx1 = cx - eyeDist - 1; by1 = cy + bd; bx2 = cx + eyeDist + 1; by2 = cy + bd; }
+    else                   { bx1 = cx - eyeDist - 1; by1 = cy - bd; bx2 = cx + eyeDist + 1; by2 = cy - bd; }
+    ctx.beginPath(); ctx.arc(bx1, by1, 2.5, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(bx2, by2, 2.5, 0, Math.PI*2); ctx.fill();
+  }
+
+  if (!blink){
+    ctx.strokeStyle = '#1c1d22'; ctx.lineWidth = 1.3; ctx.lineCap = 'round';
+    const mx = cx + dir.x * 6.5, my = cy + dir.y * 6.5;
+    ctx.beginPath();
+    if (dir.x === 1 || dir.x === -1) ctx.arc(mx, my, 2.5, dir.x === 1 ? 0.3 : Math.PI - 0.3, dir.x === 1 ? Math.PI - 0.3 : Math.PI * 2 - 0.3);
+    else ctx.arc(mx, my, 2.5, dir.y === 1 ? -0.3 : Math.PI + 0.3, dir.y === 1 ? Math.PI + 0.3 : -0.3);
+    ctx.stroke();
+  }
+
+  if (Math.sin(t*5) > 0.85){
+    ctx.strokeStyle = '#ff6b8a'; ctx.lineWidth = 1.8; ctx.lineCap = 'round';
+    const tx = cx + dir.x * (CELL*0.45), ty = cy + dir.y * (CELL*0.45);
+    ctx.beginPath();
+    ctx.moveTo(cx + dir.x*CELL*0.25, cy + dir.y*CELL*0.25);
+    ctx.lineTo(tx, ty);
     ctx.stroke();
   }
 }
 
-/* Превью для карточки в гараже: спрайт если есть, иначе процедурный.
-   Тоже без тени у спрайта, но с тенью у процедурного. */
-function drawCarPreview(canvasEl, color, rarity, carId) {
-  var c = canvasEl.getContext('2d');
-  canvasEl.width = 52;
-  canvasEl.height = 36;
-  c.imageSmoothingEnabled = false;
-  c.clearRect(0, 0, 52, 36);
+function drawSegment(skin, x, y, index, total, t){
+  const px = x * CELL, py = y * CELL;
+  const pad = 2, baseSize = CELL - pad*2;
+  const cx = px + CELL/2, cy = py + CELL/2;
 
-  c.save();
-  c.translate(26, 18);
-  c.scale(1.6, 1.6);
+  let color1 = skin.colors[0], color2 = skin.colors[1];
+  let size = baseSize, offsetX = 0, offsetY = 0, shape = 'rounded';
+  let alpha = 1;
 
-  var sprite = getSprite(carId);
-  var usedSprite = false;
-
-  if (sprite && sprite.ready && sprite.canvas) {
-    c.imageSmoothingEnabled = false;
-    var dx = -Math.floor(CAR_W / 2);
-    var dy = -Math.floor(CAR_H / 2);
-    c.drawImage(sprite.canvas, dx, dy);
-    usedSprite = true;
+  if (skin.id === 'gummy'){
+    const wobble = Math.sin(t*3 + index*0.6) * 0.5;
+    offsetY = wobble * (dir.x !== 0 ? 1 : 0);
+    offsetX = wobble * (dir.y !== 0 ? 1 : 0);
+    size = baseSize * (0.94 + Math.sin(t*2.5 + index*0.4) * 0.06);
+  } else if (skin.id === 'mint' || skin.id === 'peach'){
+    const wobble = Math.sin(t*2.5 + index*0.5) * 1;
+    offsetY = wobble * (dir.x !== 0 ? 1 : 0);
+    offsetX = wobble * (dir.y !== 0 ? 1 : 0);
+  } else if (skin.id === 'bubble'){ shape = 'circle'; size = baseSize * 1.02; }
+  else if (skin.id === 'candy' || skin.id === 'lime' || skin.id === 'orange' || skin.id === 'blueberry' || skin.id === 'watermelon'){ size = baseSize * 0.98; }
+  else if (skin.id === 'strawberry'){
+    const wave = Math.sin(t*3 + index*0.4) * 0.8;
+    offsetY = wave * (dir.x !== 0 ? 1 : 0);
+    offsetX = wave * (dir.y !== 0 ? 1 : 0);
+  } else if (skin.id === 'unicorn'){
+    const hue = (t * 120 + index * 25) % 360;
+    color1 = `hsl(${hue}, 85%, 78%)`;
+    color2 = `hsl(${(hue + 40) % 360}, 85%, 68%)`;
+    size = baseSize * (0.96 + Math.sin(t*3 + index*0.3) * 0.05);
+  } else if (skin.id === 'dragon' || skin.id === 'phoenix'){ size = baseSize * (0.94 + Math.sin(t*2 + index*0.3) * 0.06); }
+  else if (skin.gemGradient){
+    const w1 = 0.5 + 0.5 * Math.sin(t*1.2 + index * 0.15);
+    const w2 = 0.5 + 0.5 * Math.sin(t*1.2 + 1.5 + index * 0.15);
+    const r1 = hexToRgb(skin.colors[0]);
+    const r2 = hexToRgb(skin.colors[1]);
+    const r3 = hexToRgb(skin.accent);
+    const mix1 = { r: r1.r*(1-w1) + r3.r*w1, g: r1.g*(1-w1) + r3.g*w1, b: r1.b*(1-w1) + r3.b*w1 };
+    const mix2 = { r: r2.r*(1-w2) + r1.r*w2, g: r2.g*(1-w2) + r1.g*w2, b: r2.b*(1-w2) + r1.b*w2 };
+    color1 = rgbToHex(mix1.r, mix1.g, mix1.b);
+    color2 = rgbToHex(mix2.r, mix2.g, mix2.b);
+    size = baseSize * (0.97 + Math.sin(t*2 + index*0.2) * 0.04);
   }
 
-  if (!usedSprite) {
-    c.fillStyle = 'rgba(0,0,0,0.3)';
-    c.fillRect(-7, -3, 16, 10);
-    c.fillStyle = color;
-    c.fillRect(-8, -5, 16, 10);
-    c.fillStyle = '#7eaac9';
-    c.fillRect(3, -4, 4, 8);
-    c.fillStyle = '#4a6d88';
-    c.fillRect(-6, -3, 3, 6);
-    c.fillStyle = '#111';
-    c.fillRect(-6, -6, 4, 2);
-    c.fillRect(2, -6, 4, 2);
-    c.fillRect(-6, 4, 4, 2);
-    c.fillRect(2, 4, 4, 2);
+  if (isBuffActive('ghost')) alpha = 0.5 + Math.sin(t * 4) * 0.15;
+  ctx.globalAlpha = alpha;
+
+  const drawX = px + pad + offsetX, drawY = py + pad + offsetY;
+  const drawCx = cx + offsetX, drawCy = cy + offsetY;
+
+  ctx.fillStyle = 'rgba(0,0,0,0.28)';
+  roundRect(ctx, drawX + 1, drawY + 2.5, size, size, index === 0 ? 10 : 7);
+  ctx.fill();
+
+  const grad = ctx.createLinearGradient(drawX, drawY, drawX + CELL, drawY + CELL);
+  grad.addColorStop(0, color1);
+  grad.addColorStop(1, color2);
+  ctx.fillStyle = grad;
+
+  const radius = index === 0 ? 10 : 7;
+
+  if (shape === 'circle'){
+    ctx.beginPath(); ctx.arc(drawCx, drawCy, size/2, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    ctx.beginPath(); ctx.arc(drawCx - size*0.18, drawCy - size*0.22, size*0.18, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.15)';
+    ctx.beginPath(); ctx.arc(drawCx - size*0.28, drawCy - size*0.3, size*0.08, 0, Math.PI*2); ctx.fill();
+  } else {
+    roundRect(ctx, drawX, drawY, size, size, radius); ctx.fill();
+    const shadeGrad = ctx.createLinearGradient(drawX, drawY + size*0.4, drawX, drawY + size);
+    shadeGrad.addColorStop(0, 'rgba(0,0,0,0)');
+    shadeGrad.addColorStop(1, 'rgba(0,0,0,0.22)');
+    ctx.fillStyle = shadeGrad;
+    roundRect(ctx, drawX, drawY + size*0.4, size, size*0.6, radius); ctx.fill();
+    const hlGrad = ctx.createLinearGradient(drawX, drawY, drawX, drawY + size*0.5);
+    hlGrad.addColorStop(0, 'rgba(255,255,255,0.28)');
+    hlGrad.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = hlGrad;
+    roundRect(ctx, drawX + 2, drawY + 2, size - 4, size * 0.5, radius - 2); ctx.fill();
   }
 
-  c.restore();
-}
-
-function drawTrackPreview(canvasEl, style) {
-  var c = canvasEl.getContext('2d');
-  canvasEl.width = 52;
-  canvasEl.height = 36;
-  c.imageSmoothingEnabled = false;
-
-  var pal = PALETTES[style] || PALETTES.country;
-  c.fillStyle = pal.bg;
-  c.fillRect(0, 0, 52, 36);
-
-  c.strokeStyle = pal.road;
-  c.lineWidth = 8;
-  c.beginPath();
-  c.ellipse(26, 18, 18, 10, 0, 0, Math.PI * 2);
-  c.stroke();
-
-  c.strokeStyle = pal.line;
-  c.lineWidth = 1;
-  c.beginPath();
-  c.ellipse(26, 18, 18, 10, 0, 0, Math.PI * 2);
-  c.stroke();
-}
-
-/* =========== HUD =========== */
-function updateHUD() {
-  var player = null;
-  for (var i = 0; i < racers.length; i++) if (racers[i].isPlayer) { player = racers[i]; break; }
-  if (!player) return;
-
-  var track = getTrack(state.activeTrack);
-  document.getElementById('hud-track').textContent = track ? track.name : '—';
-  document.getElementById('hud-lap').textContent = player.laps;
-  document.getElementById('hud-place').textContent = player.place + '/' + racers.length;
-}
-
-function refreshLeaderboard() {
-  var el = document.getElementById('hud-topright');
-  var sorted = racers.slice().sort(function(a, b) { return a.place - b.place; });
-  var html = '<div class="hud-title">ПОЗИЦИИ</div>';
-  for (var i = 0; i < sorted.length; i++) {
-    var r = sorted[i];
-    var cls = getCarClass(r.car);
-    html += '<div class="row' + (r.isPlayer ? ' player' : '') + '">' +
-              '<span>' + r.car.name + '<span class="rank rank-' + cls.rank + '">' + cls.rank + '</span></span>' +
-              '<span>' + r.place + '</span>' +
-            '</div>';
+  if (skin.stripes){
+    ctx.fillStyle = 'rgba(180,120,40,0.3)';
+    for (let i = 0; i < 2; i++){
+      const sx = drawX + 4 + i * (size - 8) * 0.6;
+      ctx.fillRect(sx, drawY + 4, 1.5, size - 8);
+    }
   }
-  el.innerHTML = html;
-}
-
-/* =========== TOAST =========== */
-function showToast(text, type) {
-  var box = document.getElementById('toast-container');
-  var el = document.createElement('div');
-  el.className = 'toast' + (type ? ' ' + type : '');
-  el.textContent = text;
-  box.appendChild(el);
-  while (box.children.length > 3) box.removeChild(box.firstChild);
-  setTimeout(function() { if (el.parentNode) el.parentNode.removeChild(el); }, 2000);
-}
-
-/* =========== ДЕНЬГИ =========== */
-function updateMoneyDisplay(pulse) {
-  var el = document.getElementById('money');
-  el.textContent = state.money.toLocaleString('ru-RU');
-  if (pulse) {
-    el.classList.add('pulse');
-    setTimeout(function() { el.classList.remove('pulse'); }, 400);
+  if (skin.spiral){
+    ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    const steps = 20, totalAngle = Math.PI * 4, startA = index * 0.4;
+    for (let i = 0; i <= steps; i++){
+      const a = startA + (totalAngle * i / steps);
+      const r = (size/2.2) * (i / steps);
+      const sx = drawCx + Math.cos(a) * r, sy = drawCy + Math.sin(a) * r;
+      i === 0 ? ctx.moveTo(sx, sy) : ctx.lineTo(sx, sy);
+    }
+    ctx.stroke();
   }
-  for (var i = 0; i < shopButtonRefreshers.length; i++) shopButtonRefreshers[i]();
+  if (skin.seeds){
+    for (let i = 0; i < 5; i++){
+      const seed = index * 7 + i * 13;
+      const dx = ((seed * 9301 + 49297) % 233280) / 233280;
+      const dy = ((seed * 4993 + 7919) % 233280) / 233280;
+      ctx.fillStyle = 'rgba(255,240,200,0.85)';
+      ctx.beginPath(); ctx.arc(drawX + 3 + dx * (size-6), drawY + 3 + dy * (size-6), 0.9, 0, Math.PI*2); ctx.fill();
+    }
+  }
+  if (skin.sparkle){
+    const sparkPhase = t*4 + index*0.6;
+    if (Math.sin(sparkPhase) > 0.7){
+      const sx = drawX + 4 + (Math.sin(sparkPhase*2.3) * 0.5 + 0.5) * (size - 8);
+      const sy = drawY + 4 + (Math.cos(sparkPhase*1.7) * 0.5 + 0.5) * (size - 8);
+      drawSparkle(sx, sy, 3.5, 'rgba(255,250,200,0.95)');
+    }
+  }
+  if (skin.scales){
+    ctx.strokeStyle = 'rgba(0,60,20,0.28)'; ctx.lineWidth = 1;
+    for (let row = 0; row < 2; row++){
+      for (let col = 0; col < 2; col++){
+        const sx = drawX + 4 + col * 10, sy = drawY + 4 + row * 10;
+        ctx.beginPath(); ctx.arc(sx + 3, sy + 3, 3.5, Math.PI, Math.PI * 2); ctx.stroke();
+      }
+    }
+  }
+  if (skin.gemGradient){
+    ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(drawCx, drawY + 3); ctx.lineTo(drawX + size - 3, drawCy);
+    ctx.lineTo(drawCx, drawY + size - 3); ctx.lineTo(drawX + 3, drawCy);
+    ctx.closePath(); ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+    const inset = 5;
+    ctx.beginPath();
+    ctx.moveTo(drawCx, drawY + inset); ctx.lineTo(drawX + size - inset, drawCy);
+    ctx.lineTo(drawCx, drawY + size - inset); ctx.lineTo(drawX + inset, drawCy);
+    ctx.closePath(); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.beginPath(); ctx.arc(drawCx, drawCy, 1.5, 0, Math.PI*2); ctx.fill();
+  }
+  if (skin.shine && index < 4){
+    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    ctx.beginPath(); ctx.arc(drawCx - size*0.2, drawCy - size*0.25, 1.8, 0, Math.PI*2); ctx.fill();
+  }
+  if (skin.horn && index === 0){
+    ctx.fillStyle = '#ffd76e';
+    ctx.beginPath();
+    const hornX = drawCx, hornY = drawCy;
+    if (dir.x === 1) { ctx.moveTo(hornX + size*0.4, hornY - 2); ctx.lineTo(hornX + size*0.7, hornY); ctx.lineTo(hornX + size*0.4, hornY + 2); }
+    else if (dir.x === -1) { ctx.moveTo(hornX - size*0.4, hornY - 2); ctx.lineTo(hornX - size*0.7, hornY); ctx.lineTo(hornX - size*0.4, hornY + 2); }
+    else if (dir.y === 1) { ctx.moveTo(hornX - 2, hornY + size*0.4); ctx.lineTo(hornX, hornY + size*0.7); ctx.lineTo(hornX + 2, hornY + size*0.4); }
+    else { ctx.moveTo(hornX - 2, hornY - size*0.4); ctx.lineTo(hornX, hornY - size*0.7); ctx.lineTo(hornX + 2, hornY - size*0.4); }
+    ctx.closePath(); ctx.fill();
+  }
+  if (index === 0) drawFace(skin, cx, cy, dir, t, index);
+
+  ctx.globalAlpha = 1;
 }
 
-function updateMiniStats() {
-  document.getElementById('mini-laps').textContent = state.laps;
-  document.getElementById('mini-wins').textContent = state.wins;
+function drawSparkle(x, y, size, color){
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.moveTo(x, y - size);
+  ctx.lineTo(x + size*0.3, y - size*0.3);
+  ctx.lineTo(x + size, y);
+  ctx.lineTo(x + size*0.3, y + size*0.3);
+  ctx.lineTo(x, y + size);
+  ctx.lineTo(x - size*0.3, y + size*0.3);
+  ctx.lineTo(x - size, y);
+  ctx.lineTo(x - size*0.3, y - size*0.3);
+  ctx.closePath();
+  ctx.fill();
 }
 
-/* =========== МОДАЛКА =========== */
-var modalResolve = null;
-function showModal(title, text, onConfirm) {
-  document.getElementById('modal-title').textContent = title;
-  document.getElementById('modal-text').textContent = text;
-  document.getElementById('modal-overlay').classList.add('show');
-  modalResolve = onConfirm;
+function drawSnake(t){
+  const skin = getSkin(state.active);
+  const total = snake.length;
+  for (let i = total - 1; i >= 0; i--){
+    drawSegment(skin, snake[i].x, snake[i].y, i, total, t);
+  }
+  if (total > 0 && (isBuffActive('magnet') || isBuffActive('speed') || isBuffActive('ghost'))) {
+    const head = snake[0];
+    const cx = head.x * CELL + CELL/2;
+    const cy = head.y * CELL + CELL/2;
+    const radius = CELL * 0.75;
+    const icons = [];
+    if (isBuffActive('speed')) icons.push('⚡');
+    if (isBuffActive('ghost')) icons.push('👻');
+    if (isBuffActive('magnet')) icons.push('🧲');
+    icons.forEach((icon, i) => {
+      const a = -Math.PI / 2 + (i - (icons.length - 1) / 2) * 0.6;
+      const ix = cx + Math.cos(a) * radius;
+      const iy = cy + Math.sin(a) * radius - 12;
+      ctx.font = '13px serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(icon, ix, iy);
+    });
+  }
 }
-document.getElementById('modal-cancel').addEventListener('click', function() {
-  document.getElementById('modal-overlay').classList.remove('show');
-  modalResolve = null;
+
+function drawParticles(){
+  particles.forEach(p => {
+    ctx.globalAlpha = Math.max(0, p.life);
+    if (p.type === 'heart') drawHeart(p.x, p.y, p.size * (0.6 + 0.4 * p.life), p.color);
+    else { ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI*2); ctx.fill(); }
+  });
+  ctx.globalAlpha = 1;
+}
+
+function drawHeart(x, y, size, color){
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.moveTo(x, y + size * 0.3);
+  ctx.bezierCurveTo(x, y, x - size/2, y, x - size/2, y + size * 0.3);
+  ctx.bezierCurveTo(x - size/2, y + size * 0.7, x, y + size * 0.9, x, y + size * 1.1);
+  ctx.bezierCurveTo(x, y + size * 0.9, x + size/2, y + size * 0.7, x + size/2, y + size * 0.3);
+  ctx.bezierCurveTo(x + size/2, y, x, y, x, y + size * 0.3);
+  ctx.fill();
+}
+
+/* ============================================================
+   ОСНОВНОЙ ЦИКЛ
+============================================================ */
+function loop(now){
+  const dt = Math.min(0.05, (now - lastTime) / 1000);
+  lastTime = now;
+
+  if (!paused) gameTime += dt;
+  if (timerRunning && !paused) {
+    time += dt;
+    hudTimer.textContent = time.toFixed(1);
+  }
+
+  if (running && !paused) {
+    const speedOn = isBuffActive('speed');
+    const baseStep = speedOn ? 0.145 / 1.75 : 0.145;
+    tickAcc += dt;
+    while (tickAcc >= baseStep) {
+      tickAcc -= baseStep;
+      step();
+      if (!running) break;
+    }
+  }
+
+  if (running && !paused) {
+    updateBuffs(dt);
+    tickBuffsBarUI();
+    if (buffPickup) {
+      buffPickup.life -= dt;
+      if (buffPickup.life <= 0) buffPickup = null;
+    } else {
+      buffSpawnTimer -= dt;
+      if (buffSpawnTimer <= 0) {
+        spawnBuff();
+        buffSpawnTimer = 12 + Math.random() * 8;
+      }
+    }
+  }
+
+  if (!paused) updateParticles(dt);
+  if (foodEatenPulse > 0 && !paused) foodEatenPulse = Math.max(0, foodEatenPulse - dt * 3);
+
+  let sx = 0, sy = 0;
+  if (shake > 0 && !paused){
+    sx = (Math.random() - 0.5) * shake;
+    sy = (Math.random() - 0.5) * shake;
+    shake *= 0.86;
+    if (shake < 0.3) shake = 0;
+  }
+  ctx.save();
+  ctx.translate(sx, sy);
+
+  drawGrid();
+  drawTrail();
+  drawFood();
+  drawExtraFoods();
+  drawBuffPickup();
+  if (snake) drawSnake(gameTime);
+  drawParticles();
+
+  if (foodEatenPulse > 0) {
+    ctx.fillStyle = `rgba(255,255,255,${foodEatenPulse * 0.06})`;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+
+  ctx.restore();
+  requestAnimationFrame(loop);
+}
+
+/* ============================================================
+   УПРАВЛЕНИЕ
+============================================================ */
+function setDir(nx, ny){
+  if (!running || paused) return;
+  if (nx === -dir.x && ny === -dir.y) return;
+  if (nx === dir.x && ny === dir.y) return;
+  nextDir = { x: nx, y: ny };
+  SFX.sfx.turn();
+}
+
+document.addEventListener('keydown', (e) => {
+  const k = e.key.toLowerCase();
+  if (['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k)) e.preventDefault();
+  if (caseOpenOverlay.classList.contains('show')) return;
+  if (mobileShopScreen.classList.contains('open')) return;
+  if (radioOpen) return;
+  if (k === ' ' || k === 'p') {
+    if (running) { e.preventDefault(); togglePause(); }
+    return;
+  }
+  if (!running) { if (k === 'enter') startGame(); return; }
+  if (paused) return;
+  switch(k){
+    case 'arrowup': case 'w': case 'ц': setDir(0,-1); break;
+    case 'arrowdown': case 's': case 'ы': setDir(0,1); break;
+    case 'arrowleft': case 'a': case 'ф': setDir(-1,0); break;
+    case 'arrowright': case 'd': case 'в': setDir(1,0); break;
+  }
 });
-document.getElementById('modal-confirm').addEventListener('click', function() {
-  document.getElementById('modal-overlay').classList.remove('show');
-  if (modalResolve) modalResolve();
-  modalResolve = null;
+
+let touchStart = null;
+canvas.addEventListener('touchstart', (e) => {
+  touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+}, { passive: true });
+canvas.addEventListener('touchend', (e) => {
+  if (!touchStart || !running || paused) return;
+  const dx = e.changedTouches[0].clientX - touchStart.x;
+  const dy = e.changedTouches[0].clientY - touchStart.y;
+  if (Math.abs(dx) > Math.abs(dy)) setDir(dx > 0 ? 1 : -1, 0);
+  else setDir(0, dy > 0 ? 1 : -1);
+  touchStart = null;
+}, { passive: true });
+
+/* ============================================================
+   РАДИО UI
+============================================================ */
+let radioOpen = false;
+let radioProgressInterval = null;
+
+function openRadioPanel(){
+  radioOpen = true;
+  document.getElementById('radioPanel').classList.add('open');
+  if (running && !paused) pauseGame('radio');
+  SFX.sfx.click();
+  renderRadioPlaylist();
+  updateRadioUI();
+  startRadioProgressLoop();
+}
+function closeRadioPanel(){
+  radioOpen = false;
+  document.getElementById('radioPanel').classList.remove('open');
+  SFX.sfx.click();
+  stopRadioProgressLoop();
+  if (paused && pausedByRadio) resumeGame();
+}
+
+document.getElementById('radioToggle').addEventListener('click', (e) => {
+  e.stopPropagation();
+  if (radioOpen) closeRadioPanel();
+  else openRadioPanel();
+});
+document.getElementById('radioClose').addEventListener('click', closeRadioPanel);
+
+document.addEventListener('pointerdown', (e) => {
+  if (!radioOpen) return;
+  const panel = document.getElementById('radioPanel');
+  if (panel.contains(e.target)) return;
+  if (e.target.closest('#radioToggle')) return;
+  closeRadioPanel();
+}, true);
+
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && radioOpen) closeRadioPanel(); });
+
+document.getElementById('radioPlayBtn').addEventListener('click', () => {
+  SFX.resume(); SFX.sfx.click();
+  if (Radio.getPlaylist().length === 0) { showToast('Плейлист пуст — добавь треки', 'info', 2000); return; }
+  Radio.toggle();
+  updateRadioUI();
+});
+document.getElementById('radioPrev').addEventListener('click', () => { SFX.sfx.click(); Radio.prev(); updateRadioUI(); });
+document.getElementById('radioNext').addEventListener('click', () => { SFX.sfx.click(); Radio.next(); updateRadioUI(); });
+
+document.getElementById('radioAddBtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  document.getElementById('radioFileInput').click();
+});
+document.getElementById('radioFileInput').addEventListener('change', (e) => {
+  const files = Array.from(e.target.files || []);
+  if (!files.length) return;
+  const added = Radio.addFiles(files);
+  renderRadioPlaylist();
+  if (added.length === 1) showToast(`Добавлен трек: ${added[0].name}`, 'success', 2200);
+  else if (added.length > 1) showToast(`Добавлено треков: ${added.length}`, 'success', 2200);
+  if (!Radio.isPlaying() && added.length > 0) {
+    const idx = Radio.getPlaylist().indexOf(added[added.length - 1]);
+    if (idx >= 0) { Radio.play(idx); updateRadioUI(); }
+  }
+  e.target.value = '';
 });
 
-/* =========== ВКЛАДКИ =========== */
-function setupTabs() {
-  var tabs = document.querySelectorAll('.tab');
-  for (var i = 0; i < tabs.length; i++) {
-    (function(tab) {
-      tab.addEventListener('click', function() {
-        var all = document.querySelectorAll('.tab');
-        for (var j = 0; j < all.length; j++) all[j].classList.remove('active');
-        tab.classList.add('active');
-        state.activeTab = tab.dataset.tab;
-        renderTab();
+document.getElementById('radioProgressTrack').addEventListener('click', (e) => {
+  const rect = e.currentTarget.getBoundingClientRect();
+  Radio.seek((e.clientX - rect.left) / rect.width);
+  updateProgressUI();
+});
+
+document.getElementById('radioVolume').addEventListener('input', (e) => {
+  const v = parseInt(e.target.value, 10) / 100;
+  Radio.setVolume(v);
+  document.getElementById('radioVolumeLabel').textContent = Math.round(v * 100) + '%';
+});
+document.getElementById('radioVolume').value = Math.round(Radio.getVolume() * 100);
+document.getElementById('radioVolumeLabel').textContent = Math.round(Radio.getVolume() * 100) + '%';
+
+function renderRadioPlaylist(){
+  const list = Radio.getPlaylist();
+  const el = document.getElementById('radioPlaylist');
+  el.innerHTML = '';
+  if (list.length === 0) {
+    el.innerHTML = `<div class="radio-empty"><div class="radio-empty-icon">🎵</div><div>Плейлист пуст</div><div class="radio-empty-hint">Нажми «➕ Добавить» или положи треки в <b>music/</b></div></div>`;
+    return;
+  }
+  list.forEach((track, index) => {
+    const item = document.createElement('div');
+    item.className = 'radio-track' + (index === Radio.getCurrentIndex() ? ' active' : '');
+    item.innerHTML = `
+      <div class="radio-track-icon">${track.icon || '🎵'}</div>
+      <div class="radio-track-info">
+        <div class="radio-track-name">${escapeHtml(track.name)}</div>
+        <div class="radio-track-meta">${escapeHtml(track.artist || 'Аудиофайл')}</div>
+      </div>
+    `;
+    if (track.kind === 'user') {
+      const rm = document.createElement('button');
+      rm.className = 'radio-track-remove';
+      rm.textContent = '✕';
+      rm.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        Radio.remove(index);
+        renderRadioPlaylist();
+        updateRadioUI();
       });
-    })(tabs[i]);
-  }
-}
-
-function renderTab() {
-  var c = document.getElementById('content');
-  c.innerHTML = '';
-  c.scrollTop = 0;
-  shopButtonRefreshers = [];
-
-  if (state.activeTab === 'race')         renderRaceTab(c);
-  else if (state.activeTab === 'cars')    renderCarsTab(c);
-  else if (state.activeTab === 'tracks')  renderTracksTab(c);
-  else if (state.activeTab === 'profile') renderProfileTab(c);
-}
-
-/* =========== RACE TAB =========== */
-function renderRaceTab(c) {
-  var player = null;
-  for (var i = 0; i < racers.length; i++) if (racers[i].isPlayer) { player = racers[i]; break; }
-  var track = getTrack(state.activeTrack);
-  var car = getCar(state.activeCar);
-  var cls = getCarClass(car);
-
-  var reward1 = Math.floor(BASE_REWARD * track.rewardMult * cls.multiplier * PLACE_BONUS[1]);
-  var reward6 = Math.floor(BASE_REWARD * track.rewardMult * cls.multiplier * PLACE_BONUS[6]);
-  var lapTime = getCarLapTime(car);
-
-  var faster = 0, slower = 0, same = 0;
-  for (var k = 0; k < racers.length; k++) {
-    if (racers[k].isPlayer) continue;
-    var otherLap = racers[k].lapTime;
-    if (otherLap < lapTime - 0.01) faster++;
-    else if (otherLap > lapTime + 0.01) slower++;
-    else same++;
-  }
-
-  var div = document.createElement('div');
-
-  div.innerHTML =
-    '<h2>🏁 Текущая гонка</h2>' +
-    '<div class="race-info">' +
-      '<div class="row"><span class="label">Трасса</span><span class="value gold">' + track.name + '</span></div>' +
-      '<div class="row"><span class="label">Машина</span><span class="value" style="color:' + car.color + '">' + car.name + ' <span class="rank-badge rank-' + cls.rank + '">' + cls.rank + '</span></span></div>' +
-      '<div class="row"><span class="label">Класс</span><span class="value" style="color:' + cls.color + '">' + cls.label + '</span></div>' +
-      '<div class="row"><span class="label">Время круга</span><span class="value">' + lapTime.toFixed(2) + ' сек</span></div>' +
-      '<div class="row"><span class="label">Награда за 1 место</span><span class="value green">💰 ' + reward1.toLocaleString('ru-RU') + '</span></div>' +
-      '<div class="row"><span class="label">Награда за 6 место</span><span class="value">💰 ' + reward6.toLocaleString('ru-RU') + '</span></div>' +
-      '<div class="row"><span class="label">Ваша позиция</span><span class="value">' + (player ? player.place : '—') + ' / ' + racers.length + '</span></div>' +
-    '</div>' +
-    '<div class="hint">' +
-      '⚡ Соперники: <b style="color:#f59e0b">' + faster + '</b> быстрее · ' +
-      '<b style="color:#4caf50">' + same + '</b> наравне · ' +
-      '<b style="color:#888">' + slower + '</b> медленнее.' +
-    '</div>' +
-    '<button class="big-btn" id="btn-restart-race">🔄 Перезапустить гонку</button>';
-
-  c.appendChild(div);
-
-  var btn = document.getElementById('btn-restart-race');
-  if (btn) btn.addEventListener('click', restartRace);
-}
-
-/* =========== CARS TAB =========== */
-function renderCarsTab(c) {
-  var h = document.createElement('h2');
-  h.textContent = '🚗 Гараж';
-  c.appendChild(h);
-
-  var hint = document.createElement('div');
-  hint.className = 'hint warn';
-  hint.innerHTML =
-    '<b>Иерархия скорости:</b><br>' +
-    'Обычная (C) никогда не догонит Редкую (B), Редкая — Эпическую (A), Эпическая — Легендарную (S).<br>' +
-    'Внутри класса машины различаются на ±3%.';
-  c.appendChild(hint);
-
-  var table = document.createElement('div');
-  table.className = 'class-table';
-  var tableHtml = '<div class="hud-title" style="color:#888;font-size:10px;margin-bottom:6px;">КЛАССЫ СКОРОСТИ</div>';
-  for (var ri = RARITY_ORDER.length - 1; ri >= 0; ri--) {
-    var key = RARITY_ORDER[ri];
-    var cl = CLASSES[key];
-    var isCurrent = state.activeCar && getCar(state.activeCar).rarity === key;
-    tableHtml += '<div class="class-row' + (isCurrent ? ' current' : '') + '">' +
-      '<span class="class-rank rank-' + cl.rank + '">' + cl.rank + '</span>' +
-      '<span class="class-name">' + cl.label + '</span>' +
-      '<span class="class-speed">' + cl.baseLapTime.toFixed(1) + 'с / круг</span>' +
-      '</div>';
-  }
-  table.innerHTML = tableHtml;
-  c.appendChild(table);
-
-  for (var ci = 0; ci < CARS.length; ci++) {
-    (function(car) {
-      var owned = state.ownedCars.indexOf(car.id) !== -1;
-      var active = state.activeCar === car.id;
-      var cls = getCarClass(car);
-      var lapTime = getCarLapTime(car);
-
-      var el = document.createElement('div');
-      el.className = 'item rarity-' + car.rarity +
-                     (owned ? ' owned' : '') +
-                     (active ? ' active' : '');
-
-      var preview = document.createElement('div');
-      preview.className = 'item-preview';
-      var pCanvas = document.createElement('canvas');
-      preview.appendChild(pCanvas);
-
-      var info = document.createElement('div');
-      info.className = 'item-info';
-      info.innerHTML =
-        '<div class="item-name" style="color:' + car.color + '">' + car.name + '</div>' +
-        '<div class="item-rarity" style="color:' + cls.color + '">' +
-          cls.label +
-          ' <span class="rank-badge rank-' + cls.rank + '">' + cls.rank + '</span>' +
-        '</div>' +
-        '<div class="item-stats">Круг <b>' + lapTime.toFixed(2) + 'с</b> · Множитель <b>x' + cls.multiplier + '</b></div>';
-
-      var action = document.createElement('div');
-      action.className = 'item-action';
-
-      var priceEl = document.createElement('div');
-      priceEl.className = 'item-price' + (owned ? ' owned' : '');
-      priceEl.textContent = owned ? '✅ Есть' : '💰 ' + car.price.toLocaleString('ru-RU');
-      action.appendChild(priceEl);
-
-      if (active) {
-        var btn = document.createElement('button');
-        btn.textContent = '✅ Активна';
-        btn.disabled = true;
-        action.appendChild(btn);
-      } else if (owned) {
-        var btn2 = document.createElement('button');
-        btn2.className = 'equip';
-        btn2.textContent = 'Выбрать';
-        btn2.addEventListener('click', function() {
-          state.activeCar = car.id;
-          save();
-          setupRacers();
-          renderTab();
-        });
-        action.appendChild(btn2);
-      } else {
-        var btn3 = document.createElement('button');
-        var upd = function() {
-          if (state.money >= car.price) {
-            btn3.disabled = false;
-            btn3.textContent = 'Купить';
-          } else {
-            btn3.disabled = true;
-            btn3.textContent = 'Не хватает';
-          }
-        };
-        upd();
-        shopButtonRefreshers.push(upd);
-        btn3.addEventListener('click', function() {
-          if (state.money < car.price) return;
-          showModal(
-            'Купить машину?',
-            'Купить ' + car.name + ' за 💰 ' + car.price.toLocaleString('ru-RU') + '?',
-            function() {
-              state.money -= car.price;
-              state.ownedCars.push(car.id);
-              state.activeCar = car.id;
-              save();
-              updateMoneyDisplay(true);
-              setupRacers();
-              renderTab();
-              showToast('Куплено: ' + car.name, 'win');
-            }
-          );
-        });
-        action.appendChild(btn3);
-      }
-
-      el.appendChild(preview);
-      el.appendChild(info);
-      el.appendChild(action);
-      c.appendChild(el);
-
-      drawCarPreview(pCanvas, car.color, car.rarity, car.id);
-    })(CARS[ci]);
-  }
-}
-
-/* =========== TRACKS TAB =========== */
-function renderTracksTab(c) {
-  var h = document.createElement('h2');
-  h.textContent = '🛣️ Трассы';
-  c.appendChild(h);
-
-  var hint = document.createElement('div');
-  hint.className = 'hint';
-  hint.innerHTML = 'Трассы не влияют на скорость машин — только на размер награды за круг.';
-  c.appendChild(hint);
-
-  for (var ti = 0; ti < TRACKS.length; ti++) {
-    (function(track) {
-      var owned = state.ownedTracks.indexOf(track.id) !== -1;
-      var active = state.activeTrack === track.id;
-      var r = CLASSES[track.rarity] || CLASSES.common;
-
-      var el = document.createElement('div');
-      el.className = 'item rarity-' + track.rarity +
-                     (owned ? ' owned' : '') +
-                     (active ? ' active' : '');
-
-      var preview = document.createElement('div');
-      preview.className = 'item-preview';
-      var pCanvas = document.createElement('canvas');
-      preview.appendChild(pCanvas);
-
-      var info = document.createElement('div');
-      info.className = 'item-info';
-      info.innerHTML =
-        '<div class="item-name">' + track.name + '</div>' +
-        '<div class="item-rarity" style="color:' + r.color + '">' + r.label + '</div>' +
-        '<div class="item-stats">Множитель награды <b>x' + track.rewardMult + '</b></div>';
-
-      var action = document.createElement('div');
-      action.className = 'item-action';
-
-      var priceEl = document.createElement('div');
-      priceEl.className = 'item-price' + (owned ? ' owned' : '');
-      priceEl.textContent = owned ? '✅ Есть' : '💰 ' + track.price.toLocaleString('ru-RU');
-      action.appendChild(priceEl);
-
-      if (active) {
-        var btn = document.createElement('button');
-        btn.textContent = '✅ Активна';
-        btn.disabled = true;
-        action.appendChild(btn);
-      } else if (owned) {
-        var btn2 = document.createElement('button');
-        btn2.className = 'equip';
-        btn2.textContent = 'Выбрать';
-        btn2.addEventListener('click', function() {
-          state.activeTrack = track.id;
-          save();
-          setupRacers();
-          renderTab();
-        });
-        action.appendChild(btn2);
-      } else {
-        var btn3 = document.createElement('button');
-        var upd = function() {
-          if (state.money >= track.price) {
-            btn3.disabled = false;
-            btn3.textContent = 'Купить';
-          } else {
-            btn3.disabled = true;
-            btn3.textContent = 'Не хватает';
-          }
-        };
-        upd();
-        shopButtonRefreshers.push(upd);
-        btn3.addEventListener('click', function() {
-          if (state.money < track.price) return;
-          showModal(
-            'Открыть трассу?',
-            'Купить «' + track.name + '» за 💰 ' + track.price.toLocaleString('ru-RU') + '?',
-            function() {
-              state.money -= track.price;
-              state.ownedTracks.push(track.id);
-              state.activeTrack = track.id;
-              save();
-              updateMoneyDisplay(true);
-              setupRacers();
-              renderTab();
-              showToast('Открыто: ' + track.name, 'win');
-            }
-          );
-        });
-        action.appendChild(btn3);
-      }
-
-      el.appendChild(preview);
-      el.appendChild(info);
-      el.appendChild(action);
-      c.appendChild(el);
-
-      drawTrackPreview(pCanvas, track.style);
-    })(TRACKS[ti]);
-  }
-}
-
-/* =========== PROFILE TAB =========== */
-function renderProfileTab(c) {
-  var activeCar = getCar(state.activeCar);
-  var cls = getCarClass(activeCar);
-
-  var div = document.createElement('div');
-  div.innerHTML =
-    '<h2>👤 Профиль</h2>' +
-    '<div class="stat-row"><span class="label">💰 Деньги</span><span class="value gold">' + state.money.toLocaleString('ru-RU') + '</span></div>' +
-    '<div class="stat-row"><span class="label">🏁 Всего кругов</span><span class="value">' + state.laps + '</span></div>' +
-    '<div class="stat-row"><span class="label">🏆 Побед</span><span class="value green">' + state.wins + '</span></div>' +
-    '<div class="stat-row"><span class="label">🚗 Машин в гараже</span><span class="value">' + state.ownedCars.length + ' / ' + CARS.length + '</span></div>' +
-    '<div class="stat-row"><span class="label">🛣️ Трасс открыто</span><span class="value">' + state.ownedTracks.length + ' / ' + TRACKS.length + '</span></div>' +
-    '<div class="stat-row"><span class="label">⭐ Активная машина</span><span class="value">' + activeCar.name + ' <span class="rank-badge rank-' + cls.rank + '">' + cls.rank + '</span></span></div>' +
-    '<div class="stat-row"><span class="label">📍 Активная трасса</span><span class="value">' + getTrack(state.activeTrack).name + '</span></div>' +
-    '<button class="big-btn danger" id="btn-reset" style="margin-top:14px;">🗑 Сбросить прогресс</button>';
-  c.appendChild(div);
-
-  var btn = document.getElementById('btn-reset');
-  if (btn) btn.addEventListener('click', function() {
-    showModal(
-      'Сбросить прогресс?',
-      'Весь прогресс: деньги, машины, трассы — будут удалены навсегда.',
-      resetGame
-    );
+      item.appendChild(rm);
+    }
+    item.addEventListener('click', () => { SFX.resume(); SFX.sfx.click(); Radio.play(index); updateRadioUI(); });
+    el.appendChild(item);
   });
 }
 
-/* =========== ДЕЙСТВИЯ =========== */
-function restartRace() {
-  setupRacers();
-  showToast('🏁 Новая гонка!', 'info');
+function updateRadioUI(){
+  const track = Radio.getCurrentTrack();
+  const playing = Radio.isPlaying();
+  document.getElementById('radioPlayBtn').textContent = playing ? '❚❚' : '▶';
+  const toggle = document.getElementById('radioToggle');
+  if (playing) toggle.classList.add('playing'); else toggle.classList.remove('playing');
+  if (track) {
+    document.getElementById('radioNowArt').textContent = track.icon || '🎵';
+    if (playing) document.getElementById('radioNowArt').classList.add('playing');
+    else document.getElementById('radioNowArt').classList.remove('playing');
+    document.getElementById('radioNowTitle').textContent = track.name;
+    document.getElementById('radioNowArtist').textContent = track.artist || 'Аудиофайл';
+  } else {
+    document.getElementById('radioNowArt').textContent = '🎵';
+    document.getElementById('radioNowArt').classList.remove('playing');
+    document.getElementById('radioNowTitle').textContent = 'Трек не выбран';
+    document.getElementById('radioNowArtist').textContent = 'Добавь треки или положи их в music/';
+  }
+  updateProgressUI();
 }
 
-function resetGame() {
-  try { localStorage.removeItem('pixelRacingTycoon'); } catch (e) {}
-  state.money = 500;
-  state.laps = 0;
-  state.wins = 0;
-  state.ownedCars = ['lada'];
-  state.ownedTracks = ['oval'];
-  state.activeCar = 'lada';
-  state.activeTrack = 'oval';
-  save();
-  updateMoneyDisplay();
-  updateMiniStats();
-  setupRacers();
-  renderTab();
-  showToast('Прогресс сброшен', 'info');
+function updateProgressUI(){
+  const { current, total, percent } = Radio.getProgress();
+  const fill = document.getElementById('radioProgressFill');
+  if (total > 0) {
+    document.getElementById('radioTimeNow').textContent = formatTime(current);
+    document.getElementById('radioTimeTotal').textContent = formatTime(total);
+    fill.style.width = Math.min(100, percent) + '%';
+  } else {
+    document.getElementById('radioTimeNow').textContent = '0:00';
+    document.getElementById('radioTimeTotal').textContent = '--:--';
+    fill.style.width = '0%';
+  }
+}
+function formatTime(sec){
+  if (!Number.isFinite(sec)) return '--:--';
+  const m = Math.floor(sec / 60), s = Math.floor(sec % 60);
+  return m + ':' + (s < 10 ? '0' : '') + s;
+}
+function startRadioProgressLoop(){ stopRadioProgressLoop(); radioProgressInterval = setInterval(() => { if (radioOpen) updateProgressUI(); }, 500); }
+function stopRadioProgressLoop(){ if (radioProgressInterval) { clearInterval(radioProgressInterval); radioProgressInterval = null; } }
+
+/* ============================================================
+   СТАРТ
+============================================================ */
+function showStartOverlay(){
+  const totalOwned = state.owned.length;
+  const totalSkins = SKINS.length;
+  const musicCount = Radio.getPlaylist().length;
+  let line = `Собирай фрукты · Открывай кейсы · Лови баффы`;
+  line += `<br><span style="color:#9a9ba4;font-size:12px">Привет, ${escapeHtml(profile.name)}! · Скинов: ${totalOwned}/${totalSkins}`;
+  if (musicCount > 0) line += ` · 🎵 ${musicCount}`;
+  line += `</span>`;
+  ovTitle.textContent = state.gamesPlayed > 0 ? 'С возвращением!' : 'Змейка v2.5.1';
+  ovText.innerHTML = line;
+  ovBtn.textContent = state.gamesPlayed > 0 ? '▶ Продолжить' : '▶ Играть';
+  overlay.classList.remove('hidden');
 }
 
-/* =========== СТАРТ =========== */
-var loopStarted = false;
-
-function startLoop() {
-  if (loopStarted) return;
-  loopStarted = true;
-  lastTime = performance.now();
-  requestAnimationFrame(gameLoop);
+function startGame(){
+  SFX.resume();
+  SFX.sfx.start();
+  overlay.classList.add('hidden');
+  closeMobileShop();
+  resetGame();
 }
+ovBtn.onclick = startGame;
+playBtn.onclick = () => { if (!running) startGame(); };
 
-function startGame() {
-  load();
-  setupTabs();
-  updateMoneyDisplay();
-  updateMiniStats();
-  updateHUD();
+/* ============================================================
+   ИНИЦИАЛИЗАЦИЯ
+============================================================ */
+resetGame();
+running = false;
+timerRunning = false;
+showStartOverlay();
 
-  setupRacers();
-  renderTab();
-  startLoop();
+renderCases();
+renderCollection();
+renderProfile();
+renderRadioPlaylist();
+updateRadioUI();
+requestAnimationFrame(loop);
 
-  preloadAllSprites(function() {
-    // После загрузки спрайтов перерисовываем текущую вкладку,
-    // чтобы превью в гараже подхватили их
-    renderTab();
-  });
-}
+(async () => {
+  const count = await Radio.init();
+  renderRadioPlaylist();
+  updateRadioUI();
+  if (count > 0) showToast(`🎵 Загружено треков из music/: ${count}`, 'success', 2500);
+})();
 
-if (document.readyState === 'complete' || document.readyState === 'interactive') {
-  requestAnimationFrame(startGame);
-} else {
-  window.addEventListener('DOMContentLoaded', function() {
-    requestAnimationFrame(startGame);
-  });
-}
+const onceInteraction = () => {
+  SFX.resume();
+  document.removeEventListener('pointerdown', onceInteraction);
+  document.removeEventListener('keydown', onceInteraction);
+  document.removeEventListener('touchstart', onceInteraction);
+};
+document.addEventListener('pointerdown', onceInteraction, { once: true });
+document.addEventListener('keydown', onceInteraction, { once: true });
+document.addEventListener('touchstart', onceInteraction, { once: true });
 </script>
 </body>
 </html>
