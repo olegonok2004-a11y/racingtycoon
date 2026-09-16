@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Змейка">
-<title>🐍 Змейка — Telegram Edition v2.8</title>
+<title>🐍 Змейка — Telegram Edition v2.9</title>
 <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22%D0%97%D0%BC%D0%B5%D0%B9%D0%BA%D0%B0%22%2C%22short_name%22%3A%22Snake%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230f0f17%22%2C%22theme_color%22%3A%22%230f0f17%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%253D%2527http%253A%2F%2Fwww.w3.org%2F2000%2Fsvg%2527%2520viewBox%253D%25270%25200%252064%252064%2527%253E%253Crect%2520width%253D%252764%2527%2520height%253D%252764%2527%2520rx%253D%252714%2527%2520fill%253D%2527%25230f0f17%2527%2F%253E%253Ctext%2520x%253D%252732%2527%2520y%253D%252744%2527%2520font-size%253D%252740%2527%2520text-anchor%253D%2527middle%2527%253E%25F0%259F%2590%258D%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
@@ -16,40 +16,34 @@
   :root {
     --gap: 14px;
     --radius: 18px;
-
     --bg-deep: #0f0f17;
     --bg-panel: #1c1d26;
     --bg-panel-2: #23242e;
     --bg-elevated: #2a2b36;
     --bg-hover: #33343f;
     --bg-active: #3d3e4a;
-
     --border-soft: rgba(255,255,255,.08);
     --border-mid: rgba(255,255,255,.14);
     --border-strong: rgba(255,255,255,.22);
-
     --text-primary: #f0f1f5;
     --text-secondary: #a5a7b3;
     --text-muted: #737582;
-
     --accent: #7c8aff;
     --accent-2: #b5a4d4;
     --accent-3: #e0a47a;
     --success: #7fb87f;
     --danger: #d07a7a;
-
     --common: #8a8e96;
     --uncommon: #7fb87f;
     --rare: #5c9dff;
     --epic: #b57aff;
     --legendary: #ffb545;
-
+    --tg-blue: #29a9eb;
     --shadow-soft: 0 1px 2px rgba(0,0,0,.4), 0 2px 8px rgba(0,0,0,.25);
     --shadow-mid: 0 2px 4px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
     --shadow-deep: 0 4px 8px rgba(0,0,0,.5), 0 16px 40px rgba(0,0,0,.45);
     --shadow-btn: 0 2px 0 rgba(0,0,0,.4), 0 4px 12px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.1);
     --shadow-btn-active: 0 1px 0 rgba(0,0,0,.4), 0 2px 6px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.05);
-
     --tg-safe-top: 0px;
     --tg-safe-bottom: 0px;
   }
@@ -81,7 +75,6 @@
     z-index: 0;
   }
 
-  /* ===== УГЛОВЫЕ КНОПКИ ===== */
   .corner-btn {
     position: fixed;
     width: 48px; height: 48px;
@@ -153,8 +146,7 @@
 
   .hud {
     display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 8px; padding: 0 2px; gap: 6px;
-    flex-wrap: wrap;
+    margin-bottom: 8px; padding: 0 2px; gap: 6px; flex-wrap: wrap;
   }
   .hud .stat {
     display: flex; align-items: center; gap: 5px;
@@ -172,12 +164,10 @@
   .hud .stat .val.timer.warning { color: var(--danger); animation: timerPulse .6s infinite alternate; }
   @keyframes timerPulse { from { opacity: 1; } to { opacity: .4; } }
   .hud .stat .val.score { color: var(--accent-2); }
-
   .hud .stat.combo {
     background: linear-gradient(90deg, rgba(255,181,69,.2), rgba(255,215,120,.1));
     border-color: rgba(255,181,69,.4);
-    opacity: 0;
-    transform: scale(.8);
+    opacity: 0; transform: scale(.8);
     transition: opacity .2s, transform .2s;
   }
   .hud .stat.combo.show { opacity: 1; transform: scale(1); animation: comboPulse .3s; }
@@ -230,7 +220,6 @@
   @keyframes buffIn { from { opacity: 0; transform: scale(.7) translateY(-10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
   .buff-chip.ending { animation: buffEnding .8s infinite; }
   @keyframes buffEnding { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
-
   .buff-chip .buff-icon {
     width: 34px; height: 34px; border-radius: 9px;
     display: flex; align-items: center; justify-content: center;
@@ -257,17 +246,13 @@
   .buff-chip.ghost      { --buff-color-a: #b5a4d4; --buff-color-b: #7a6a9a; }
   .buff-chip.multifruit { --buff-color-a: #7fb87f; --buff-color-b: #4a8a4a; }
 
-  /* ============================================================
-     КРЕСТОВИНА — УВЕЛИЧЕНА НА 30% (было 165px)
-  ============================================================ */
   .dpad {
     display: none;
     position: fixed;
     bottom: calc(70px + env(safe-area-inset-bottom) + var(--tg-safe-bottom));
     left: 50%;
     transform: translateX(-50%);
-    width: 215px;
-    height: 215px;
+    width: 215px; height: 215px;
     margin: 0;
     flex-shrink: 0;
     touch-action: none;
@@ -278,12 +263,10 @@
     pointer-events: auto;
   }
   .dpad.hidden { display: none !important; }
-  .dpad:active,
-  .dpad.pressed { opacity: .95; }
+  .dpad:active, .dpad.pressed { opacity: .95; }
 
   .dpad-base {
-    position: absolute;
-    inset: 0;
+    position: absolute; inset: 0;
     border-radius: 50%;
     background:
       radial-gradient(circle at 35% 30%, rgba(255,255,255,.1), transparent 45%),
@@ -298,24 +281,19 @@
   }
   .dpad-base::after {
     content: '';
-    position: absolute;
-    inset: 24px;
+    position: absolute; inset: 24px;
     border-radius: 50%;
     background:
       radial-gradient(circle at 40% 35%, rgba(255,255,255,.06), transparent 55%),
       linear-gradient(145deg, #2a2b35, #1e1f26);
-    box-shadow:
-      inset 0 2px 6px rgba(0,0,0,.5),
-      inset 0 -1px 2px rgba(255,255,255,.04);
+    box-shadow: inset 0 2px 6px rgba(0,0,0,.5), inset 0 -1px 2px rgba(255,255,255,.04);
   }
-
   .dpad-cross { position: absolute; inset: 0; pointer-events: none; }
   .dpad-center {
     position: absolute;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    width: 62px;
-    height: 62px;
+    width: 62px; height: 62px;
     border-radius: 50%;
     background:
       radial-gradient(circle at 35% 30%, rgba(255,255,255,.12), transparent 50%),
@@ -324,29 +302,23 @@
       inset 0 1px 2px rgba(255,255,255,.1),
       inset 0 -2px 4px rgba(0,0,0,.6),
       0 2px 6px rgba(0,0,0,.5);
-    z-index: 3;
-    pointer-events: none;
+    z-index: 3; pointer-events: none;
   }
   .dpad-center::after {
     content: '';
     position: absolute;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    width: 13px;
-    height: 13px;
+    width: 13px; height: 13px;
     border-radius: 50%;
     background: radial-gradient(circle at 30% 30%, #555, #111);
     box-shadow: inset 0 -1px 2px rgba(0,0,0,.7), 0 1px 2px rgba(255,255,255,.08);
   }
-
   .dpad-btn {
     position: absolute;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    z-index: 2;
-    transition: transform .08s;
+    background: transparent; border: none;
+    cursor: pointer; padding: 0;
+    z-index: 2; transition: transform .08s;
     -webkit-tap-highlight-color: transparent;
     pointer-events: auto;
     touch-action: none;
@@ -364,8 +336,7 @@
       0 0 0 1px rgba(255,255,255,.08);
     transition: box-shadow .1s, background .1s;
   }
-  .dpad-btn:active::before,
-  .dpad-btn.pressed::before {
+  .dpad-btn:active::before, .dpad-btn.pressed::before {
     background:
       radial-gradient(circle at 35% 30%, rgba(124,138,255,.25), transparent 50%),
       linear-gradient(145deg, #2a2b35, #1e1f26);
@@ -375,49 +346,35 @@
       0 1px 3px rgba(0,0,0,.4),
       0 0 14px rgba(124,138,255,.5);
   }
-  .dpad-btn:active,
-  .dpad-btn.pressed { transform: scale(.96); }
-
-  /* Верхняя: было 58x62, стало 75x81 */
+  .dpad-btn:active, .dpad-btn.pressed { transform: scale(.96); }
   .dpad-up {
     top: 4px; left: 50%;
     transform: translateX(-50%);
-    width: 75px;
-    height: 81px;
+    width: 75px; height: 81px;
   }
   .dpad-up::before { inset: 0; border-radius: 36px 36px 13px 13px; }
   .dpad-up:active, .dpad-up.pressed { transform: translateX(-50%) scale(.96); }
-
-  /* Нижняя */
   .dpad-down {
     bottom: 4px; left: 50%;
     transform: translateX(-50%);
-    width: 75px;
-    height: 81px;
+    width: 75px; height: 81px;
   }
   .dpad-down::before { inset: 0; border-radius: 13px 13px 36px 36px; }
   .dpad-down:active, .dpad-down.pressed { transform: translateX(-50%) scale(.96); }
-
-  /* Левая: было 62x58, стало 81x75 */
   .dpad-left {
     left: 4px; top: 50%;
     transform: translateY(-50%);
-    width: 81px;
-    height: 75px;
+    width: 81px; height: 75px;
   }
   .dpad-left::before { inset: 0; border-radius: 36px 13px 13px 36px; }
   .dpad-left:active, .dpad-left.pressed { transform: translateY(-50%) scale(.96); }
-
-  /* Правая */
   .dpad-right {
     right: 4px; top: 50%;
     transform: translateY(-50%);
-    width: 81px;
-    height: 75px;
+    width: 81px; height: 75px;
   }
   .dpad-right::before { inset: 0; border-radius: 13px 36px 36px 13px; }
   .dpad-right:active, .dpad-right.pressed { transform: translateY(-50%) scale(.96); }
-
   .dpad-btn .dpad-arrow {
     position: absolute;
     top: 50%; left: 50%;
@@ -425,21 +382,15 @@
     font-size: 21px;
     font-weight: 900;
     color: rgba(255,255,255,.6);
-    text-shadow:
-      0 -1px 0 rgba(0,0,0,.6),
-      0 1px 1px rgba(255,255,255,.1);
+    text-shadow: 0 -1px 0 rgba(0,0,0,.6), 0 1px 1px rgba(255,255,255,.1);
     pointer-events: none;
     z-index: 1;
   }
-  .dpad-btn:active .dpad-arrow,
-  .dpad-btn.pressed .dpad-arrow {
+  .dpad-btn:active .dpad-arrow, .dpad-btn.pressed .dpad-arrow {
     color: rgba(124,138,255,.95);
-    text-shadow:
-      0 -1px 0 rgba(0,0,0,.7),
-      0 0 12px rgba(124,138,255,.8);
+    text-shadow: 0 -1px 0 rgba(0,0,0,.7), 0 0 12px rgba(124,138,255,.8);
   }
 
-  /* ===== ПАУЗА ===== */
   .pause-indicator {
     position: absolute; inset: 0;
     display: none;
@@ -473,7 +424,6 @@
     text-transform: uppercase; color: var(--text-primary); opacity: .85;
   }
 
-  /* ===== МЕНЮ ===== */
   .shop {
     background: var(--bg-panel);
     border-radius: var(--radius);
@@ -490,8 +440,7 @@
   .shop h2 { font-size: 15px; color: var(--text-primary); letter-spacing: .3px; font-weight: 600; }
   .shop-wallet {
     display: flex; align-items: center; gap: 4px;
-    font-size: 12px; font-weight: 600;
-    color: var(--accent-3);
+    font-size: 12px; font-weight: 600; color: var(--accent-3);
     background: var(--bg-elevated);
     padding: 4px 9px; border-radius: 8px;
     border: 1px solid var(--border-soft);
@@ -499,14 +448,14 @@
   }
 
   .shop-tabs {
-    display: flex; gap: 4px; margin-bottom: 12px; flex-shrink: 0;
+    display: flex; gap: 3px; margin-bottom: 12px; flex-shrink: 0;
     background: var(--bg-elevated); padding: 4px; border-radius: 10px;
   }
   .shop-tab {
-    flex: 1; padding: 8px 4px; border-radius: 7px;
+    flex: 1; padding: 8px 2px; border-radius: 7px;
     background: transparent; border: none;
     color: var(--text-secondary);
-    font-size: 11px; font-weight: 600;
+    font-size: 10.5px; font-weight: 600;
     cursor: pointer;
     transition: background .15s, color .15s;
     font-family: inherit;
@@ -595,7 +544,6 @@
   .case-card.ruby     { --case-color-a: #ff4a6e; --case-color-b: #b02040; }
   .case-card.sapphire { --case-color-a: #4a9eff; --case-color-b: #1a4fb8; }
   .case-card.amethyst { --case-color-a: #b57aff; --case-color-b: #6a2fc4; }
-
   .case-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
   .case-icon {
     width: 48px; height: 48px; border-radius: 12px;
@@ -687,15 +635,22 @@
 
   .profile-avatar-row { display: flex; align-items: center; gap: 14px; padding: 4px 0; flex-shrink: 0; }
   .profile-avatar {
-    width: 60px; height: 60px; border-radius: 16px;
+    width: 60px; height: 60px; border-radius: 50%;
     background: linear-gradient(135deg, var(--accent), var(--accent-2));
     display: flex; align-items: center; justify-content: center;
     font-size: 30px;
     box-shadow: 0 4px 14px rgba(124,138,255,.35), inset 0 -4px 8px rgba(0,0,0,.25), inset 0 4px 8px rgba(255,255,255,.15);
     flex-shrink: 0; position: relative; overflow: hidden;
     cursor: pointer; transition: transform .15s;
+    border: 2px solid rgba(255,255,255,.15);
   }
   .profile-avatar:hover { transform: scale(1.05); }
+  .profile-avatar img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    border-radius: inherit;
+  }
+  .profile-avatar.has-photo::after { display: none; }
   .profile-avatar::after {
     content: ''; position: absolute; top: 6px; left: 10px;
     width: 20px; height: 8px; border-radius: 50%;
@@ -706,13 +661,18 @@
     font-size: 16px; font-weight: 700;
     color: var(--text-primary);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    cursor: pointer;
     padding: 2px 6px; margin-left: -6px;
     border-radius: 6px;
-    transition: background .15s;
   }
-  .profile-name:hover { background: var(--bg-elevated); }
   .profile-name-edit { font-size: 10.5px; color: var(--text-muted); margin-top: 3px; }
+  .profile-tg-badge {
+    display: inline-flex; align-items: center; gap: 3px;
+    font-size: 10px; font-weight: 600;
+    padding: 2px 6px; border-radius: 4px;
+    background: rgba(41,169,235,.15);
+    color: var(--tg-blue);
+    margin-left: 4px;
+  }
 
   .profile-stats {
     display: grid; grid-template-columns: repeat(2, 1fr);
@@ -839,7 +799,6 @@
   }
   .roulette-wrap::before { left: 0; background: linear-gradient(90deg, rgba(8,8,14,1), rgba(8,8,14,0)); }
   .roulette-wrap::after { right: 0; background: linear-gradient(-90deg, rgba(8,8,14,1), rgba(8,8,14,0)); }
-
   .roulette-marker {
     position: absolute; top: 0; bottom: 0; left: 50%;
     width: 3px;
@@ -856,14 +815,12 @@
   }
   .roulette-marker::before { top: -2px; border-top: 10px solid #ffb545; }
   .roulette-marker::after { bottom: -2px; border-bottom: 10px solid #ffb545; }
-
   .roulette-track {
     position: absolute; top: 0; left: 0;
     height: 100%; display: flex; align-items: center;
     transition: transform 5s cubic-bezier(.15, .6, .2, 1);
     will-change: transform; padding: 0 20px;
   }
-
   .roulette-item {
     flex-shrink: 0;
     width: 100px; height: 106px;
@@ -887,7 +844,6 @@
     from { box-shadow: 0 0 8px rgba(255,181,69,.3); }
     to   { box-shadow: 0 0 24px rgba(255,181,69,.8), inset 0 0 20px rgba(255,181,69,.3); }
   }
-
   .roulette-item-icon {
     width: 52px; height: 52px; border-radius: 10px;
     display: flex; align-items: center; justify-content: center;
@@ -900,7 +856,6 @@
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     max-width: 100%;
   }
-
   .case-result {
     display: none; flex-direction: column; align-items: center;
     gap: 18px;
@@ -908,7 +863,6 @@
   }
   .case-result.show { display: flex; }
   @keyframes resultIn { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: scale(1); } }
-
   .case-result-icon {
     width: 130px; height: 130px; border-radius: 24px;
     display: flex; align-items: center; justify-content: center;
@@ -925,7 +879,6 @@
     animation: resultGlow 2s infinite alternate;
   }
   @keyframes resultGlow { from { opacity: .3; } to { opacity: .7; } }
-
   .case-result-name { font-size: 22px; font-weight: 800; color: var(--text-primary); text-align: center; letter-spacing: -.3px; }
   .case-result-rarity {
     font-size: 12px; font-weight: 700; letter-spacing: 1.5px;
@@ -940,7 +893,6 @@
     background: linear-gradient(90deg, rgba(255,181,69,.3), rgba(255,215,120,.3));
     color: var(--legendary);
   }
-
   .case-result-actions { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; justify-content: center; }
   .btn-secondary {
     padding: 12px 24px; font-size: 13px; font-weight: 700;
@@ -953,7 +905,6 @@
   }
   .btn-secondary:hover { background: var(--bg-hover); }
   .btn-secondary:active { transform: scale(.97); box-shadow: var(--shadow-btn-active); }
-
   .confetti {
     position: absolute; width: 8px; height: 14px;
     opacity: 0; pointer-events: none;
@@ -962,6 +913,236 @@
   @keyframes confettiFall {
     0% { opacity: 1; transform: translate(0, -100px) rotate(0deg); }
     100% { opacity: 0; transform: translate(var(--dx, 0px), 100vh) rotate(720deg); }
+  }
+
+  /* ============================================================
+     ДРУЗЬЯ
+  ============================================================ */
+  .friends-pane {
+    display: flex; flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+    padding-right: 4px;
+    flex: 1; min-height: 0;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-mid) transparent;
+  }
+  .friends-pane::-webkit-scrollbar { width: 6px; }
+  .friends-pane::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 10px; }
+
+  .friends-search {
+    display: flex; gap: 6px;
+    flex-shrink: 0;
+  }
+  .friends-search input {
+    flex: 1;
+    padding: 11px 14px;
+    border-radius: 10px;
+    background: var(--bg-elevated);
+    border: 1.5px solid var(--border-mid);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+    transition: border-color .15s, background .15s;
+    min-width: 0;
+    -webkit-user-select: text;
+    user-select: text;
+  }
+  .friends-search input::placeholder {
+    color: var(--text-muted);
+  }
+  .friends-search input:focus {
+    border-color: var(--accent);
+    background: var(--bg-hover);
+  }
+  .friends-search button {
+    padding: 11px 16px;
+    border-radius: 10px;
+    background: linear-gradient(180deg, #8b97ff 0%, #7c8aff 100%);
+    color: #0a0a12;
+    border: 1.5px solid rgba(255,255,255,.2);
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform .1s, background .15s;
+    font-family: inherit;
+    white-space: nowrap;
+    box-shadow: 0 3px 0 #4a4fb8, 0 4px 12px rgba(124,138,255,.4);
+  }
+  .friends-search button:hover {
+    background: linear-gradient(180deg, #98a2ff 0%, #8b97ff 100%);
+  }
+  .friends-search button:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 #4a4fb8, 0 2px 6px rgba(124,138,255,.3);
+  }
+
+  .friends-invite-card {
+    background: linear-gradient(135deg, rgba(41,169,235,.15), rgba(124,138,255,.1));
+    border: 1.5px solid rgba(41,169,235,.4);
+    border-radius: 12px;
+    padding: 12px;
+    flex-shrink: 0;
+  }
+  .friends-invite-card .title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--tg-blue);
+    letter-spacing: .3px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .friends-invite-card .desc {
+    font-size: 11px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 10px;
+  }
+  .friends-invite-card .actions {
+    display: flex;
+    gap: 6px;
+  }
+  .friends-invite-card .actions button {
+    flex: 1;
+    padding: 9px 12px;
+    border-radius: 9px;
+    background: var(--bg-elevated);
+    border: 1.5px solid var(--border-mid);
+    color: var(--text-primary);
+    font-size: 11.5px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background .15s, transform .1s;
+    box-shadow: var(--shadow-btn);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+  .friends-invite-card .actions button.share {
+    background: linear-gradient(180deg, #29a9eb 0%, #1d8fcc 100%);
+    color: #fff;
+    border-color: rgba(255,255,255,.2);
+    box-shadow: 0 3px 0 #146b99, 0 4px 12px rgba(41,169,235,.4);
+  }
+  .friends-invite-card .actions button.share:hover {
+    background: linear-gradient(180deg, #33b4f2 0%, #29a9eb 100%);
+  }
+  .friends-invite-card .actions button:active {
+    transform: translateY(2px);
+    box-shadow: var(--shadow-btn-active);
+  }
+
+  .friends-list {
+    display: flex; flex-direction: column; gap: 8px;
+    flex: 1; min-height: 0;
+  }
+
+  .friend-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-soft);
+    transition: background .15s, border-color .15s;
+  }
+  .friend-card:hover {
+    background: var(--bg-hover);
+    border-color: var(--border-mid);
+  }
+  .friend-avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 19px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+    overflow: hidden;
+    border: 2px solid rgba(255,255,255,.15);
+  }
+  .friend-avatar img {
+    width: 100%; height: 100%; object-fit: cover;
+  }
+  .friend-info {
+    flex: 1; min-width: 0;
+  }
+  .friend-name {
+    font-size: 13px; font-weight: 700;
+    color: var(--text-primary);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .friend-username {
+    font-size: 11px; font-weight: 500;
+    color: var(--text-muted);
+    margin-top: 2px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .friend-actions {
+    display: flex; gap: 5px;
+    flex-shrink: 0;
+  }
+  .friend-actions button {
+    width: 32px; height: 32px;
+    border-radius: 9px;
+    background: var(--bg-active);
+    border: 1.5px solid var(--border-mid);
+    color: var(--text-primary);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    transition: background .15s, transform .1s;
+    font-family: inherit;
+    padding: 0;
+    box-shadow: var(--shadow-btn);
+  }
+  .friend-actions button:hover { background: var(--bg-hover); }
+  .friend-actions button:active { transform: scale(.9); }
+  .friend-actions button.open-tg {
+    background: linear-gradient(180deg, #29a9eb 0%, #1d8fcc 100%);
+    color: #fff;
+    border-color: rgba(255,255,255,.2);
+    box-shadow: 0 2px 0 #146b99, 0 3px 8px rgba(41,169,235,.4);
+  }
+  .friend-actions button.open-tg:hover {
+    background: linear-gradient(180deg, #33b4f2 0%, #29a9eb 100%);
+  }
+  .friend-actions button.remove {
+    background: rgba(208,122,122,.15);
+    border-color: rgba(208,122,122,.4);
+    color: var(--danger);
+  }
+  .friend-actions button.remove:hover {
+    background: rgba(208,122,122,.3);
+  }
+
+  .friends-empty {
+    text-align: center;
+    padding: 24px 16px;
+    color: var(--text-muted);
+    font-size: 12px;
+    line-height: 1.6;
+    background: rgba(0,0,0,.15);
+    border-radius: 12px;
+    border: 1px dashed var(--border-mid);
+  }
+  .friends-empty-icon {
+    font-size: 40px;
+    margin-bottom: 10px;
+    opacity: .6;
+  }
+  .friends-empty-title {
+    color: var(--text-secondary);
+    font-weight: 700;
+    font-size: 13px;
+    margin-bottom: 4px;
   }
 
   .mobile-shop-screen {
@@ -1070,7 +1251,6 @@
   }
   .radio-close:hover { background: var(--bg-hover); }
   .radio-close:active { transform: scale(.92); box-shadow: var(--shadow-btn-active); }
-
   .radio-now {
     display: flex; align-items: center; gap: 12px;
     padding: 10px; background: rgba(0,0,0,.25);
@@ -1238,7 +1418,6 @@
   @keyframes toastIn { from { opacity: 0; transform: translateY(-20px) scale(.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
   @keyframes toastOut { to { opacity: 0; transform: translateY(-20px) scale(.9); } }
 
-  /* ===== DEVICE LAYOUTS ===== */
   .device-phone .game-wrap {
     flex-direction: column; align-items: center;
     justify-content: flex-start;
@@ -1271,44 +1450,23 @@
   .device-phone .corner-btn { width: 44px; height: 44px; font-size: 19px; border-radius: 12px; }
 
   @media (orientation: landscape) and (max-height: 550px) {
-    .device-phone .game-wrap {
-      flex-direction: row; align-items: center; justify-content: center;
-      gap: 10px; padding: 6px;
-    }
+    .device-phone .game-wrap { flex-direction: row; align-items: center; justify-content: center; gap: 10px; padding: 6px; }
     .device-phone .board-panel { max-height: 100%; max-width: 60vw; }
     .device-phone .hud { margin-bottom: 4px; }
     .device-phone .hud .stat { font-size: 10.5px; padding: 3px 7px; }
     .device-phone .buffs-bar { min-height: 34px; margin-top: 4px; }
-    /* Крестовина в ландшафте — тоже +30%: было 145, стало 188 */
     .device-phone .dpad {
-      width: 188px;
-      height: 188px;
+      width: 188px; height: 188px;
       bottom: calc(10px + env(safe-area-inset-bottom) + var(--tg-safe-bottom));
-      right: 10px;
-      left: auto;
-      transform: none;
+      right: 10px; left: auto; transform: none;
     }
-    .device-phone .dpad-up,
-    .device-phone .dpad-down {
-      width: 66px;
-      height: 71px;
-    }
-    .device-phone .dpad-left,
-    .device-phone .dpad-right {
-      width: 71px;
-      height: 66px;
-    }
-    .device-phone .dpad-center {
-      width: 54px;
-      height: 54px;
-    }
+    .device-phone .dpad-up, .device-phone .dpad-down { width: 66px; height: 71px; }
+    .device-phone .dpad-left, .device-phone .dpad-right { width: 71px; height: 66px; }
+    .device-phone .dpad-center { width: 54px; height: 54px; }
     .device-phone .dpad-btn .dpad-arrow { font-size: 18px; }
   }
 
-  .device-tablet .game-wrap {
-    flex-direction: column; align-items: center;
-    padding: 14px; gap: 14px;
-  }
+  .device-tablet .game-wrap { flex-direction: column; align-items: center; padding: 14px; gap: 14px; }
   .device-tablet .board-panel { max-width: min(80vw, 600px); }
   .device-tablet .shop { width: 100%; max-width: min(80vw, 600px); max-height: 40vh; }
   .device-tablet .collection-grid { grid-template-columns: repeat(4, 1fr); }
@@ -1320,16 +1478,13 @@
     .device-tablet .collection-grid { grid-template-columns: repeat(2, 1fr); }
   }
 
-  .device-desktop .game-wrap {
-    flex-direction: row; align-items: center; justify-content: center;
-    gap: 22px;
-  }
+  .device-desktop .game-wrap { flex-direction: row; align-items: center; justify-content: center; gap: 22px; }
   .device-desktop .board-panel { max-height: calc(100vh - 36px); }
   .device-desktop canvas {
     width: min(560px, calc(100vh - 190px), 60vw);
     height: min(560px, calc(100vh - 190px), 60vw);
   }
-  .device-desktop .shop { width: 340px; max-height: min(560px, calc(100vh - 36px)); }
+  .device-desktop .shop { width: 360px; max-height: min(560px, calc(100vh - 36px)); }
 
   @media (max-height: 640px) {
     .device-desktop canvas {
@@ -1339,7 +1494,7 @@
   }
   @media (max-width: 900px) {
     .device-desktop .game-wrap { gap: 14px; }
-    .device-desktop .shop { width: 290px; }
+    .device-desktop .shop { width: 310px; }
   }
 
   body.tg-webapp .corner-btn { backdrop-filter: blur(10px); }
@@ -1383,9 +1538,10 @@
       <div class="shop-wallet">🍎 <span id="shopApples">0</span></div>
     </div>
     <div class="shop-tabs">
-      <button class="shop-tab active" data-tab="modes">🎮 Режимы</button>
-      <button class="shop-tab" data-tab="cases">📦 Кейсы</button>
-      <button class="shop-tab" data-tab="collection">👕 Скины</button>
+      <button class="shop-tab active" data-tab="modes">🎮</button>
+      <button class="shop-tab" data-tab="cases">📦</button>
+      <button class="shop-tab" data-tab="collection">👕</button>
+      <button class="shop-tab" data-tab="friends">👥</button>
       <button class="shop-tab" data-tab="profile">👤</button>
     </div>
     <div class="shop-pane active" id="paneModes">
@@ -1396,6 +1552,9 @@
     </div>
     <div class="shop-pane" id="paneCollection">
       <div class="collection-grid" id="collectionGrid"></div>
+    </div>
+    <div class="shop-pane" id="paneFriends">
+      <div class="friends-pane" id="friendsPane"></div>
     </div>
     <div class="shop-pane" id="paneProfile">
       <div class="profile-in-menu" id="profileInMenu"></div>
@@ -1418,9 +1577,10 @@
     <button class="mobile-close-btn" id="mobileCloseBtn">✕</button>
   </div>
   <div class="shop-tabs">
-    <button class="shop-tab active" data-tab="modes">🎮 Режимы</button>
-    <button class="shop-tab" data-tab="cases">📦 Кейсы</button>
-    <button class="shop-tab" data-tab="collection">👕 Скины</button>
+    <button class="shop-tab active" data-tab="modes">🎮</button>
+    <button class="shop-tab" data-tab="cases">📦</button>
+    <button class="shop-tab" data-tab="collection">👕</button>
+    <button class="shop-tab" data-tab="friends">👥</button>
     <button class="shop-tab" data-tab="profile">👤</button>
   </div>
   <div class="shop-pane active" id="mobilePaneModes" style="flex:1;min-height:0">
@@ -1431,6 +1591,9 @@
   </div>
   <div class="shop-pane" id="mobilePaneCollection" style="flex:1;min-height:0">
     <div class="collection-grid" id="mobileCollectionGrid"></div>
+  </div>
+  <div class="shop-pane" id="mobilePaneFriends" style="flex:1;min-height:0">
+    <div class="friends-pane" id="mobileFriendsPane"></div>
   </div>
   <div class="shop-pane" id="mobilePaneProfile" style="flex:1;min-height:0">
     <div class="profile-in-menu" id="mobileProfileInMenu"></div>
@@ -1522,7 +1685,14 @@
 
 <script>
 /* ============================================================
-   TELEGRAM WEBAPP — включает подтягивание username
+   v2.9 — Друзья + аватарка из Telegram
+============================================================ */
+
+/* ⚠️ ВАЖНО: замени на имя своего бота (без @) */
+const BOT_USERNAME = 'DeepveinX_bot';
+
+/* ============================================================
+   TELEGRAM WEBAPP
 ============================================================ */
 const TelegramApp = (() => {
   const tg = window.Telegram?.WebApp;
@@ -1535,73 +1705,71 @@ const TelegramApp = (() => {
       tg.expand();
       isActive = true;
       document.body.classList.add('tg-webapp');
-
-      // ==== ПОДТЯГИВАЕМ USERNAME ИЗ TELEGRAM ====
       pullTelegramProfile();
-
       if (tg.onEvent) {
         tg.onEvent('themeChanged', applyTheme);
         tg.onEvent('viewportChanged', onViewportChanged);
       }
       if (tg.disableVerticalSwipes) tg.disableVerticalSwipes();
       if (tg.enableClosingConfirmation) tg.enableClosingConfirmation();
-
       if (tg.BackButton) {
         tg.BackButton.onClick(() => {
           if (radioOpen) { closeRadioPanel(); return; }
           if (mobileShopScreen.classList.contains('open')) { closeMobileShop(); return; }
         });
       }
+      // Загружаем друзей из CloudStorage
+      loadFriendsFromCloud();
     } catch(e) {
       console.warn('Telegram WebApp init error:', e);
     }
   }
 
-  /* ==== Подтягиваем имя пользователя из Telegram ====
-     Логика:
-     - если у пользователя в профиле уже есть имя (он его задал вручную) — НЕ перезаписываем
-     - иначе берём @username, если есть
-     - иначе first_name
-     - иначе 'Игрок'
-  */
   function pullTelegramProfile(){
     if (!tg || !tg.initDataUnsafe) return;
     const user = tg.initDataUnsafe.user;
     if (!user) return;
 
-    // Флаг "пользователь сам менял имя" храним в profile
     const userEditedName = profile.customName === true;
 
+    // ==== ИМЯ ====
     if (!userEditedName) {
       let newName = null;
-      if (user.username) {
-        newName = '@' + user.username;
-      } else if (user.first_name) {
-        newName = user.first_name + (user.last_name ? ' ' + user.last_name : '');
-      }
+      if (user.username) newName = '@' + user.username;
+      else if (user.first_name) newName = user.first_name + (user.last_name ? ' ' + user.last_name : '');
       if (newName) {
         profile.name = newName.slice(0, 20);
         saveProfile();
-        // Перерисуем профиль если он уже отрисован
         if (typeof renderProfile === 'function') renderProfile();
+        if (typeof renderFriends === 'function') renderFriends();
         if (typeof showStartOverlay === 'function' && !running) showStartOverlay();
-        console.log('[Telegram] Имя из профиля ТГ:', profile.name);
       }
     }
 
-    // Также сохраняем ID пользователя (для возможной синхронизации в будущем)
+    // ==== АВАТАРКА ИЗ TELEGRAM ====
+    if (user.photo_url) {
+      profile.photoUrl = user.photo_url;
+      saveProfile();
+    }
+
+    // ==== USERNAME для друзей ====
+    if (user.username) {
+      profile.username = user.username;
+      saveProfile();
+    }
+
+    // ==== ID ====
     if (user.id && !profile.tgId) {
       profile.tgId = user.id;
       saveProfile();
     }
+
+    // Перерисуем профиль если он уже отрисован
+    if (typeof renderProfile === 'function') renderProfile();
   }
 
-  function applyTheme(){
-    if (!tg || !tg.themeParams) return;
-    if (tg.viewportStableHeight) onViewportChanged();
-  }
-
-  function onViewportChanged(){ /* CSS сам разберётся */ }
+  function applyTheme(){ if (tg.viewportStableHeight) onViewportChanged(); }
+  function onViewportChanged(){}
 
   function hapticImpact(style = 'light'){
     if (!tg || !tg.HapticFeedback) return;
@@ -1612,7 +1780,56 @@ const TelegramApp = (() => {
     try { tg.HapticFeedback.notificationOccurred(type); } catch(e){}
   }
 
-  return { init, hapticImpact, hapticNotify, isActive: () => isActive, pullTelegramProfile };
+  // ==== Открыть профиль в Telegram ====
+  function openTelegramProfile(username){
+    if (!tg) return false;
+    try {
+      if (username) {
+        tg.openTelegramLink(`https://t.me/${username}`);
+        return true;
+      }
+    } catch(e) { console.warn('openTelegramLink error:', e); }
+    return false;
+  }
+
+  // ==== Поделиться ссылкой (через диалог Telegram) ====
+  function shareInviteLink(text, url){
+    if (!tg || !tg.openTelegramLink) return false;
+    try {
+      // Формируем ссылку "поделиться"
+      const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
+      tg.openTelegramLink(shareUrl);
+      return true;
+    } catch(e) { return false; }
+  }
+
+  // ==== CloudStorage helpers ====
+  function cloudSet(key, value, callback){
+    if (!tg || !tg.CloudStorage) { if (callback) callback(false); return; }
+    try {
+      tg.CloudStorage.setItem(key, String(value), (err) => {
+        if (callback) callback(!err);
+      });
+    } catch(e) { if (callback) callback(false); }
+  }
+  function cloudGet(key, callback){
+    if (!tg || !tg.CloudStorage) { callback(null, false); return; }
+    try {
+      tg.CloudStorage.getItem(key, (err, value) => {
+        if (err || !value) callback(null, false);
+        else callback(value, true);
+      });
+    } catch(e) { callback(null, false); }
+  }
+
+  return {
+    init, hapticImpact, hapticNotify,
+    isActive: () => isActive,
+    pullTelegramProfile,
+    openTelegramProfile,
+    shareInviteLink,
+    cloudSet, cloudGet,
+  };
 })();
 
 /* ============================================================
@@ -1686,6 +1903,7 @@ const SFX = (() => {
     comboUp(level){ const base = 600 + level * 80; play(base, 0.06, 'triangle', 0.10); setTimeout(() => play(base * 1.25, 0.08, 'triangle', 0.10), 50); },
     comboBreak(){ play(300, 0.1, 'sawtooth', 0.06); setTimeout(() => play(200, 0.12, 'sawtooth', 0.06), 70); },
     demonRoar(){ play(120, 0.4, 'sawtooth', 0.1); setTimeout(() => play(90, 0.5, 'sawtooth', 0.1), 200); setTimeout(() => play(60, 0.7, 'sine', 0.08), 450); },
+    friend(){ play(660, 0.08, 'triangle', 0.12); setTimeout(() => play(990, 0.1, 'triangle', 0.12), 60); setTimeout(() => play(1320, 0.12, 'triangle', 0.10), 120); },
   };
   return { play, arp, sfx, resume };
 })();
@@ -1724,7 +1942,6 @@ const Radio = (() => {
       return loaded;
     } catch(e) { return []; }
   }
-
   function addFiles(files){
     const added = [];
     for (const f of files) {
@@ -1736,7 +1953,6 @@ const Radio = (() => {
     }
     return added;
   }
-
   async function init(){
     try { const v = localStorage.getItem(STORAGE_VOLUME); if (v) volume = Math.max(0, Math.min(1, parseFloat(v))); } catch(e){}
     const folderTracks = await loadFolderPlaylist();
@@ -1744,7 +1960,6 @@ const Radio = (() => {
     try { const idx = parseInt(localStorage.getItem(STORAGE_INDEX) ?? '-1', 10); if (idx >= 0 && idx < playlist.length) currentIndex = idx; } catch(e){}
     return folderTracks.length;
   }
-
   function saveIndex(){ try { localStorage.setItem(STORAGE_INDEX, String(currentIndex)); } catch(e){} }
   function saveVolume(){ try { localStorage.setItem(STORAGE_VOLUME, String(volume)); } catch(e){} }
   function getPlaylist(){ return playlist; }
@@ -1791,30 +2006,20 @@ const Radio = (() => {
   function setVolume(v){ volume = Math.max(0, Math.min(1, v)); if (audioEl) audioEl.volume = GlobalMute.get() ? 0 : volume; saveVolume(); }
   function getProgress(){ if (audioEl && audioEl.duration) return { current: audioEl.currentTime || 0, total: audioEl.duration || 0, percent: (audioEl.currentTime / audioEl.duration) * 100 }; return { current: 0, total: 0, percent: 0 }; }
   function seek(percent){ if (audioEl && audioEl.duration) audioEl.currentTime = Math.max(0, Math.min(1, percent)) * audioEl.duration; }
-
   GlobalMute.onChange((muted) => { if (audioEl) audioEl.volume = muted ? 0 : volume; });
-
   return { init, saveIndex, saveVolume, getPlaylist, getCurrentIndex, getCurrentTrack, isPlaying, getVolume, play, pause, stop, toggle, next, prev, addFiles, remove, setVolume, getProgress, seek };
 })();
 
 /* ============================================================
-   РЕДКОСТИ — УЛУЧШЕННЫЕ ШАНСЫ
+   РЕДКОСТИ
 ============================================================ */
 const RARITIES = {
-  common:    { name: 'Обычный',      weight: 40, color: '#8a8e96' },   // было 60
-  uncommon:  { name: 'Необычный',    weight: 28, color: '#7fb87f' },   // было 25
-  rare:      { name: 'Редкий',       weight: 18, color: '#5c9dff' },   // было 10
-  epic:      { name: 'Эпический',    weight: 10, color: '#b57aff' },   // было 4
-  legendary: { name: 'ЛЕГЕНДАРНЫЙ',  weight: 4,  color: '#ffb545' },   // было 1
+  common:    { name: 'Обычный',      weight: 40, color: '#8a8e96' },
+  uncommon:  { name: 'Необычный',    weight: 28, color: '#7fb87f' },
+  rare:      { name: 'Редкий',       weight: 18, color: '#5c9dff' },
+  epic:      { name: 'Эпический',    weight: 10, color: '#b57aff' },
+  legendary: { name: 'ЛЕГЕНДАРНЫЙ',  weight: 4,  color: '#ffb545' },
 };
-
-/* Итоговые шансы:
-   обычный    = 40%
-   необычный  = 28%
-   редкий     = 18%
-   эпический  = 10%
-   легендарный = 4%   ← в 4 раза чаще
-*/
 
 const SKINS = [
   { id:'gummy',  name:'Мармеладка', rarity:'common', icon:'🍬', colors:['#ff8ba7','#ff6b8a'], accent:'#ffe5ec', trait:'Сладость', face:'happy', blush:true },
@@ -1878,28 +2083,45 @@ function getCase(id){ return CASES.find(c => c.id === id); }
 function getSkin(id){ return SKINS.find(s => s.id === id) || SKINS[0]; }
 
 /* ============================================================
-   СОСТОЯНИЕ
+   СОСТОЯНИЕ + ПРОФИЛЬ + ДРУЗЬЯ
 ============================================================ */
 const STORAGE_KEY = 'snake_v2_save';
 const AUDIO_KEY = 'snake_v24_audio_muted';
-const PROFILE_KEY = 'snake_v25_profile';
+const PROFILE_KEY = 'snake_v29_profile';
 const MODE_KEY = 'snake_v26_mode';
+const FRIENDS_KEY = 'snake_v29_friends';
 
 let state = {
   apples: 50, owned: ['gummy'], active: 'gummy',
   bestScore: 0, totalApples: 0, gamesPlayed: 0,
   casesOpened: 0, buffsPicked: 0,
   bestByMode: { classic: 0, hardcore: 0, endless: 0 },
-  version: '2.8',
+  version: '2.9',
 };
 
-let profile = { name: 'Игрок', avatar: '🐍', created: Date.now(), customName: false };
+let profile = {
+  name: 'Игрок',
+  avatar: '🐍',
+  photoUrl: null,     // ← аватарка из Telegram
+  username: null,     // ← @username из Telegram
+  tgId: null,
+  customName: false,
+  created: Date.now(),
+};
+
+// Список друзей: [{ id?, name, username, addedAt }]
+let friends = [];
 let selectedMode = 'classic';
 let fractionalApples = 0;
 
 function save() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e){} }
 function saveProfile() { try { localStorage.setItem(PROFILE_KEY, JSON.stringify(profile)); } catch(e){} }
 function saveMode() { try { localStorage.setItem(MODE_KEY, selectedMode); } catch(e){} }
+function saveFriends() {
+  try { localStorage.setItem(FRIENDS_KEY, JSON.stringify(friends)); } catch(e){}
+  // Синхронизация с Telegram CloudStorage
+  TelegramApp.cloudSet('snake_friends', JSON.stringify(friends));
+}
 
 function load() {
   try {
@@ -1930,16 +2152,41 @@ function load() {
       const p = JSON.parse(raw);
       profile.name = (typeof p.name === 'string' && p.name.trim()) ? p.name.trim().slice(0, 20) : 'Игрок';
       profile.avatar = typeof p.avatar === 'string' ? p.avatar : '🐍';
+      profile.photoUrl = typeof p.photoUrl === 'string' ? p.photoUrl : null;
+      profile.username = typeof p.username === 'string' ? p.username : null;
       profile.customName = p.customName === true;
       profile.tgId = p.tgId;
     }
   } catch(e){}
+  try {
+    const raw = localStorage.getItem(FRIENDS_KEY);
+    if (raw) {
+      friends = JSON.parse(raw);
+      if (!Array.isArray(friends)) friends = [];
+    }
+  } catch(e){ friends = []; }
   try {
     const m = localStorage.getItem(MODE_KEY);
     if (m && MODES[m]) selectedMode = m;
   } catch(e){}
 }
 load();
+
+// Загрузка друзей из CloudStorage (приоритет над localStorage)
+function loadFriendsFromCloud(){
+  TelegramApp.cloudGet('snake_friends', (value, ok) => {
+    if (ok && value) {
+      try {
+        const cloudFriends = JSON.parse(value);
+        if (Array.isArray(cloudFriends) && cloudFriends.length >= friends.length) {
+          friends = cloudFriends;
+          saveFriends(); // обновим localStorage тоже
+          renderFriends();
+        }
+      } catch(e) {}
+    }
+  });
+}
 
 let soundMuted = false;
 try { soundMuted = localStorage.getItem(AUDIO_KEY) === '1'; } catch(e){}
@@ -1953,8 +2200,7 @@ function applySoundToggleUI(){
 applySoundToggleUI();
 
 document.getElementById('soundToggle').addEventListener('click', () => {
-  SFX.resume();
-  TelegramApp.hapticImpact('light');
+  SFX.resume(); TelegramApp.hapticImpact('light');
   soundMuted = !soundMuted;
   GlobalMute.set(soundMuted);
   try { localStorage.setItem(AUDIO_KEY, soundMuted ? '1' : '0'); } catch(e){}
@@ -2006,9 +2252,7 @@ window.addEventListener('orientationchange', () => setTimeout(detectDevice, 250)
 /* ============================================================
    КОНФИГ
 ============================================================ */
-const CELL = 24;
-const COLS = 20;
-const ROWS = 20;
+const CELL = 24, COLS = 20, ROWS = 20;
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 
@@ -2036,6 +2280,8 @@ const collectionGrid = document.getElementById('collectionGrid');
 const mobileCollectionGrid = document.getElementById('mobileCollectionGrid');
 const profileInMenu = document.getElementById('profileInMenu');
 const mobileProfileInMenu = document.getElementById('mobileProfileInMenu');
+const friendsPane = document.getElementById('friendsPane');
+const mobileFriendsPane = document.getElementById('mobileFriendsPane');
 const mobileShopScreen = document.getElementById('mobileShopScreen');
 const mobileShopToggle = document.getElementById('mobileShopToggle');
 const mobileCloseBtn = document.getElementById('mobileCloseBtn');
@@ -2049,12 +2295,9 @@ const BUFFS_LIST = [
   { id: 'ghost',      name: 'Призрак',     icon: '👻', duration: 7,  colorA: '#b5a4d4', colorB: '#7a6a9a', desc: 'Проходит сквозь тело' },
   { id: 'multifruit', name: 'Мультифрукт', icon: '🍇', duration: 10, colorA: '#7fb87f', colorB: '#4a8a4a', desc: 'Больше фруктов на поле' },
 ];
-
 const BUFFS = {};
 BUFFS_LIST.forEach(b => { BUFFS[b.id] = b; });
-
-let lastBuffType = null;
-let sameTypeStreak = 0;
+let lastBuffType = null, sameTypeStreak = 0;
 
 function pickRandomBuffType(){
   let pool = BUFFS_LIST;
@@ -2063,11 +2306,10 @@ function pickRandomBuffType(){
     if (pool.length === 0) pool = BUFFS_LIST;
   }
   const picked = pool[Math.floor(Math.random() * pool.length)];
-  if (picked.id === lastBuffType) { sameTypeStreak++; }
+  if (picked.id === lastBuffType) sameTypeStreak++;
   else { sameTypeStreak = 1; lastBuffType = picked.id; }
   return picked.id;
 }
-
 let activeBuffs = {};
 function isBuffActive(id){ return id in activeBuffs; }
 
@@ -2086,7 +2328,6 @@ function activateBuff(id){
   }
   updateBuffsBar();
 }
-
 function updateBuffs(dt){
   for (const id in activeBuffs) {
     const b = activeBuffs[id];
@@ -2102,14 +2343,9 @@ function updateBuffs(dt){
     }
   }
 }
-
 function updateBuffsBar(){
   const ids = Object.keys(activeBuffs);
-  if (ids.length === 0) {
-    buffsBar.classList.add('empty');
-    buffsBar.innerHTML = '';
-    return;
-  }
+  if (ids.length === 0) { buffsBar.classList.add('empty'); buffsBar.innerHTML = ''; return; }
   buffsBar.classList.remove('empty');
   buffsBar.innerHTML = '';
   ids.forEach(id => {
@@ -2128,7 +2364,6 @@ function updateBuffsBar(){
     buffsBar.appendChild(chip);
   });
 }
-
 function tickBuffsBarUI(){
   const chips = buffsBar.children;
   const ids = Object.keys(activeBuffs);
@@ -2145,7 +2380,6 @@ function tickBuffsBarUI(){
     if (b.timeLeft > 2 && chip.classList.contains('ending')) chip.classList.remove('ending');
   });
 }
-
 function spawnBuffEffect(id){
   const cfg = BUFFS[id];
   const cx = canvas.width / 2, cy = canvas.height / 2;
@@ -2160,7 +2394,6 @@ function spawnBuffEffect(id){
    КОМБО
 ============================================================ */
 let combo = { value: 1, timer: 0, maxTime: 3.0, count: 0 };
-
 function onFruitEaten(){
   combo.count++;
   combo.timer = combo.maxTime;
@@ -2173,51 +2406,46 @@ function onFruitEaten(){
   }
   updateComboUI();
 }
-
 function updateComboUI(){
-  if (combo.value > 1) {
-    hudCombo.classList.add('show');
-    hudComboVal.textContent = combo.value;
-  } else {
-    hudCombo.classList.remove('show');
-  }
+  if (combo.value > 1) { hudCombo.classList.add('show'); hudComboVal.textContent = combo.value; }
+  else hudCombo.classList.remove('show');
 }
-
 function updateCombo(dt){
   if (combo.timer > 0) {
     combo.timer -= dt;
     if (combo.timer <= 0) {
       if (combo.value > 1) SFX.sfx.comboBreak();
-      combo.value = 1;
-      combo.count = 0;
-      combo.timer = 0;
+      combo.value = 1; combo.count = 0; combo.timer = 0;
       updateComboUI();
     }
   }
 }
-
-function resetCombo(){
-  combo.value = 1;
-  combo.count = 0;
-  combo.timer = 0;
-  updateComboUI();
-}
+function resetCombo(){ combo.value = 1; combo.count = 0; combo.timer = 0; updateComboUI(); }
 
 /* ============================================================
-   ПРОФИЛЬ
+   ПРОФИЛЬ — рендер (с аватаркой из TG)
 ============================================================ */
 const AVATAR_OPTIONS = ['🐍','🦎','🐉','🐲','🦖','🐢','🦂','🐊','🦕','🐸','🦄','👾'];
+
+function buildAvatarHTML(){
+  if (profile.photoUrl) {
+    return `<img src="${profile.photoUrl}" alt="" onerror="this.parentNode.classList.remove('has-photo'); this.remove();">`;
+  }
+  return profile.avatar;
+}
 
 function buildProfileHTML(){
   const bestC = state.bestByMode.classic;
   const bestH = state.bestByMode.hardcore;
   const bestE = state.bestByMode.endless;
+  const hasPhoto = !!profile.photoUrl;
+  const tgBadge = profile.username ? `<span class="profile-tg-badge">✈️ @${escapeHtml(profile.username)}</span>` : '';
   return `
     <div class="profile-avatar-row">
-      <div class="profile-avatar" data-action="avatar">${profile.avatar}</div>
+      <div class="profile-avatar ${hasPhoto ? 'has-photo' : ''}" data-action="avatar">${buildAvatarHTML()}</div>
       <div class="profile-name-block">
-        <div class="profile-name" data-action="name">${escapeHtml(profile.name)}</div>
-        <div class="profile-name-edit">нажми на имя, чтобы изменить</div>
+        <div class="profile-name" data-action="name">${escapeHtml(profile.name)}${tgBadge}</div>
+        <div class="profile-name-edit">${hasPhoto ? 'нажми, чтобы сменить аватарку' : 'нажми на имя, чтобы изменить'}</div>
       </div>
     </div>
     <div class="profile-stats">
@@ -2228,7 +2456,7 @@ function buildProfileHTML(){
       <div class="profile-stat"><div class="label">Игр сыграно</div><div class="value blue">${state.gamesPlayed}</div></div>
       <div class="profile-stat"><div class="label">Всего фруктов</div><div class="value green">${state.totalApples}</div></div>
       <div class="profile-stat"><div class="label">Кейсов открыто</div><div class="value">${state.casesOpened}</div></div>
-      <div class="profile-stat"><div class="label">Баффов собрано</div><div class="value">${state.buffsPicked}</div></div>
+      <div class="profile-stat"><div class="label">Друзей</div><div class="value">${friends.length}</div></div>
     </div>
     <div class="profile-section-title">Коллекция по редкости</div>
     <div class="rarity-progress">${buildRarityRows()}</div>
@@ -2270,6 +2498,15 @@ function attachProfileHandlers(root){
     const action = el.dataset.action;
     if (action === 'avatar') {
       el.addEventListener('click', () => {
+        // Если есть фото из TG — сбрасываем его и переключаем эмодзи
+        if (profile.photoUrl) {
+          profile.photoUrl = null;
+          profile.avatar = AVATAR_OPTIONS[0];
+          saveProfile(); renderProfile();
+          showToast('Аватарка сброшена — используется эмодзи', 'info', 1800);
+          TelegramApp.hapticImpact('light');
+          return;
+        }
         const idx = AVATAR_OPTIONS.indexOf(profile.avatar);
         profile.avatar = AVATAR_OPTIONS[(idx + 1) % AVATAR_OPTIONS.length];
         saveProfile(); renderProfile(); SFX.sfx.equip();
@@ -2282,7 +2519,7 @@ function attachProfileHandlers(root){
         const trimmed = newName.trim().slice(0, 20);
         if (trimmed) {
           profile.name = trimmed;
-          profile.customName = true;   // ← запоминаем, что пользователь задал своё имя
+          profile.customName = true;
           saveProfile(); renderProfile();
           showToast(`Имя изменено: ${profile.name}`, 'success', 1500);
         }
@@ -2291,17 +2528,206 @@ function attachProfileHandlers(root){
       el.addEventListener('click', () => {
         const ok = confirm('Ты уверен? Весь прогресс (скины, яблоки, рекорды) будет удалён.');
         if (!ok) return;
-        state = { apples: 50, owned: ['gummy'], active: 'gummy', bestScore: 0, totalApples: 0, gamesPlayed: 0, casesOpened: 0, buffsPicked: 0, bestByMode: { classic: 0, hardcore: 0, endless: 0 }, version: '2.8' };
-        profile.customName = false;   // ← разрешаем снова подтянуть из TG
-        saveProfile();
-        save();
+        state = { apples: 50, owned: ['gummy'], active: 'gummy', bestScore: 0, totalApples: 0, gamesPlayed: 0, casesOpened: 0, buffsPicked: 0, bestByMode: { classic: 0, hardcore: 0, endless: 0 }, version: '2.9' };
+        profile.customName = false;
+        saveProfile(); save();
         renderCases(); renderCollection(); renderProfile(); renderModes(); updateHUD();
-        TelegramApp.pullTelegramProfile();   // сразу пробуем подтянуть заново
+        TelegramApp.pullTelegramProfile();
         showToast('Прогресс сброшен', 'info', 1800);
         SFX.sfx.deny();
       });
     }
   });
+}
+
+/* ============================================================
+   ДРУЗЬЯ — рендер + логика
+============================================================ */
+function buildFriendsHTML(){
+  const myUsername = profile.username || '';
+  const inviteLink = myUsername
+    ? `https://t.me/${BOT_USERNAME}?start=ref_${profile.tgId || 'user'}`
+    : `https://t.me/${BOT_USERNAME}`;
+
+  const friendCards = friends.length > 0
+    ? friends.map((f, i) => `
+      <div class="friend-card" data-friend-index="${i}">
+        <div class="friend-avatar">${escapeHtml(f.name?.[0]?.toUpperCase() || '?')}</div>
+        <div class="friend-info">
+          <div class="friend-name">${escapeHtml(f.name || f.username || 'Игрок')}</div>
+          <div class="friend-username">${f.username ? '@' + escapeHtml(f.username) : 'без username'}</div>
+        </div>
+        <div class="friend-actions">
+          ${f.username ? `<button class="open-tg" data-action="open" data-username="${escapeHtml(f.username)}" title="Открыть в Telegram">✈️</button>` : ''}
+          <button class="remove" data-action="remove" data-index="${i}" title="Удалить">✕</button>
+        </div>
+      </div>
+    `).join('')
+    : `
+      <div class="friends-empty">
+        <div class="friends-empty-icon">👥</div>
+        <div class="friends-empty-title">Пока никого нет</div>
+        <div>Добавь друзей по @username<br>и соревнуйтесь вместе!</div>
+      </div>
+    `;
+
+  return `
+    <div class="friends-search">
+      <input type="text" id="friendSearchInput" placeholder="@username друга" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <button id="friendAddBtn">➕ Добавить</button>
+    </div>
+
+    <div class="friends-invite-card">
+      <div class="title">✈️ Пригласи друзей</div>
+      <div class="desc">Поделись ссылкой — друзья смогут присоединиться к игре и вы будете вместе соревноваться!</div>
+      <div class="actions">
+        <button class="share" id="friendsShareBtn">📤 Поделиться</button>
+        <button id="friendsCopyBtn">📋 Копировать</button>
+      </div>
+    </div>
+
+    <div class="profile-section-title" style="padding-top:0">Мои друзья (${friends.length})</div>
+    <div class="friends-list" id="friendsList">${friendCards}</div>
+  `;
+}
+
+function renderFriends(){
+  const html = buildFriendsHTML();
+  friendsPane.innerHTML = html;
+  mobileFriendsPane.innerHTML = html;
+  attachFriendsHandlers(friendsPane);
+  attachFriendsHandlers(mobileFriendsPane);
+}
+
+function attachFriendsHandlers(root){
+  // Кнопка "Добавить"
+  const addBtn = root.querySelector('#friendAddBtn');
+  const searchInput = root.querySelector('#friendSearchInput');
+  if (addBtn && searchInput) {
+    addBtn.addEventListener('click', () => {
+      const value = searchInput.value.trim();
+      addFriendFromInput(value);
+      searchInput.value = '';
+    });
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const value = searchInput.value.trim();
+        addFriendFromInput(value);
+        searchInput.value = '';
+      }
+    });
+  }
+
+  // Кнопка "Поделиться"
+  const shareBtn = root.querySelector('#friendsShareBtn');
+  if (shareBtn) {
+    shareBtn.addEventListener('click', () => {
+      const link = `https://t.me/${BOT_USERNAME}?start=ref_${profile.tgId || 'user'}`;
+      const text = 'Играю в Змейку! Присоединяйся 🐍';
+      const ok = TelegramApp.shareInviteLink(text, link);
+      if (!ok) {
+        // Fallback — копируем в буфер
+        copyToClipboard(link);
+        showToast('Ссылка скопирована в буфер', 'success', 2000);
+      }
+      TelegramApp.hapticImpact('light');
+    });
+  }
+
+  // Кнопка "Копировать"
+  const copyBtn = root.querySelector('#friendsCopyBtn');
+  if (copyBtn) {
+    copyBtn.addEventListener('click', () => {
+      const link = `https://t.me/${BOT_USERNAME}?start=ref_${profile.tgId || 'user'}`;
+      copyToClipboard(link);
+      showToast('Ссылка скопирована', 'success', 1800);
+      TelegramApp.hapticImpact('light');
+    });
+  }
+
+  // Кнопки на карточках друзей
+  root.querySelectorAll('[data-action="open"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const username = btn.dataset.username;
+      const ok = TelegramApp.openTelegramProfile(username);
+      if (!ok) {
+        showToast('Не удалось открыть профиль', 'error', 1800);
+      }
+      TelegramApp.hapticImpact('light');
+    });
+  });
+  root.querySelectorAll('[data-action="remove"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.index, 10);
+      removeFriend(idx);
+    });
+  });
+}
+
+function addFriendFromInput(value){
+  if (!value) {
+    showToast('Введи @username', 'info', 1800);
+    return;
+  }
+  // Убираем @ и пробелы
+  let username = value.replace(/^@+/, '').trim();
+  // Проверка: только латиница, цифры, _
+  if (!/^[a-zA-Z0-9_]{3,32}$/.test(username)) {
+    showToast('Некорректный username', 'error', 2000);
+    SFX.sfx.deny();
+    return;
+  }
+  // Нельзя добавить себя
+  if (profile.username && username.toLowerCase() === profile.username.toLowerCase()) {
+    showToast('Это ты сам 🙂', 'info', 1800);
+    return;
+  }
+  // Проверка на дубликат
+  if (friends.some(f => (f.username || '').toLowerCase() === username.toLowerCase())) {
+    showToast('Уже в списке друзей', 'info', 1800);
+    return;
+  }
+  // Добавляем
+  friends.push({
+    username,
+    name: '@' + username,
+    addedAt: Date.now(),
+  });
+  saveFriends();
+  renderFriends();
+  renderProfile();
+  SFX.sfx.friend();
+  TelegramApp.hapticNotify('success');
+  showToast(`✈️ @${username} добавлен!`, 'success', 2200);
+}
+
+function removeFriend(index){
+  if (index < 0 || index >= friends.length) return;
+  const removed = friends[index];
+  if (!confirm(`Удалить @${removed.username} из друзей?`)) return;
+  friends.splice(index, 1);
+  saveFriends();
+  renderFriends();
+  renderProfile();
+  SFX.sfx.click();
+  showToast(`Удалён из друзей`, 'info', 1500);
+}
+
+function copyToClipboard(text){
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text);
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+  } catch(e) { console.warn('Copy failed:', e); }
 }
 
 /* ============================================================
@@ -2364,17 +2790,14 @@ function createModeCard(mode){
   card.addEventListener('mouseenter', () => SFX.sfx.hover());
   return card;
 }
-
 function selectMode(modeId){
   if (!MODES[modeId]) return;
   selectedMode = modeId;
-  saveMode();
-  renderModes();
+  saveMode(); renderModes();
   SFX.sfx.equip();
   TelegramApp.hapticImpact('light');
   showToast(`Режим: ${MODES[modeId].name}`, 'info', 1400);
 }
-
 function renderModes(){
   modesList.innerHTML = '';
   mobileModesList.innerHTML = '';
@@ -2410,7 +2833,6 @@ function createCaseCard(cs){
   card.addEventListener('mouseenter', () => SFX.sfx.hover());
   return card;
 }
-
 function renderCases(){
   casesList.innerHTML = '';
   mobileCasesList.innerHTML = '';
@@ -2420,7 +2842,6 @@ function renderCases(){
   });
   updateHUD();
 }
-
 function createSkinTile(skin){
   const owned = state.owned.includes(skin.id);
   const active = state.active === skin.id;
@@ -2450,7 +2871,6 @@ function createSkinTile(skin){
   }
   return tile;
 }
-
 function renderCollection(){
   collectionGrid.innerHTML = '';
   mobileCollectionGrid.innerHTML = '';
@@ -2464,7 +2884,6 @@ function renderCollection(){
    КЕЙСЫ
 ============================================================ */
 let currentCase = null;
-
 function openCase(cs){
   SFX.resume();
   if (state.apples < cs.price) {
@@ -2514,7 +2933,6 @@ function openCase(cs){
     });
   });
 }
-
 function rollFromCase(cs){
   const items = cs.pool.map(id => { const skin = getSkin(id); return { skin, weight: RARITIES[skin.rarity].weight }; });
   const totalWeight = items.reduce((sum, it) => sum + it.weight, 0);
@@ -2522,7 +2940,6 @@ function rollFromCase(cs){
   for (const it of items) { roll -= it.weight; if (roll <= 0) return it.skin; }
   return items[items.length - 1].skin;
 }
-
 function revealResult(skin){
   const isNew = !state.owned.includes(skin.id);
   if (isNew) { state.owned.push(skin.id); save(); }
@@ -2542,7 +2959,6 @@ function revealResult(skin){
   if (isNew) showToast(`✨ Новый скин: ${skin.name}!`, 'success', 2500);
   else showToast(`Повтор: ${skin.name}`, 'info', 1800);
 }
-
 function spawnConfetti(count){
   const colors = ['#ff4a6e','#ffb545','#4a9eff','#b57aff','#7fb87f','#fff'];
   for (let i = 0; i < count; i++){
@@ -2557,7 +2973,6 @@ function spawnConfetti(count){
     setTimeout(() => el.remove(), 3500);
   }
 }
-
 caseResultClose.addEventListener('click', () => { caseOpenOverlay.classList.remove('show'); caseResult.classList.remove('show'); SFX.sfx.click(); });
 caseResultOpenAgain.addEventListener('click', () => { if (!currentCase) return; caseOpenOverlay.classList.remove('show'); caseResult.classList.remove('show'); SFX.sfx.click(); setTimeout(() => openCase(currentCase), 200); });
 
@@ -2566,24 +2981,16 @@ caseResultOpenAgain.addEventListener('click', () => { if (!currentCase) return; 
 ============================================================ */
 let snake, dir, nextDir, food, extraFoods = [], score, running, gameOver;
 let time = 0, timerRunning = false;
-let tickAcc = 0;
-let particles = [];
-let foodPulse = 0;
-let shake = 0;
+let tickAcc = 0, particles = [];
+let foodPulse = 0, shake = 0;
 let lastTime = performance.now();
-let gameTime = 0;
-let trailSpots = [];
+let gameTime = 0, trailSpots = [];
 let foodEatenPulse = 0;
-let buffSpawnTimer = 0;
-let buffPickup = null;
+let buffSpawnTimer = 0, buffPickup = null;
 let timeRemaining = 0;
-let demonSnake = null;
-let demonMoveTimer = 0;
-let obstacles = [];
-let endlessSpawnTimer = 0;
-
-let paused = false;
-let pausedByRadio = false;
+let demonSnake = null, demonMoveTimer = 0;
+let obstacles = [], endlessSpawnTimer = 0;
+let paused = false, pausedByRadio = false;
 
 function pauseGame(reason = 'user'){
   if (!running || paused) return;
@@ -2594,8 +3001,7 @@ function pauseGame(reason = 'user'){
 }
 function resumeGame(){
   if (!running || !paused) return;
-  paused = false;
-  pausedByRadio = false;
+  paused = false; pausedByRadio = false;
   SFX.sfx.unpause();
   pauseIndicator.classList.remove('show');
 }
@@ -2608,28 +3014,21 @@ function resetGame(){
   score = 0; time = 0; tickAcc = 0;
   food = null; extraFoods = []; particles = []; trailSpots = []; shake = 0;
   foodEatenPulse = 0;
-  activeBuffs = {};
-  buffPickup = null;
+  activeBuffs = {}; buffPickup = null;
   buffSpawnTimer = 5 + Math.random() * 3;
-  lastBuffType = null;
-  sameTypeStreak = 0;
-  demonSnake = null;
-  obstacles = [];
-  endlessSpawnTimer = 0;
+  lastBuffType = null; sameTypeStreak = 0;
+  demonSnake = null; obstacles = []; endlessSpawnTimer = 0;
   fractionalApples = 0;
   resetCombo();
   if (mode.timeLimit > 0) timeRemaining = mode.timeLimit;
   else timeRemaining = 0;
-  if (mode.endlessFood) {
-    for (let i = 0; i < 5; i++) spawnFood();
-  } else spawnFood();
+  if (mode.endlessFood) { for (let i = 0; i < 5; i++) spawnFood(); }
+  else spawnFood();
   if (mode.hasDemon) { spawnDemonSnake(); spawnObstacles(); }
   gameOver = false; running = true; timerRunning = true;
   paused = false;
   pauseIndicator.classList.remove('show');
-  updateBuffsBar();
-  updateHUD();
-  updateComboUI();
+  updateBuffsBar(); updateHUD(); updateComboUI();
 }
 
 function isCellFreeForBuff(x, y){
@@ -2641,7 +3040,6 @@ function isCellFreeForBuff(x, y){
   if (obstacles.some(o => o.x === x && o.y === y)) return false;
   return true;
 }
-
 function spawnFood(){
   const mode = MODES[selectedMode];
   const free = [];
@@ -2654,10 +3052,8 @@ function spawnFood(){
   if (mode.endlessFood && food) extraFoods.push(newFood);
   else food = newFood;
 }
-
 function spawnExtraFood(){
-  const maxFoods = 5;
-  if (1 + extraFoods.length >= maxFoods) return;
+  if (1 + extraFoods.length >= 5) return;
   const free = [];
   for (let y=0; y<ROWS; y++)
     for (let x=0; x<COLS; x++)
@@ -2666,7 +3062,6 @@ function spawnExtraFood(){
   const pos = free[Math.floor(Math.random()*free.length)];
   extraFoods.push({ x: pos.x, y: pos.y, type: Math.floor(Math.random()*6), spawnT: 0 });
 }
-
 function spawnBuff(){
   const mode = MODES[selectedMode];
   if (!mode.buffsEnabled) return;
@@ -2679,7 +3074,6 @@ function spawnBuff(){
   const type = pickRandomBuffType();
   buffPickup = { x: pos.x, y: pos.y, type, spawnT: 0, life: 12 };
 }
-
 function spawnObstacles(){
   const count = 6 + Math.floor(Math.random() * 4);
   for (let i = 0; i < count; i++){
@@ -2694,20 +3088,16 @@ function spawnObstacles(){
     obstacles.push({ x: pos.x, y: pos.y, type: Math.random() < 0.5 ? 'rock' : 'spike' });
   }
 }
-
 function spawnDemonSnake(){
   const startX = 16, startY = 3;
   demonSnake = [
-    { x: startX, y: startY },
-    { x: startX + 1, y: startY },
-    { x: startX + 2, y: startY },
-    { x: startX + 3, y: startY },
+    { x: startX, y: startY }, { x: startX + 1, y: startY },
+    { x: startX + 2, y: startY }, { x: startX + 3, y: startY },
   ];
   demonMoveTimer = 0;
   SFX.sfx.demonRoar();
   showToast('💀 Демоническая змея появилась!', 'error', 3000);
 }
-
 function updateDemonSnake(dt){
   if (!demonSnake || demonSnake.length === 0) return;
   const mode = MODES[selectedMode];
@@ -2732,13 +3122,11 @@ function updateDemonSnake(dt){
   demonSnake.unshift({ x: head.x + best.d.x, y: head.y + best.d.y });
   demonSnake.pop();
 }
-
 function checkDemonCollision(){
   if (!demonSnake) return false;
   const head = snake[0];
   return demonSnake.some(s => s.x === head.x && s.y === head.y);
 }
-
 function updateHUD(){
   state.apples = Math.floor(state.apples);
   hudApples.textContent = state.apples;
@@ -2825,7 +3213,6 @@ function step(){
   applyMagnet();
   if (checkDemonCollision()) return die();
 }
-
 function addApples(multiplier){
   if (multiplier === 1/3) {
     fractionalApples += 1/3;
@@ -2839,7 +3226,6 @@ function addApples(multiplier){
     state.totalApples += amount;
   }
 }
-
 function applyMagnet(){
   if (!isBuffActive('magnet')) return;
   const head = snake[0];
@@ -2867,7 +3253,6 @@ function applyMagnet(){
     taken.add(key); m.fruit.x = m.nx; m.fruit.y = m.ny;
   });
 }
-
 function die(){
   const mode = MODES[selectedMode];
   running = false; timerRunning = false; gameOver = true;
@@ -2896,7 +3281,6 @@ function die(){
   if (dpad) dpad.classList.add('hidden');
   updateHUD(); updateBuffsBar(); renderProfile(); renderModes(); resetCombo();
 }
-
 function winGame(){
   const mode = MODES[selectedMode];
   running = false; timerRunning = false;
@@ -2920,7 +3304,6 @@ function winGame(){
   if (dpad) dpad.classList.add('hidden');
   updateBuffsBar(); renderProfile(); renderModes(); resetCombo();
 }
-
 function spawnBurst(x, y, color, count){
   for (let i = 0; i < count; i++){
     const a = Math.random() * Math.PI * 2;
@@ -2938,7 +3321,7 @@ function updateParticles(dt){
     const p = particles[i];
     p.x += p.vx * dt * 60; p.y += p.vy * dt * 60;
     if (p.type === 'dot') { p.vx *= 0.93; p.vy *= 0.93; p.vy += 0.1 * dt * 60; }
-    else { p.vy *= 0.98; }
+    else p.vy *= 0.98;
     p.life -= dt / p.maxLife;
     if (p.life <= 0) particles.splice(i, 1);
   }
@@ -2953,9 +3336,6 @@ function rgbToHex(r, g, b){ return '#' + [r,g,b].map(v => Math.max(0,Math.min(25
 function shade(hex, factor){ const { r, g, b } = hexToRgb(hex); return rgbToHex(r*factor, g*factor, b*factor); }
 function rgba(hex, a){ const { r, g, b } = hexToRgb(hex); return `rgba(${r},${g},${b},${a})`; }
 
-/* ============================================================
-   ОТРИСОВКА
-============================================================ */
 function drawGrid(){
   const mode = MODES[selectedMode];
   const bgGrad = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 40, canvas.width/2, canvas.height/2, canvas.width * 0.75);
@@ -2995,7 +3375,6 @@ function drawGrid(){
     ctx.setLineDash([]);
   }
 }
-
 function drawFruitAt(fruit, isExtra){
   if (!fruit) return;
   foodPulse += 0.08;
@@ -3018,7 +3397,6 @@ function drawFruitAt(fruit, isExtra){
 }
 function drawFood(){ drawFruitAt(food, false); }
 function drawExtraFoods(){ extraFoods.forEach(f => drawFruitAt(f, true)); }
-
 function drawDemonSnake(){
   if (!demonSnake) return;
   demonSnake.forEach((seg, i) => {
@@ -3055,7 +3433,6 @@ function drawDemonSnake(){
     roundRect(ctx, px + pad, py + pad, size, size, isHead ? 9 : 6); ctx.fill();
   });
 }
-
 function drawObstacles(){
   obstacles.forEach(o => {
     const cx = o.x * CELL + CELL/2, cy = o.y * CELL + CELL/2;
@@ -3082,7 +3459,6 @@ function drawObstacles(){
     }
   });
 }
-
 function drawBuffPickup(){
   if (!buffPickup) return;
   const cfg = BUFFS[buffPickup.type];
@@ -3114,7 +3490,6 @@ function drawBuffPickup(){
     ctx.fillText(Math.ceil(buffPickup.life) + 'с', cx, cy + float + r + 10);
   }
 }
-
 function drawTrail(){
   trailSpots.forEach(spot => {
     const cx = spot.x * CELL + CELL/2, cy = spot.y * CELL + CELL/2;
@@ -3123,7 +3498,6 @@ function drawTrail(){
   });
   ctx.globalAlpha = 1;
 }
-
 function roundRect(ctx, x, y, w, h, r){
   ctx.beginPath();
   ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y);
@@ -3136,7 +3510,6 @@ function roundRect(ctx, x, y, w, h, r){
   ctx.quadraticCurveTo(x, y, x + r, y);
   ctx.closePath();
 }
-
 function drawFace(skin, cx, cy, dir, t, index){
   const faceType = skin.face || 'happy';
   let ex1, ey1, ex2, ey2;
@@ -3206,7 +3579,6 @@ function drawFace(skin, cx, cy, dir, t, index){
     ctx.stroke();
   }
 }
-
 function drawSegment(skin, x, y, index, total, t){
   const px = x * CELL, py = y * CELL;
   const pad = 2, baseSize = CELL - pad*2;
@@ -3329,7 +3701,6 @@ function drawSegment(skin, x, y, index, total, t){
   if (index === 0) drawFace(skin, cx, cy, dir, t, index);
   ctx.globalAlpha = 1;
 }
-
 function drawSparkle(x, y, size, color){
   ctx.fillStyle = color;
   ctx.beginPath();
@@ -3339,13 +3710,11 @@ function drawSparkle(x, y, size, color){
   ctx.lineTo(x - size, y); ctx.lineTo(x - size*0.3, y - size*0.3);
   ctx.closePath(); ctx.fill();
 }
-
 function drawSnake(t){
   const skin = getSkin(state.active);
   const total = snake.length;
   for (let i = total - 1; i >= 0; i--) drawSegment(skin, snake[i].x, snake[i].y, i, total, t);
 }
-
 function drawParticles(){
   particles.forEach(p => {
     ctx.globalAlpha = Math.max(0, p.life);
@@ -3354,7 +3723,6 @@ function drawParticles(){
   });
   ctx.globalAlpha = 1;
 }
-
 function drawHeart(x, y, size, color){
   ctx.fillStyle = color;
   ctx.beginPath();
@@ -3477,7 +3845,6 @@ function bindDpadButton(btn, dx, dy){
   btn.addEventListener('mouseup', onRelease);
   btn.addEventListener('mouseleave', onRelease);
 }
-
 if (dpad) {
   bindDpadButton(dpad.querySelector('.dpad-up'), 0, -1);
   bindDpadButton(dpad.querySelector('.dpad-down'), 0, 1);
@@ -3487,9 +3854,8 @@ if (dpad) {
 
 let globalTouchStart = null;
 const SWIPE_MIN_DIST = 24;
-
 function shouldIgnoreSwipe(e){
-  if (e.target.closest('.shop, .btn, button, .mobile-shop-screen, .mobile-shop-toggle, .corner-btn, .radio-panel, .case-open-overlay, .profile-in-menu, .dpad')) return true;
+  if (e.target.closest('.shop, .btn, button, .mobile-shop-screen, .mobile-shop-toggle, .corner-btn, .radio-panel, .case-open-overlay, .profile-in-menu, .friends-pane, .friends-search, .dpad, input, textarea')) return true;
   if (mobileShopScreen.classList.contains('open')) return true;
   if (radioOpen) return true;
   if (caseOpenOverlay.classList.contains('show')) return true;
@@ -3497,14 +3863,12 @@ function shouldIgnoreSwipe(e){
   if (paused) return true;
   return false;
 }
-
 document.addEventListener('touchstart', (e) => {
   if (shouldIgnoreSwipe(e)) return;
   if (!running) return;
   if (e.touches.length !== 1) return;
   globalTouchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY, time: Date.now() };
 }, { passive: true });
-
 document.addEventListener('touchend', (e) => {
   if (!globalTouchStart) return;
   if (!running || paused) { globalTouchStart = null; return; }
@@ -3518,12 +3882,9 @@ document.addEventListener('touchend', (e) => {
   else setDir(0, dy > 0 ? 1 : -1);
   globalTouchStart = null;
 }, { passive: true });
-
 document.addEventListener('touchcancel', () => { globalTouchStart = null; }, { passive: true });
 
-let radioOpen = false;
-let radioProgressInterval = null;
-
+let radioOpen = false, radioProgressInterval = null;
 function openRadioPanel(){
   radioOpen = true;
   document.getElementById('radioPanel').classList.add('open');
@@ -3541,10 +3902,8 @@ function closeRadioPanel(){
   stopRadioProgressLoop();
   if (paused && pausedByRadio) resumeGame();
 }
-
 document.getElementById('radioToggle').addEventListener('click', (e) => { e.stopPropagation(); if (radioOpen) closeRadioPanel(); else openRadioPanel(); });
 document.getElementById('radioClose').addEventListener('click', closeRadioPanel);
-
 document.addEventListener('pointerdown', (e) => {
   if (!radioOpen) return;
   const panel = document.getElementById('radioPanel');
@@ -3552,9 +3911,7 @@ document.addEventListener('pointerdown', (e) => {
   if (e.target.closest('#radioToggle')) return;
   closeRadioPanel();
 }, true);
-
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && radioOpen) closeRadioPanel(); });
-
 document.getElementById('radioPlayBtn').addEventListener('click', () => {
   SFX.resume(); SFX.sfx.click();
   if (Radio.getPlaylist().length === 0) { showToast('Плейлист пуст — добавь треки', 'info', 2000); return; }
@@ -3562,7 +3919,6 @@ document.getElementById('radioPlayBtn').addEventListener('click', () => {
 });
 document.getElementById('radioPrev').addEventListener('click', () => { SFX.sfx.click(); Radio.prev(); updateRadioUI(); });
 document.getElementById('radioNext').addEventListener('click', () => { SFX.sfx.click(); Radio.next(); updateRadioUI(); });
-
 document.getElementById('radioAddBtn').addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('radioFileInput').click(); });
 document.getElementById('radioFileInput').addEventListener('change', (e) => {
   const files = Array.from(e.target.files || []);
@@ -3577,13 +3933,11 @@ document.getElementById('radioFileInput').addEventListener('change', (e) => {
   }
   e.target.value = '';
 });
-
 document.getElementById('radioProgressTrack').addEventListener('click', (e) => {
   const rect = e.currentTarget.getBoundingClientRect();
   Radio.seek((e.clientX - rect.left) / rect.width);
   updateProgressUI();
 });
-
 document.getElementById('radioVolume').addEventListener('input', (e) => {
   const v = parseInt(e.target.value, 10) / 100;
   Radio.setVolume(v);
@@ -3621,7 +3975,6 @@ function renderRadioPlaylist(){
     el.appendChild(item);
   });
 }
-
 function updateRadioUI(){
   const track = Radio.getCurrentTrack();
   const playing = Radio.isPlaying();
@@ -3642,7 +3995,6 @@ function updateRadioUI(){
   }
   updateProgressUI();
 }
-
 function updateProgressUI(){
   const { current, total, percent } = Radio.getProgress();
   const fill = document.getElementById('radioProgressFill');
@@ -3671,6 +4023,7 @@ function showStartOverlay(){
   const musicCount = Radio.getPlaylist().length;
   let line = `Режим: <b style="color:${mode.colorA}">${mode.icon} ${mode.name}</b>`;
   line += `<br><span style="color:#9a9ba4;font-size:12px">Привет, ${escapeHtml(profile.name)}! · Скинов: ${totalOwned}/${totalSkins}`;
+  if (friends.length > 0) line += ` · 👥 ${friends.length}`;
   if (musicCount > 0) line += ` · 🎵 ${musicCount}`;
   line += `</span>`;
   ovTitle.textContent = state.gamesPlayed > 0 ? 'С возвращением!' : 'Змейка Telegram';
@@ -3702,6 +4055,7 @@ renderModes();
 renderCases();
 renderCollection();
 renderProfile();
+renderFriends();
 renderRadioPlaylist();
 updateRadioUI();
 requestAnimationFrame(loop);
