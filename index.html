@@ -1086,7 +1086,12 @@
   .device-phone .mobile-shop-toggle { display: flex; }
   .device-phone .mobile-shop-screen { display: flex; }
   .device-phone .corner-btn { width: 42px; height: 42px; font-size: 18px; }
-  .device-phone .sound-toggle { top: calc(10px + env(safe-area-inset-top)); right: 10px; }
+  .device-phone .sound-toggle {
+  top: auto;
+  right: auto;
+  bottom: calc(10px + env(safe-area-inset-bottom));
+  left: calc(10px + 42px + 8px);   /* 10px (радио) + 42px (ширина радио) + 8px зазор */
+}
   .device-phone .radio-toggle { bottom: calc(10px + env(safe-area-inset-bottom)); left: 10px; }
   .device-phone .radio-panel {
     bottom: calc(70px + env(safe-area-inset-bottom));
